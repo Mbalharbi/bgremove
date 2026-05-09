@@ -4,32 +4,53 @@ import { getPostSlugs } from "@/lib/blog";
 
 export const dynamic = "force-static";
 
+interface StaticEntry {
+  path: string;
+  priority: number;
+  freq: "daily" | "weekly" | "monthly";
+}
+
+const STATIC_PATHS: StaticEntry[] = [
+  // Core
+  { path: "", priority: 1.0, freq: "weekly" },
+  { path: "bulk", priority: 0.9, freq: "weekly" },
+  { path: "tools/image-compressor", priority: 0.8, freq: "weekly" },
+  { path: "tools/image-resizer", priority: 0.8, freq: "weekly" },
+
+  // Programmatic SEO landing pages
+  { path: "portrait-background-remover", priority: 0.85, freq: "weekly" },
+  { path: "product-photo-background-remover", priority: 0.85, freq: "weekly" },
+  { path: "logo-background-remover", priority: 0.8, freq: "weekly" },
+  { path: "transparent-png-maker", priority: 0.85, freq: "weekly" },
+  { path: "screenshot-background-remover", priority: 0.8, freq: "weekly" },
+
+  // Content
+  { path: "blog", priority: 0.7, freq: "weekly" },
+
+  // Static
+  { path: "about", priority: 0.5, freq: "monthly" },
+  { path: "privacy", priority: 0.4, freq: "monthly" },
+  { path: "terms", priority: 0.4, freq: "monthly" },
+  { path: "contact", priority: 0.4, freq: "monthly" },
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const staticPaths: { path: string; priority: number; freq: "daily" | "weekly" | "monthly" }[] = [
-    { path: "", priority: 1.0, freq: "weekly" },
-    { path: "bulk", priority: 0.9, freq: "weekly" },
-    { path: "tools/image-compressor", priority: 0.8, freq: "weekly" },
-    { path: "tools/image-resizer", priority: 0.8, freq: "weekly" },
-    { path: "blog", priority: 0.6, freq: "weekly" },
-    { path: "about", priority: 0.5, freq: "monthly" },
-    { path: "privacy", priority: 0.4, freq: "monthly" },
-    { path: "terms", priority: 0.4, freq: "monthly" },
-    { path: "contact", priority: 0.4, freq: "monthly" },
-  ];
 
-  const staticEntries: MetadataRoute.Sitemap = staticPaths.map(({ path, priority, freq }) => ({
-    url: path ? `${SITE.url}/${path}/` : `${SITE.url}/`,
-    lastModified: now,
-    changeFrequency: freq,
-    priority,
-  }));
+  const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map(
+    ({ path, priority, freq }) => ({
+      url: path ? `${SITE.url}/${path}/` : `${SITE.url}/`,
+      lastModified: now,
+      changeFrequency: freq,
+      priority,
+    })
+  );
 
   const blogEntries: MetadataRoute.Sitemap = getPostSlugs().map((slug) => ({
     url: `${SITE.url}/blog/${slug}/`,
     lastModified: now,
     changeFrequency: "monthly" as const,
-    priority: 0.5,
+    priority: 0.6,
   }));
 
   return [...staticEntries, ...blogEntries];

@@ -56,7 +56,10 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  alternates: { canonical: SITE.url },
+  alternates: {
+    canonical: SITE.url,
+    types: { "application/rss+xml": `${SITE.url}/feed.xml` },
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -102,6 +105,9 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   category: "technology",
+  other: {
+    "msapplication-TileColor": "#10b981",
+  },
 };
 
 export default function RootLayout({

@@ -27,6 +27,13 @@ export const FOOTER_LINKS = {
     { href: "/bulk", label: "Bulk Remover" },
     { href: "/tools/image-compressor", label: "Image Compressor" },
     { href: "/tools/image-resizer", label: "Image Resizer" },
+    { href: "/transparent-png-maker", label: "Transparent PNG Maker" },
+  ],
+  "Use cases": [
+    { href: "/portrait-background-remover", label: "Portrait Remover" },
+    { href: "/product-photo-background-remover", label: "Product Photo Remover" },
+    { href: "/logo-background-remover", label: "Logo Background Remover" },
+    { href: "/screenshot-background-remover", label: "Screenshot Remover" },
   ],
   Company: [
     { href: "/about", label: "About" },
