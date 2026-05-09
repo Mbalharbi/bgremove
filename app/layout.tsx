@@ -105,6 +105,11 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   category: "technology",
+  verification: {
+    other: {
+      "msvalidate.01": "E8C4754DB79A31C17DFAEAFFB7398139",
+    },
+  },
   other: {
     "msapplication-TileColor": "#10b981",
   },
