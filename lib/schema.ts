@@ -57,34 +57,66 @@ export const organizationSchema = {
   url: SITE.url,
   logo: `${SITE.url}/icon-512.png`,
   description: SITE.description,
+  sameAs: [
+    "https://github.com/Mbalharbi/bgremove",
+  ],
 };
 
+/**
+ * Enhanced WebApplication schema. Helps both Google rich results AND
+ * AI assistants (ChatGPT Search, Perplexity, Gemini, Claude with web)
+ * understand BgRemove as a software tool with category, rating, and offers.
+ */
 export const webApplicationSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
+  "@id": `${SITE.url}/#webapp`,
   name: SITE.name,
+  alternateName: ["BgRemovers", "Background Remover", "Free BG Remover"],
   url: SITE.url,
   applicationCategory: "MultimediaApplication",
-  operatingSystem: "Any",
-  browserRequirements: "Requires a modern browser with WebGL or WASM support.",
+  applicationSubCategory: "Background Remover",
+  operatingSystem: "Any modern web browser (Chrome, Safari, Firefox, Edge)",
+  browserRequirements: "Requires WebGL 2.0 and WebAssembly support (all modern browsers).",
+  softwareVersion: "1.0",
+  description: SITE.description,
+  isAccessibleForFree: true,
   offers: {
     "@type": "Offer",
     price: "0",
     priceCurrency: "USD",
+    availability: "https://schema.org/InStock",
+    category: "Free",
   },
   aggregateRating: {
     "@type": "AggregateRating",
     ratingValue: "4.9",
     ratingCount: "248",
+    bestRating: "5",
+    worstRating: "1",
   },
-  description: SITE.description,
   featureList: [
-    "Browser-based background removal",
-    "100% private processing",
-    "Free with no signup",
-    "Bulk processing for multiple images",
-    "Image compression",
-    "Image resizing",
+    "Browser-based background removal (no upload required)",
+    "100% private — photos never leave the device",
+    "Free with no signup, no watermark, no daily limit",
+    "Bulk processing for up to 20 images per batch",
+    "Image compression (JPG, PNG, WebP)",
+    "Image resizing with social media presets",
+    "Output: transparent PNG with full alpha channel",
+    "Works on desktop and mobile",
+    "Dark mode",
+  ],
+  screenshot: `${SITE.url}/og-image.png`,
+  publisher: {
+    "@type": "Organization",
+    name: SITE.name,
+    url: SITE.url,
+  },
+  // Helps AI tools recognise BgRemove as an alternative to known competitors.
+  isSimilarTo: [
+    { "@type": "SoftwareApplication", name: "Remove.bg", url: "https://www.remove.bg" },
+    { "@type": "SoftwareApplication", name: "Adobe Express", url: "https://www.adobe.com/express/" },
+    { "@type": "SoftwareApplication", name: "Canva", url: "https://www.canva.com" },
   ],
 };
 
@@ -129,6 +161,7 @@ export function softwareAppSchema(opts: {
     description: opts.description,
     applicationCategory: opts.category ?? "MultimediaApplication",
     operatingSystem: "Any",
+    isAccessibleForFree: true,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
 }

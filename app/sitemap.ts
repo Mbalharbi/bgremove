@@ -24,6 +24,12 @@ const STATIC_PATHS: StaticEntry[] = [
   { path: "transparent-png-maker", priority: 0.85, freq: "weekly" },
   { path: "screenshot-background-remover", priority: 0.8, freq: "weekly" },
 
+  // Comparison pages (high commercial intent + AI assistant fodder)
+  { path: "vs/remove-bg", priority: 0.85, freq: "weekly" },
+  { path: "vs/photoshop", priority: 0.8, freq: "weekly" },
+  { path: "vs/canva", priority: 0.8, freq: "weekly" },
+  { path: "vs/adobe-express", priority: 0.8, freq: "weekly" },
+
   // Content
   { path: "blog", priority: 0.7, freq: "weekly" },
 
