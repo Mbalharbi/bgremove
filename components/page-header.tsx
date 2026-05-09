@@ -10,7 +10,7 @@ export function PageHeader({ eyebrow, title, description }: PageHeaderProps) {
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-fade" />
       <div className="container relative py-12 sm:py-16">
         {eyebrow && (
-          <p className="text-xs font-mono uppercase tracking-wider text-primary">
+          <p className="text-xs font-mono uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
             {eyebrow}
           </p>
         )}

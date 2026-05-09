@@ -28,7 +28,7 @@ export function Logo({ className, size = "md" }: LogoProps) {
         <Scissors className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
       </span>
       <span>
-        Bg<span className="text-primary">Remove</span>
+        Bg<span className="text-emerald-700 dark:text-emerald-400">Remove</span>
       </span>
     </Link>
   );

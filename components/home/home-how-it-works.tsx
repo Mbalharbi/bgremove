@@ -26,7 +26,7 @@ export function HomeHowItWorks() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Icon className="h-6 w-6" />
               </div>
-              <p className="font-mono text-xs uppercase tracking-wide text-primary">
+              <p className="font-mono text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
                 Step {i + 1}
               </p>
               <h3 className="mt-1 text-lg font-semibold">{step.title}</h3>
