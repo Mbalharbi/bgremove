@@ -46,7 +46,7 @@ export function HomeComparison() {
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="p-4 text-left font-semibold">Feature</th>
-                <th className="p-4 text-center font-semibold text-primary">BgRemove</th>
+                <th className="p-4 text-center font-semibold text-emerald-700 dark:text-emerald-400">BgRemove</th>
                 <th className="p-4 text-center font-semibold">Remove.bg</th>
                 <th className="p-4 text-center font-semibold">Photoshop</th>
               </tr>

@@ -103,7 +103,9 @@ export function UploadZone({
       role="button"
       tabIndex={disabled ? -1 : 0}
       aria-disabled={disabled}
-      aria-label="Upload an image to remove its background"
+      aria-label={multiple
+        ? "Drop images, paste, or tap to upload (removes the background)"
+        : "Drop an image, paste, or tap to upload (removes the background)"}
       onClick={disabled ? undefined : onClick}
       onKeyDown={disabled ? undefined : onKeyDown}
       onDrop={onDrop}
