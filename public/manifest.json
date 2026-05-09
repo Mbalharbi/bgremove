@@ -1,0 +1,49 @@
+{
+  "name": "BgRemove - Free Background Remover",
+  "short_name": "BgRemove",
+  "description": "Remove image backgrounds in seconds. 100% private. 100% free.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "categories": ["productivity", "graphics", "photo", "utilities"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Bulk remove",
+      "url": "/bulk/",
+      "description": "Process up to 20 images at once"
+    },
+    {
+      "name": "Compress",
+      "url": "/tools/image-compressor/",
+      "description": "Compress JPG, PNG, WebP"
+    },
+    {
+      "name": "Resize",
+      "url": "/tools/image-resizer/",
+      "description": "Resize for social media"
+    }
+  ]
+}
