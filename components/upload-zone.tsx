@@ -127,6 +127,7 @@ export function UploadZone({
         type="file"
         accept={accept}
         multiple={multiple}
+        aria-label={multiple ? "Choose image files to upload" : "Choose an image file to upload"}
         className="sr-only"
         onChange={(e) => {
           if (e.target.files) handleFiles(e.target.files);
