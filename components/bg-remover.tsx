@@ -101,8 +101,14 @@ export function BgRemover() {
   if (status.kind === "ready") {
     const { beforeUrl, afterUrl, filename, result, inputSize } = status.src;
     return (
-      <div className="flex flex-col gap-4">
-        <ImagePreview beforeUrl={beforeUrl} afterUrl={afterUrl} alt={filename} />
+      <div className="flex min-h-[480px] flex-col gap-4">
+        <ImagePreview
+          beforeUrl={beforeUrl}
+          afterUrl={afterUrl}
+          alt={filename}
+          width={result.width}
+          height={result.height}
+        />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <span className="rounded-md bg-muted px-2 py-1 font-mono">
@@ -129,7 +135,7 @@ export function BgRemover() {
 
   if (status.kind === "loading") {
     return (
-      <div className="flex w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-primary/40 bg-card/60 p-10 sm:p-16">
+      <div className="flex min-h-[480px] w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-primary/40 bg-card/60 p-10 sm:p-16">
         <div className="relative">
           <div className="absolute inset-0 animate-ping rounded-full bg-primary/30" />
           <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -147,7 +153,7 @@ export function BgRemover() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-h-[480px] flex-col gap-4">
       <UploadZone
         onFile={process}
         onError={(message) => toast({ title: "Upload error", description: message, variant: "destructive" })}

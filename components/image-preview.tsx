@@ -9,6 +9,10 @@ interface ImagePreviewProps {
   afterUrl: string;
   alt?: string;
   className?: string;
+  /** Image natural width — used to reserve aspect ratio and prevent CLS. */
+  width?: number;
+  /** Image natural height — used to reserve aspect ratio and prevent CLS. */
+  height?: number;
 }
 
 /**
@@ -19,6 +23,8 @@ export function ImagePreview({
   afterUrl,
   alt = "Image preview",
   className,
+  width,
+  height,
 }: ImagePreviewProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [position, setPosition] = React.useState(50);
@@ -57,6 +63,11 @@ export function ImagePreview({
     else if (e.key === "End") setPosition(100);
   };
 
+  // Reserve aspect ratio so the container has a stable height before the
+  // image loads. Eliminates CLS during state transitions.
+  const aspectStyle: React.CSSProperties | undefined =
+    width && height ? { aspectRatio: `${width} / ${height}` } : undefined;
+
   return (
     <div
       ref={containerRef}
@@ -65,15 +76,18 @@ export function ImagePreview({
         dragging ? "cursor-grabbing" : "cursor-grab",
         className
       )}
+      style={aspectStyle}
       onPointerDown={onPointerDown}
     >
       {/* After (transparent PNG) — shows checkered bg */}
-      <div className="checker-bg">
+      <div className="checker-bg absolute inset-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={afterUrl}
           alt={`${alt} — background removed`}
-          className="block h-auto w-full"
+          width={width}
+          height={height}
+          className="block h-full w-full object-contain"
           draggable={false}
         />
       </div>
@@ -87,7 +101,9 @@ export function ImagePreview({
         <img
           src={beforeUrl}
           alt={`${alt} — original`}
-          className="block h-auto w-full"
+          width={width}
+          height={height}
+          className="block h-full w-full object-contain"
           draggable={false}
         />
       </div>

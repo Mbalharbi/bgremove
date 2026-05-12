@@ -15,7 +15,17 @@ const BULK_LIMIT = 20;
 type ItemStatus =
   | { kind: "queued" }
   | { kind: "processing" }
-  | { kind: "done"; blob: Blob; processingMs: number; width: number; height: number }
+  | {
+      kind: "done";
+      blob: Blob;
+      /** Object URL created once on transition. Used as <img src> without
+       *  regenerating on every render — eliminates a memory leak and a CLS
+       *  shift from repeated image loads. */
+      doneUrl: string;
+      processingMs: number;
+      width: number;
+      height: number;
+    }
   | { kind: "error"; message: string };
 
 interface Item {
@@ -52,32 +62,38 @@ export function BulkRemover() {
     [items.length, toast]
   );
 
+  const revokeItem = (it: Item) => {
+    URL.revokeObjectURL(it.thumbnailUrl);
+    if (it.status.kind === "done") URL.revokeObjectURL(it.status.doneUrl);
+  };
+
   const remove = (id: string) => {
-    setItems((prev) => {
-      const next = prev.filter((it) => {
+    setItems((prev) =>
+      prev.filter((it) => {
         if (it.id === id) {
-          URL.revokeObjectURL(it.thumbnailUrl);
-          if (it.status.kind === "done") {
-            // Blob is held in memory; nothing to revoke explicitly.
-          }
+          revokeItem(it);
           return false;
         }
         return true;
-      });
-      return next;
-    });
+      })
+    );
   };
 
   const clearAll = () => {
-    items.forEach((it) => URL.revokeObjectURL(it.thumbnailUrl));
+    items.forEach(revokeItem);
     setItems([]);
   };
 
+  // Capture latest items in a ref so the unmount cleanup revokes all URLs
+  // currently in state, not the snapshot from initial render.
+  const itemsRef = React.useRef(items);
+  React.useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
   React.useEffect(
     () => () => {
-      items.forEach((it) => URL.revokeObjectURL(it.thumbnailUrl));
+      itemsRef.current.forEach(revokeItem);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -92,6 +108,7 @@ export function BulkRemover() {
           const result = await removeBackground(item.file, {
             onProgress: (s) => setLoadStage(s),
           });
+          const doneUrl = URL.createObjectURL(result.blob);
           setItems((prev) =>
             prev.map((it) =>
               it.id === item.id
@@ -100,6 +117,7 @@ export function BulkRemover() {
                     status: {
                       kind: "done",
                       blob: result.blob,
+                      doneUrl,
                       processingMs: result.processingMs,
                       width: result.width,
                       height: result.height,
@@ -208,12 +226,10 @@ export function BulkRemover() {
                 <div className="aspect-square overflow-hidden rounded-lg bg-muted checker-bg">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={
-                      item.status.kind === "done"
-                        ? URL.createObjectURL(item.status.blob)
-                        : item.thumbnailUrl
-                    }
+                    src={item.status.kind === "done" ? item.status.doneUrl : item.thumbnailUrl}
                     alt={item.file.name}
+                    width={400}
+                    height={400}
                     className="h-full w-full object-cover"
                   />
                 </div>
