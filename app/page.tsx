@@ -2,6 +2,7 @@ import { HomeHero } from "@/components/home/home-hero";
 import { HomeHowItWorks } from "@/components/home/home-how-it-works";
 import { HomeComparison } from "@/components/home/home-comparison";
 import { HomeFaq } from "@/components/home/home-faq";
+import { HomeRelatedTools } from "@/components/home/home-related-tools";
 import { HomeUseCases } from "@/components/home/home-use-cases";
 import { JsonLd } from "@/components/json-ld";
 import {
@@ -26,6 +27,7 @@ export default function HomePage() {
       <HomeHowItWorks />
       <HomeUseCases />
       <HomeComparison />
+      <HomeRelatedTools />
       <HomeFaq />
     </>
   );
