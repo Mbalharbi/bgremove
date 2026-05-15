@@ -1,18 +1,21 @@
-// Cloudflare Workers config — assets-only deployment (no compute, no SSR).
+// Cloudflare Workers config for bgremovers.org.
 //
-// This file tells Cloudflare to treat the project as a static asset Worker:
-// it just uploads /out as a CDN-served bundle. No OpenNext, no Next.js SSR
-// runtime, no version constraint on Next.js.
+// Combines a small Worker entrypoint (handles the www → apex redirect) with
+// the static asset binding (serves the /out directory). No OpenNext, no
+// Next.js SSR runtime, no version constraint on Next.js.
 //
-// Trigger by pushing to main; Cloudflare runs `npm run build` (which produces
-// /out via `next export`) then `npx wrangler deploy` reads this file and
-// uploads the assets directory.
+// Trigger by pushing to main; Cloudflare runs `npm run build` (producing
+// /out via `next export`) then `npx wrangler deploy` reads this file,
+// bundles `worker/index.ts`, and uploads it together with the assets.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "bgremove",
-  "compatibility_date": "2026-05-09",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-05-15",
   "assets": {
     "directory": "./out",
+    "binding": "ASSETS",
+    "run_worker_first": true,
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
   }
