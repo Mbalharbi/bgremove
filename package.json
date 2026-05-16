@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/generate-png-assets.mjs",
     "build": "next build",
+    "postbuild": "node scripts/ping-indexnow.mjs",
     "start": "next start",
     "lint": "next lint",
     "generate:assets": "node scripts/generate-png-assets.mjs",
