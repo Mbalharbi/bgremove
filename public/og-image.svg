@@ -1,67 +1,68 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="100%" stop-color="#020617"/>
-    </linearGradient>
     <linearGradient id="accent" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#10b981"/>
-      <stop offset="100%" stop-color="#34d399"/>
+      <stop offset="0%" stop-color="#047857"/>
+      <stop offset="100%" stop-color="#059669"/>
     </linearGradient>
-    <radialGradient id="glow" cx="600" cy="0" r="600" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#10b981" stop-opacity="0.25"/>
+    <linearGradient id="logoBg" x1="0" y1="0" x2="68" y2="68" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="600" cy="0" r="700" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.12"/>
       <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
     </radialGradient>
     <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="1"/>
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="1"/>
     </pattern>
   </defs>
 
-  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- White background + subtle grid + soft green glow at top -->
+  <rect width="1200" height="630" fill="#ffffff"/>
   <rect width="1200" height="630" fill="url(#grid)"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
 
   <!-- Logo mark -->
   <g transform="translate(80, 80)">
-    <rect width="68" height="68" rx="16" fill="url(#accent)"/>
-    <circle cx="22" cy="24" r="5" fill="none" stroke="#0f172a" stroke-width="4"/>
-    <circle cx="22" cy="44" r="5" fill="none" stroke="#0f172a" stroke-width="4"/>
-    <line x1="27" y1="27" x2="50" y2="44" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
-    <line x1="27" y1="41" x2="50" y2="24" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+    <rect width="68" height="68" rx="16" fill="url(#logoBg)"/>
+    <circle cx="22" cy="24" r="5" fill="none" stroke="#ffffff" stroke-width="4"/>
+    <circle cx="22" cy="44" r="5" fill="none" stroke="#ffffff" stroke-width="4"/>
+    <line x1="27" y1="27" x2="50" y2="44" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    <line x1="27" y1="41" x2="50" y2="24" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
   </g>
 
-  <text x="170" y="125" font-family="Inter, system-ui, sans-serif" font-size="38" font-weight="700" fill="#f1f5f9">
+  <text x="170" y="125" font-family="Inter, system-ui, sans-serif" font-size="38" font-weight="700" fill="#0f172a">
     BgRemove
   </text>
 
-  <text x="80" y="290" font-family="Inter, system-ui, sans-serif" font-size="84" font-weight="800" fill="#f1f5f9" letter-spacing="-2">
+  <text x="80" y="290" font-family="Inter, system-ui, sans-serif" font-size="84" font-weight="800" fill="#0f172a" letter-spacing="-2">
     Remove image
   </text>
   <text x="80" y="380" font-family="Inter, system-ui, sans-serif" font-size="84" font-weight="800" fill="url(#accent)" letter-spacing="-2">
     backgrounds in seconds.
   </text>
 
-  <text x="80" y="465" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="500" fill="#94a3b8">
+  <text x="80" y="465" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="500" fill="#475569">
     Free, browser-only, never uploaded. No signup.
   </text>
 
   <!-- Trust pills -->
   <g transform="translate(80, 510)">
-    <rect width="220" height="44" rx="22" fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.4)"/>
-    <circle cx="22" cy="22" r="4" fill="#10b981"/>
-    <text x="38" y="29" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="#10b981">100% Browser-Based</text>
+    <rect width="220" height="44" rx="22" fill="rgba(16,185,129,0.10)" stroke="rgba(16,185,129,0.45)"/>
+    <circle cx="22" cy="22" r="4" fill="#047857"/>
+    <text x="38" y="29" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="#047857">100% Browser-Based</text>
 
-    <rect x="240" width="160" height="44" rx="22" fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.4)"/>
-    <circle cx="262" cy="22" r="4" fill="#10b981"/>
-    <text x="278" y="29" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="#10b981">No Upload</text>
+    <rect x="240" width="160" height="44" rx="22" fill="rgba(16,185,129,0.10)" stroke="rgba(16,185,129,0.45)"/>
+    <circle cx="262" cy="22" r="4" fill="#047857"/>
+    <text x="278" y="29" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="#047857">No Upload</text>
 
-    <rect x="420" width="170" height="44" rx="22" fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.4)"/>
-    <circle cx="442" cy="22" r="4" fill="#10b981"/>
-    <text x="458" y="29" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="#10b981">Free Forever</text>
+    <rect x="420" width="170" height="44" rx="22" fill="rgba(16,185,129,0.10)" stroke="rgba(16,185,129,0.45)"/>
+    <circle cx="442" cy="22" r="4" fill="#047857"/>
+    <text x="458" y="29" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="#047857">Free Forever</text>
   </g>
 
   <!-- URL footer -->
-  <text x="1120" y="600" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" fill="#64748b">
+  <text x="1120" y="600" text-anchor="end" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" fill="#94a3b8">
     bgremovers.org
   </text>
 </svg>
