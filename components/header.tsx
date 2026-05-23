@@ -3,33 +3,39 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Globe, Menu, X } from "lucide-react";
+import { Globe, Menu, X, ChevronDown } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { NAV_LINKS } from "@/lib/site";
 import { NAV_LINKS_AR } from "@/lib/site-ar";
+import { NAV_LINKS_PT } from "@/lib/site-pt";
+import { NAV_LINKS_DE } from "@/lib/site-de";
+import { NAV_LINKS_ES } from "@/lib/site-es";
+import { NAV_LINKS_ZH } from "@/lib/site-zh";
+import { LOCALES, detectLocale, HEADER_ARIA, type LocaleCode } from "@/lib/locales";
 import { cn } from "@/lib/utils";
+
+// Map locale codes → their localised nav links.
+const NAV_BY_LOCALE: Record<LocaleCode, ReadonlyArray<{ href: string; label: string }>> = {
+  en: NAV_LINKS,
+  ar: NAV_LINKS_AR,
+  pt: NAV_LINKS_PT,
+  de: NAV_LINKS_DE,
+  es: NAV_LINKS_ES,
+  zh: NAV_LINKS_ZH,
+};
 
 export function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+  const [langOpen, setLangOpen] = React.useState(false);
+  const langRef = React.useRef<HTMLDivElement>(null);
 
-  // Detect Arabic locale from the URL. /ar and /ar/* render Arabic nav and
-  // link to Arabic destinations; everything else stays English.
-  const isArabic = pathname === "/ar" || pathname.startsWith("/ar/");
-  const navLinks = isArabic ? NAV_LINKS_AR : NAV_LINKS;
-  const aria = isArabic
-    ? { primary: "التنقل الرئيسي", mobile: "تنقل الجوال", open: "افتح القائمة", close: "أغلق القائمة" }
-    : { primary: "Primary", mobile: "Mobile", open: "Open menu", close: "Close menu" };
-
-  // Cross-locale switcher target. We don't deep-translate paths — just point
-  // at the locale root, which is the safest default until every page exists
-  // in both languages.
-  const switcher = isArabic
-    ? { href: "/", label: "EN", title: "English" }
-    : { href: "/ar", label: "AR", title: "العربية" };
+  const locale = detectLocale(pathname);
+  const navLinks = NAV_BY_LOCALE[locale.code];
+  const aria = HEADER_ARIA[locale.code];
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -39,6 +45,19 @@ export function Header() {
   }, []);
 
   React.useEffect(() => setMobileOpen(false), [pathname]);
+  React.useEffect(() => setLangOpen(false), [pathname]);
+
+  // Close language dropdown on outside click.
+  React.useEffect(() => {
+    if (!langOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [langOpen]);
 
   return (
     <header
@@ -74,16 +93,50 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <Link
-            href={switcher.href}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent/10 hover:text-foreground"
-            title={switcher.title}
-            aria-label={`Switch to ${switcher.title}`}
-            hrefLang={switcher.label.toLowerCase()}
-          >
-            <Globe className="h-4 w-4" aria-hidden />
-            <span className="sr-only">{switcher.label}</span>
-          </Link>
+          {/* Language dropdown */}
+          <div className="relative" ref={langRef}>
+            <button
+              type="button"
+              onClick={() => setLangOpen((v) => !v)}
+              className="inline-flex h-10 items-center gap-1 rounded-full px-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent/10 hover:text-foreground"
+              aria-label={aria.language}
+              aria-expanded={langOpen}
+              aria-haspopup="listbox"
+            >
+              <Globe className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline">{locale.label}</span>
+              <ChevronDown className={cn("h-3 w-3 transition-transform", langOpen && "rotate-180")} aria-hidden />
+            </button>
+            {langOpen && (
+              <ul
+                role="listbox"
+                className="absolute right-0 mt-2 min-w-[160px] overflow-hidden rounded-xl border border-border bg-background/95 py-1 shadow-lg backdrop-blur-md"
+              >
+                {LOCALES.map((loc) => {
+                  const target = loc.prefix || "/";
+                  const isActive = loc.code === locale.code;
+                  return (
+                    <li key={loc.code} role="option" aria-selected={isActive}>
+                      <Link
+                        href={target}
+                        hrefLang={loc.bcp47}
+                        className={cn(
+                          "block px-4 py-2 text-sm transition-colors",
+                          isActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : "text-foreground hover:bg-accent/10"
+                        )}
+                      >
+                        {loc.nativeName}
+                        <span className="ml-2 text-xs text-muted-foreground">{loc.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+
           <ThemeToggle />
           <Button
             variant="ghost"
@@ -122,13 +175,32 @@ export function Header() {
                 </Link>
               );
             })}
-            <Link
-              href={switcher.href}
-              className="mt-2 rounded-md px-3 py-3 text-sm font-medium text-muted-foreground hover:bg-accent/10 hover:text-foreground"
-              hrefLang={switcher.label.toLowerCase()}
-            >
-              <Globe className="me-2 inline h-4 w-4" aria-hidden /> {switcher.title}
-            </Link>
+            {/* Language list on mobile */}
+            <div className="mt-2 border-t border-border pt-2">
+              <p className="px-3 pb-1 text-xs uppercase tracking-wider text-muted-foreground">
+                {aria.language}
+              </p>
+              {LOCALES.map((loc) => {
+                const target = loc.prefix || "/";
+                const isActive = loc.code === locale.code;
+                return (
+                  <Link
+                    key={loc.code}
+                    href={target}
+                    hrefLang={loc.bcp47}
+                    className={cn(
+                      "block rounded-md px-3 py-2 text-sm transition-colors",
+                      isActive
+                        ? "bg-primary/10 text-primary font-semibold"
+                        : "text-foreground hover:bg-accent/10"
+                    )}
+                  >
+                    {loc.nativeName}
+                    <span className="ml-2 text-xs text-muted-foreground">{loc.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </nav>
       )}

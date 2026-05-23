@@ -50,3 +50,6 @@ Thumbs.db
 
 # Lighthouse audits
 /lh-*.json
+
+# Generated screenshots (53 MB, regenerated from scripts/generate-screenshots.mjs)
+/screenshots/

@@ -50,6 +50,31 @@ const STATIC_PATHS: StaticEntry[] = [
   { path: "ar/screenshot-background-remover", priority: 0.75, freq: "weekly" },
   { path: "ar/about", priority: 0.4, freq: "monthly" },
   { path: "ar/privacy", priority: 0.3, freq: "monthly" },
+
+  // Portuguese (Brazil) — high-volume e-commerce market.
+  { path: "pt", priority: 0.95, freq: "weekly" },
+  { path: "pt/bulk", priority: 0.85, freq: "weekly" },
+  { path: "pt/about", priority: 0.4, freq: "monthly" },
+  { path: "pt/privacy", priority: 0.3, freq: "monthly" },
+
+  // German — privacy-conscious EU audience, high Ad RPM.
+  { path: "de", priority: 0.95, freq: "weekly" },
+  { path: "de/bulk", priority: 0.85, freq: "weekly" },
+  { path: "de/about", priority: 0.4, freq: "monthly" },
+  { path: "de/privacy", priority: 0.3, freq: "monthly" },
+
+  // Spanish — Spain + LATAM, largest single-language market after English.
+  { path: "es", priority: 0.95, freq: "weekly" },
+  { path: "es/bulk", priority: 0.85, freq: "weekly" },
+  { path: "es/about", priority: 0.4, freq: "monthly" },
+  { path: "es/privacy", priority: 0.3, freq: "monthly" },
+
+  // Chinese (simplified) — Mainland may have CDN reachability issues,
+  // but Taiwan/HK/Singapore + diaspora is huge.
+  { path: "zh", priority: 0.95, freq: "weekly" },
+  { path: "zh/bulk", priority: 0.85, freq: "weekly" },
+  { path: "zh/about", priority: 0.4, freq: "monthly" },
+  { path: "zh/privacy", priority: 0.3, freq: "monthly" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
