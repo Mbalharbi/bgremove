@@ -3,17 +3,33 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Globe, Menu, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { NAV_LINKS } from "@/lib/site";
+import { NAV_LINKS_AR } from "@/lib/site-ar";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+
+  // Detect Arabic locale from the URL. /ar and /ar/* render Arabic nav and
+  // link to Arabic destinations; everything else stays English.
+  const isArabic = pathname === "/ar" || pathname.startsWith("/ar/");
+  const navLinks = isArabic ? NAV_LINKS_AR : NAV_LINKS;
+  const aria = isArabic
+    ? { primary: "التنقل الرئيسي", mobile: "تنقل الجوال", open: "افتح القائمة", close: "أغلق القائمة" }
+    : { primary: "Primary", mobile: "Mobile", open: "Open menu", close: "Close menu" };
+
+  // Cross-locale switcher target. We don't deep-translate paths — just point
+  // at the locale root, which is the safest default until every page exists
+  // in both languages.
+  const switcher = isArabic
+    ? { href: "/", label: "EN", title: "English" }
+    : { href: "/ar", label: "AR", title: "العربية" };
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -37,8 +53,8 @@ export function Header() {
         <Logo />
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1" aria-label="Primary">
-          {NAV_LINKS.map((link) => {
+        <nav className="hidden md:flex items-center gap-1" aria-label={aria.primary}>
+          {navLinks.map((link) => {
             const active = pathname === link.href;
             return (
               <Link
@@ -58,13 +74,23 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
+          <Link
+            href={switcher.href}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent/10 hover:text-foreground"
+            title={switcher.title}
+            aria-label={`Switch to ${switcher.title}`}
+            hrefLang={switcher.label.toLowerCase()}
+          >
+            <Globe className="h-4 w-4" aria-hidden />
+            <span className="sr-only">{switcher.label}</span>
+          </Link>
           <ThemeToggle />
           <Button
             variant="ghost"
             size="icon"
             className="md:hidden"
             onClick={() => setMobileOpen((v) => !v)}
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-label={mobileOpen ? aria.close : aria.open}
             aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -76,10 +102,10 @@ export function Header() {
       {mobileOpen && (
         <nav
           className="md:hidden border-t border-border bg-background/95 backdrop-blur-md"
-          aria-label="Mobile"
+          aria-label={aria.mobile}
         >
           <div className="container flex flex-col py-2">
-            {NAV_LINKS.map((link) => {
+            {navLinks.map((link) => {
               const active = pathname === link.href;
               return (
                 <Link
@@ -96,6 +122,13 @@ export function Header() {
                 </Link>
               );
             })}
+            <Link
+              href={switcher.href}
+              className="mt-2 rounded-md px-3 py-3 text-sm font-medium text-muted-foreground hover:bg-accent/10 hover:text-foreground"
+              hrefLang={switcher.label.toLowerCase()}
+            >
+              <Globe className="me-2 inline h-4 w-4" aria-hidden /> {switcher.title}
+            </Link>
           </div>
         </nav>
       )}

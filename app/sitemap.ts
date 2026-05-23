@@ -38,6 +38,18 @@ const STATIC_PATHS: StaticEntry[] = [
   { path: "privacy", priority: 0.4, freq: "monthly" },
   { path: "terms", priority: 0.4, freq: "monthly" },
   { path: "contact", priority: 0.4, freq: "monthly" },
+
+  // Arabic locale (/ar/*) — mirrors the highest-value English routes.
+  // Marketing/SEO surface, NOT every English page — keep crawl budget tight.
+  { path: "ar", priority: 0.95, freq: "weekly" },
+  { path: "ar/bulk", priority: 0.85, freq: "weekly" },
+  { path: "ar/portrait-background-remover", priority: 0.8, freq: "weekly" },
+  { path: "ar/product-photo-background-remover", priority: 0.8, freq: "weekly" },
+  { path: "ar/logo-background-remover", priority: 0.75, freq: "weekly" },
+  { path: "ar/transparent-png-maker", priority: 0.8, freq: "weekly" },
+  { path: "ar/screenshot-background-remover", priority: 0.75, freq: "weekly" },
+  { path: "ar/about", priority: 0.4, freq: "monthly" },
+  { path: "ar/privacy", priority: 0.3, freq: "monthly" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
