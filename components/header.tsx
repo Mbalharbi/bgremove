@@ -13,16 +13,20 @@ import { NAV_LINKS_PT } from "@/lib/site-pt";
 import { NAV_LINKS_DE } from "@/lib/site-de";
 import { NAV_LINKS_ES } from "@/lib/site-es";
 import { NAV_LINKS_ZH } from "@/lib/site-zh";
+import { NAV_LINKS_HI } from "@/lib/site-hi";
+import { NAV_LINKS_ID } from "@/lib/site-id";
 import { LOCALES, detectLocale, HEADER_ARIA, type LocaleCode } from "@/lib/locales";
 import { cn } from "@/lib/utils";
 
 // Map locale codes → their localised nav links.
 const NAV_BY_LOCALE: Record<LocaleCode, ReadonlyArray<{ href: string; label: string }>> = {
   en: NAV_LINKS,
-  ar: NAV_LINKS_AR,
+  hi: NAV_LINKS_HI,
+  id: NAV_LINKS_ID,
   pt: NAV_LINKS_PT,
-  de: NAV_LINKS_DE,
   es: NAV_LINKS_ES,
+  ar: NAV_LINKS_AR,
+  de: NAV_LINKS_DE,
   zh: NAV_LINKS_ZH,
 };
 

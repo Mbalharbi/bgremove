@@ -16,6 +16,8 @@ const STATIC_PATHS: StaticEntry[] = [
   { path: "bulk", priority: 0.9, freq: "weekly" },
   { path: "tools/image-compressor", priority: 0.8, freq: "weekly" },
   { path: "tools/image-resizer", priority: 0.8, freq: "weekly" },
+  { path: "tools/qr-code-generator", priority: 0.75, freq: "weekly" },
+  { path: "privacy-proof", priority: 0.7, freq: "monthly" },
 
   // Programmatic SEO landing pages
   { path: "portrait-background-remover", priority: 0.85, freq: "weekly" },
@@ -38,6 +40,18 @@ const STATIC_PATHS: StaticEntry[] = [
   { path: "privacy", priority: 0.4, freq: "monthly" },
   { path: "terms", priority: 0.4, freq: "monthly" },
   { path: "contact", priority: 0.4, freq: "monthly" },
+
+  // Hindi (/hi/*) — high-opportunity Indian market.
+  { path: "hi", priority: 0.97, freq: "weekly" },
+  { path: "hi/bulk", priority: 0.85, freq: "weekly" },
+  { path: "hi/about", priority: 0.4, freq: "monthly" },
+  { path: "hi/privacy", priority: 0.3, freq: "monthly" },
+
+  // Indonesian (/id/*) — large mobile-first audience, Tokopedia/Shopee sellers.
+  { path: "id", priority: 0.97, freq: "weekly" },
+  { path: "id/bulk", priority: 0.85, freq: "weekly" },
+  { path: "id/about", priority: 0.4, freq: "monthly" },
+  { path: "id/privacy", priority: 0.3, freq: "monthly" },
 
   // Arabic locale (/ar/*) — mirrors the highest-value English routes.
   // Marketing/SEO surface, NOT every English page — keep crawl budget tight.

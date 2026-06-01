@@ -10,6 +10,8 @@ import { FOOTER_LINKS_PT, SITE_PT } from "@/lib/site-pt";
 import { FOOTER_LINKS_DE, SITE_DE } from "@/lib/site-de";
 import { FOOTER_LINKS_ES, SITE_ES } from "@/lib/site-es";
 import { FOOTER_LINKS_ZH, SITE_ZH } from "@/lib/site-zh";
+import { FOOTER_LINKS_HI, SITE_HI } from "@/lib/site-hi";
+import { FOOTER_LINKS_ID, SITE_ID } from "@/lib/site-id";
 import { detectLocale, type LocaleCode } from "@/lib/locales";
 
 type FooterLinkGroup = Readonly<Record<string, ReadonlyArray<{ href: string; label: string }>>>;
@@ -31,6 +33,22 @@ const FOOTER_BY_LOCALE: Record<LocaleCode, FooterStrings> = {
     copyright: (y) => `© ${y} ${SITE.name}. All rights reserved.`,
     madeWith: "Made with",
     tagSuffix: "for the open web.",
+  },
+  hi: {
+    links: FOOTER_LINKS_HI,
+    tagline: SITE_HI.tagline,
+    trustPill: "100% ब्राउज़र में",
+    copyright: (y) => `© ${y} ${SITE.name}. सर्वाधिकार सुरक्षित।`,
+    madeWith: "बनाया गया",
+    tagSuffix: "ओपन वेब के लिए।",
+  },
+  id: {
+    links: FOOTER_LINKS_ID,
+    tagline: SITE_ID.tagline,
+    trustPill: "100% di browser",
+    copyright: (y) => `© ${y} ${SITE.name}. Semua hak dilindungi.`,
+    madeWith: "Dibuat dengan",
+    tagSuffix: "untuk web terbuka.",
   },
   ar: {
     links: FOOTER_LINKS_AR,

@@ -27,6 +27,7 @@ export const FOOTER_LINKS = {
     { href: "/bulk", label: "Bulk Remover" },
     { href: "/tools/image-compressor", label: "Image Compressor" },
     { href: "/tools/image-resizer", label: "Image Resizer" },
+    { href: "/tools/qr-code-generator", label: "QR Code Generator" },
     { href: "/transparent-png-maker", label: "Transparent PNG Maker" },
   ],
   "Use cases": [
@@ -42,6 +43,7 @@ export const FOOTER_LINKS = {
   ],
   Legal: [
     { href: "/privacy", label: "Privacy" },
+    { href: "/privacy-proof", label: "Privacy Proof" },
     { href: "/terms", label: "Terms" },
   ],
 } as const;

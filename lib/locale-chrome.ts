@@ -1,7 +1,6 @@
 /**
- * Shared UI chrome strings per locale. These are the bits that appear
- * around content on every page (trust pills, "related tools" heading,
- * "back to all tools" button, etc).
+ * Shared UI chrome strings per locale. These appear around content on every
+ * page — trust pills, "related tools" heading, "back to all tools" button.
  */
 import type { LocaleCode } from "./locales";
 
@@ -22,6 +21,22 @@ export const CHROME: Record<LocaleCode, ChromeStrings> = {
     relatedHeading: "Related tools and guides",
     backToTools: "Back to all tools",
     backHref: "/",
+  },
+  hi: {
+    trustBrowser: "100% ब्राउज़र में",
+    trustNoUpload: "कोई अपलोड नहीं",
+    trustFree: "हमेशा फ्री",
+    relatedHeading: "रिलेटेड टूल्स और गाइड",
+    backToTools: "सभी टूल्स पर वापस",
+    backHref: "/hi",
+  },
+  id: {
+    trustBrowser: "100% di Browser",
+    trustNoUpload: "Tanpa Upload ke Server",
+    trustFree: "Gratis Selamanya",
+    relatedHeading: "Alat dan panduan terkait",
+    backToTools: "Kembali ke semua alat",
+    backHref: "/id",
   },
   ar: {
     trustBrowser: "يعمل في المتصفح بالكامل",
