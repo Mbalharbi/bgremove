@@ -63,3 +63,9 @@ export function faqSchema(opts: { bcp47: string; items: ReadonlyArray<FAQ> }) {
     })),
   };
 }
+
+/** Server-safe helper used by SEO landing pages (separate from the client
+ * SeoLanding component to avoid Next.js client-boundary issues). */
+export function buildFaqSchema(bcp47: string, faqs: ReadonlyArray<FAQ>) {
+  return faqSchema({ bcp47, items: faqs });
+}

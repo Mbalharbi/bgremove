@@ -17,6 +17,10 @@ const STATIC_PATHS: StaticEntry[] = [
   { path: "tools/image-compressor", priority: 0.8, freq: "weekly" },
   { path: "tools/image-resizer", priority: 0.8, freq: "weekly" },
   { path: "tools/qr-code-generator", priority: 0.75, freq: "weekly" },
+  { path: "tools/png-to-jpg", priority: 0.8, freq: "weekly" },
+  { path: "tools/jpg-to-png", priority: 0.8, freq: "weekly" },
+  { path: "tools/webp-converter", priority: 0.75, freq: "weekly" },
+  { path: "tools/image-metadata-viewer", priority: 0.7, freq: "weekly" },
   { path: "privacy-proof", priority: 0.7, freq: "monthly" },
 
   // Programmatic SEO landing pages
@@ -46,12 +50,32 @@ const STATIC_PATHS: StaticEntry[] = [
   { path: "hi/bulk", priority: 0.85, freq: "weekly" },
   { path: "hi/about", priority: 0.4, freq: "monthly" },
   { path: "hi/privacy", priority: 0.3, freq: "monthly" },
+  { path: "hi/remove-background-from-logo", priority: 0.8, freq: "weekly" },
+  { path: "hi/remove-background-from-product-photo", priority: 0.85, freq: "weekly" },
+  { path: "hi/remove-background-from-car-photo", priority: 0.75, freq: "weekly" },
+  { path: "hi/remove-background-from-signature", priority: 0.7, freq: "monthly" },
+  { path: "hi/remove-background-from-passport-photo", priority: 0.75, freq: "monthly" },
+  { path: "hi/transparent-png-maker", priority: 0.8, freq: "weekly" },
+  { path: "hi/screenshot-background-remover", priority: 0.7, freq: "weekly" },
+  { path: "hi/background-remover-for-amazon", priority: 0.85, freq: "weekly" },
+  { path: "hi/background-remover-for-shopify", priority: 0.8, freq: "weekly" },
+  { path: "hi/remove-bg-alternative", priority: 0.8, freq: "weekly" },
 
   // Indonesian (/id/*) — large mobile-first audience, Tokopedia/Shopee sellers.
   { path: "id", priority: 0.97, freq: "weekly" },
   { path: "id/bulk", priority: 0.85, freq: "weekly" },
   { path: "id/about", priority: 0.4, freq: "monthly" },
   { path: "id/privacy", priority: 0.3, freq: "monthly" },
+  { path: "id/remove-background-from-logo", priority: 0.8, freq: "weekly" },
+  { path: "id/remove-background-from-product-photo", priority: 0.85, freq: "weekly" },
+  { path: "id/remove-background-from-car-photo", priority: 0.75, freq: "weekly" },
+  { path: "id/remove-background-from-signature", priority: 0.7, freq: "monthly" },
+  { path: "id/remove-background-from-passport-photo", priority: 0.75, freq: "monthly" },
+  { path: "id/transparent-png-maker", priority: 0.8, freq: "weekly" },
+  { path: "id/screenshot-background-remover", priority: 0.7, freq: "weekly" },
+  { path: "id/background-remover-for-amazon", priority: 0.85, freq: "weekly" },
+  { path: "id/background-remover-for-shopify", priority: 0.8, freq: "weekly" },
+  { path: "id/remove-bg-alternative", priority: 0.8, freq: "weekly" },
 
   // Arabic locale (/ar/*) — mirrors the highest-value English routes.
   // Marketing/SEO surface, NOT every English page — keep crawl budget tight.

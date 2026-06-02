@@ -27,7 +27,11 @@ export const FOOTER_LINKS = {
     { href: "/bulk", label: "Bulk Remover" },
     { href: "/tools/image-compressor", label: "Image Compressor" },
     { href: "/tools/image-resizer", label: "Image Resizer" },
+    { href: "/tools/png-to-jpg", label: "PNG to JPG" },
+    { href: "/tools/jpg-to-png", label: "JPG to PNG" },
+    { href: "/tools/webp-converter", label: "WebP Converter" },
     { href: "/tools/qr-code-generator", label: "QR Code Generator" },
+    { href: "/tools/image-metadata-viewer", label: "Metadata Viewer" },
     { href: "/transparent-png-maker", label: "Transparent PNG Maker" },
   ],
   "Use cases": [
