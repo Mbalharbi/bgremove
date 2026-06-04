@@ -23,6 +23,41 @@ const STATIC_PATHS: StaticEntry[] = [
   { path: "tools/image-metadata-viewer", priority: 0.7, freq: "weekly" },
   { path: "privacy-proof", priority: 0.7, freq: "monthly" },
 
+  // Phase 3 — 30 English SEO landing pages.
+  // Platform-based (high commercial intent).
+  { path: "background-remover-for-amazon", priority: 0.85, freq: "weekly" },
+  { path: "background-remover-for-shopify", priority: 0.85, freq: "weekly" },
+  { path: "background-remover-for-etsy", priority: 0.8, freq: "weekly" },
+  { path: "background-remover-for-ebay", priority: 0.8, freq: "weekly" },
+  { path: "background-remover-for-noon", priority: 0.8, freq: "weekly" },
+  { path: "background-remover-for-tiktok-shop", priority: 0.8, freq: "weekly" },
+  { path: "background-remover-for-woocommerce", priority: 0.75, freq: "weekly" },
+  { path: "background-remover-for-salla", priority: 0.8, freq: "weekly" },
+  { path: "background-remover-for-zid", priority: 0.8, freq: "weekly" },
+  { path: "background-remover-for-instagram", priority: 0.8, freq: "weekly" },
+  // Object-based.
+  { path: "remove-background-from-car", priority: 0.8, freq: "weekly" },
+  { path: "remove-background-from-motorcycle", priority: 0.75, freq: "weekly" },
+  { path: "remove-background-from-jewelry", priority: 0.8, freq: "weekly" },
+  { path: "remove-background-from-furniture", priority: 0.75, freq: "weekly" },
+  { path: "remove-background-from-food", priority: 0.8, freq: "weekly" },
+  { path: "remove-background-from-watch", priority: 0.75, freq: "weekly" },
+  { path: "remove-background-from-passport-photo", priority: 0.85, freq: "weekly" },
+  { path: "remove-background-from-document", priority: 0.75, freq: "weekly" },
+  { path: "remove-background-from-business-card", priority: 0.7, freq: "weekly" },
+  { path: "remove-background-from-real-estate-photo", priority: 0.75, freq: "weekly" },
+  // Alternative / comparison (high search intent for SEO).
+  { path: "remove-bg-alternative", priority: 0.85, freq: "weekly" },
+  { path: "erase-bg-alternative", priority: 0.8, freq: "weekly" },
+  { path: "canva-background-remover-alternative", priority: 0.8, freq: "weekly" },
+  { path: "adobe-background-remover-alternative", priority: 0.8, freq: "weekly" },
+  { path: "best-free-background-remover", priority: 0.85, freq: "weekly" },
+  { path: "bgremovers-vs-remove-bg", priority: 0.85, freq: "weekly" },
+  { path: "bgremovers-vs-canva", priority: 0.8, freq: "weekly" },
+  { path: "bgremovers-vs-adobe-express", priority: 0.8, freq: "weekly" },
+  { path: "bgremovers-vs-erase-bg", priority: 0.75, freq: "weekly" },
+  { path: "free-background-remover-no-signup", priority: 0.85, freq: "weekly" },
+
   // Programmatic SEO landing pages
   { path: "portrait-background-remover", priority: 0.85, freq: "weekly" },
   { path: "product-photo-background-remover", priority: 0.85, freq: "weekly" },

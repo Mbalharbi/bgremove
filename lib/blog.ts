@@ -15,6 +15,48 @@ export interface BlogPost {
 
 const POSTS: BlogPost[] = [
   {
+    slug: "how-to-remove-background-without-photoshop",
+    title: "How to Remove a Background Without Photoshop (Free, 2026 Guide)",
+    date: "2026-06-04",
+    excerpt: "Photoshop costs $660/year. You don't need it for background removal. Five free, browser-based methods that match Photoshop's quality.",
+    readingMinutes: 9,
+  },
+  {
+    slug: "how-to-remove-product-photo-background",
+    title: "How to Remove Product Photo Backgrounds (Marketplace-Ready Guide)",
+    date: "2026-06-04",
+    excerpt: "Practical guide for ecommerce sellers: remove product photo backgrounds for Amazon, Shopify, Etsy, eBay. Free, browser-only workflow.",
+    readingMinutes: 10,
+  },
+  {
+    slug: "how-to-make-transparent-png",
+    title: "How to Make a Transparent PNG: 2026 Complete Guide",
+    date: "2026-06-04",
+    excerpt: "Everything about transparent PNGs — what they are, when to use them, how to create them from JPGs, how to fix common issues.",
+    readingMinutes: 11,
+  },
+  {
+    slug: "remove-bg-alternative-guide",
+    title: "Remove.bg Alternatives: 7 Free Options in 2026",
+    date: "2026-06-04",
+    excerpt: "Remove.bg's free tier is broken — one HD image per month. Here are seven legitimate alternatives, ranked honestly. Three are genuinely free with no caps.",
+    readingMinutes: 9,
+  },
+  {
+    slug: "background-remover-for-amazon-sellers",
+    title: "Background Remover for Amazon Sellers: The Definitive 2026 Guide",
+    date: "2026-06-04",
+    excerpt: "Amazon's MAIN image policy requires pure white backgrounds. This guide covers the rules, the cheapest compliant workflow, and the most common mistakes.",
+    readingMinutes: 12,
+  },
+  {
+    slug: "how-to-remove-logo-background",
+    title: "How to Remove a Background from a Logo (Free Guide)",
+    date: "2026-06-04",
+    excerpt: "Transform any logo (JPG with white background, screenshot, scan) into a transparent PNG. Free, browser-based, captures fine type and thin elements.",
+    readingMinutes: 8,
+  },
+  {
     slug: "remove-image-background-browser",
     title: "How to Remove a Background from an Image in Your Browser",
     date: "2026-05-09",
