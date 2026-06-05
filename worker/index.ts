@@ -1,45 +1,224 @@
 /**
  * Cloudflare Worker entrypoint for bgremovers.org.
  *
- * Two responsibilities:
+ * Three responsibilities:
  *
- *   1. **301 redirect www.bgremovers.org → bgremovers.org** (preserves path
- *      and query string). Avoids splitting SEO authority between two
- *      hostnames and stops Google indexing duplicate URLs.
+ *   1. **301 redirect www → apex.**
+ *   2. **REST API at `/api/v1/*`** — proxies to Hugging Face Inference API
+ *      for briaai/RMBG-1.4 with per-IP rate limiting (100 images/day).
+ *      Returns a transparent PNG. CORS-enabled.
+ *   3. Delegate everything else to the static-assets binding.
  *
- *   2. Delegate everything else to the static-assets handler bound as
- *      `env.ASSETS`. This is the same content that used to be served by
- *      the assets-only Worker — same /out directory, same files, same caching.
- *
- * Required wrangler.jsonc settings (already configured):
- *
- *   - `main`: this file
- *   - `assets.binding`: "ASSETS"
- *   - `assets.run_worker_first`: true   (otherwise the assets handler wins
- *                                        before the Worker can redirect)
- *
- * Cost: roughly 1 ms of Worker CPU per request — well within the free tier.
+ * Required wrangler.jsonc bindings:
+ *   - assets.binding: ASSETS
+ *   - kv_namespaces: RATE_LIMIT  (free tier — 1k writes/day is plenty)
+ *   - vars: HF_TOKEN  (optional; if absent the API returns 503 + SDK suggestion)
  */
 
 interface Env {
   ASSETS: { fetch: (req: Request) => Promise<Response> };
+  RATE_LIMIT?: KVNamespace;
+  HF_TOKEN?: string;
+}
+
+interface KVNamespace {
+  get(key: string): Promise<string | null>;
+  put(key: string, value: string, opts?: { expirationTtl?: number }): Promise<void>;
 }
 
 const APEX_HOST = "bgremovers.org";
 const WWW_HOST = "www.bgremovers.org";
 
+// Per-IP rate limit. Free, generous, prevents abuse.
+const DAILY_LIMIT = 100;
+const SECONDS_IN_DAY = 86400;
+const MAX_BYTES = 10 * 1024 * 1024; // 10 MB upload cap
+
+// HuggingFace Inference API endpoint for RMBG-1.4. Requires HF_TOKEN.
+const HF_INFERENCE_URL =
+  "https://api-inference.huggingface.co/models/briaai/RMBG-1.4";
+
+function corsHeaders(): Record<string, string> {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+  };
+}
+
+function jsonError(status: number, code: string, message: string, extra: Record<string, unknown> = {}) {
+  return new Response(
+    JSON.stringify({ error: { code, message, ...extra } }),
+    {
+      status,
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders(),
+      },
+    }
+  );
+}
+
+function todayKey(): string {
+  // YYYY-MM-DD in UTC. Counter resets at UTC midnight.
+  return new Date().toISOString().slice(0, 10);
+}
+
+async function checkAndIncrementRate(
+  kv: KVNamespace | undefined,
+  ip: string
+): Promise<{ ok: true; remaining: number } | { ok: false; remaining: 0 }> {
+  if (!kv) return { ok: true, remaining: DAILY_LIMIT }; // KV not bound → no limit
+  const key = `rl:${todayKey()}:${ip}`;
+  const cur = parseInt((await kv.get(key)) ?? "0", 10) || 0;
+  if (cur >= DAILY_LIMIT) return { ok: false, remaining: 0 };
+  await kv.put(key, String(cur + 1), { expirationTtl: SECONDS_IN_DAY + 60 });
+  return { ok: true, remaining: DAILY_LIMIT - (cur + 1) };
+}
+
+async function handleRemoveBackground(req: Request, env: Env): Promise<Response> {
+  const ip =
+    req.headers.get("cf-connecting-ip") ||
+    req.headers.get("x-real-ip") ||
+    "unknown";
+
+  // Rate limit
+  const rate = await checkAndIncrementRate(env.RATE_LIMIT, ip);
+  if (!rate.ok) {
+    return jsonError(
+      429,
+      "rate_limit_exceeded",
+      `Daily limit of ${DAILY_LIMIT} images reached. Resets at UTC midnight.`,
+      { limit: DAILY_LIMIT, reset_at: `${todayKey()}T23:59:59Z`, sdk_alternative: "https://bgremovers.org/sdk/v1.js" }
+    );
+  }
+
+  // If no HF_TOKEN configured, respond honestly with SDK alternative
+  if (!env.HF_TOKEN) {
+    return jsonError(
+      503,
+      "api_not_configured",
+      "REST API is in beta and not yet enabled. Use the free unlimited JavaScript SDK for client-side processing.",
+      {
+        sdk_url: "https://bgremovers.org/sdk/v1.js",
+        sdk_docs: "https://bgremovers.org/api/",
+      }
+    );
+  }
+
+  // Validate content
+  const ct = req.headers.get("content-type") || "";
+  let imageBytes: ArrayBuffer | null = null;
+
+  if (ct.startsWith("multipart/form-data")) {
+    const form = await req.formData();
+    const file = form.get("image");
+    if (!file || !(file instanceof Blob)) {
+      return jsonError(400, "missing_image", "Provide 'image' field in form-data.");
+    }
+    if (file.size > MAX_BYTES) {
+      return jsonError(413, "too_large", `Image exceeds ${MAX_BYTES / 1024 / 1024} MB limit.`);
+    }
+    imageBytes = await file.arrayBuffer();
+  } else if (ct.includes("application/json")) {
+    const body = (await req.json()) as { image_base64?: string; image_url?: string };
+    if (body.image_base64) {
+      const b64 = body.image_base64.replace(/^data:image\/\w+;base64,/, "");
+      imageBytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)).buffer;
+    } else if (body.image_url) {
+      const r = await fetch(body.image_url);
+      if (!r.ok) return jsonError(400, "fetch_failed", "Could not fetch image_url.");
+      imageBytes = await r.arrayBuffer();
+    } else {
+      return jsonError(400, "missing_image", "Provide image_base64 or image_url in JSON body.");
+    }
+  } else if (ct.startsWith("image/")) {
+    imageBytes = await req.arrayBuffer();
+  } else {
+    return jsonError(415, "unsupported_content_type", "Send multipart/form-data, application/json, or raw image/*.");
+  }
+
+  if (!imageBytes) return jsonError(400, "missing_image", "No image provided.");
+  if (imageBytes.byteLength > MAX_BYTES) {
+    return jsonError(413, "too_large", `Image exceeds ${MAX_BYTES / 1024 / 1024} MB limit.`);
+  }
+
+  // Call HuggingFace Inference API
+  const hfRes = await fetch(HF_INFERENCE_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.HF_TOKEN}`,
+      "Content-Type": "application/octet-stream",
+    },
+    body: imageBytes,
+  });
+
+  if (!hfRes.ok) {
+    const errText = await hfRes.text().catch(() => "");
+    return jsonError(
+      502,
+      "upstream_error",
+      "Background removal model is temporarily unavailable. Try again in a moment.",
+      { upstream_status: hfRes.status, upstream_message: errText.slice(0, 200) }
+    );
+  }
+
+  const pngBytes = await hfRes.arrayBuffer();
+  return new Response(pngBytes, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/png",
+      "X-RateLimit-Limit": String(DAILY_LIMIT),
+      "X-RateLimit-Remaining": String(rate.remaining),
+      "Cache-Control": "no-store",
+      ...corsHeaders(),
+    },
+  });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    // 301 redirect www → apex, preserving path + query.
+    // 301 redirect www → apex.
     if (url.hostname === WWW_HOST) {
       url.hostname = APEX_HOST;
       return Response.redirect(url.toString(), 301);
     }
 
-    // Everything else is handled by the static-assets binding (same behaviour
-    // as before this Worker existed).
+    // CORS preflight for the API.
+    if (url.pathname.startsWith("/api/") && request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: corsHeaders() });
+    }
+
+    // Background removal endpoint.
+    if (url.pathname === "/api/v1/remove-background") {
+      if (request.method !== "POST") {
+        return jsonError(405, "method_not_allowed", "Use POST.");
+      }
+      return handleRemoveBackground(request, env);
+    }
+
+    // API health/info endpoint.
+    if (url.pathname === "/api/v1/health") {
+      return new Response(
+        JSON.stringify({
+          status: "ok",
+          version: "1.0.0",
+          daily_limit: DAILY_LIMIT,
+          docs: "https://bgremovers.org/api/",
+          sdk: "https://bgremovers.org/sdk/v1.js",
+          rest_api_enabled: !!env.HF_TOKEN,
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders() },
+        }
+      );
+    }
+
+    // Static assets.
     return env.ASSETS.fetch(request);
   },
 };

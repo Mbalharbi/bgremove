@@ -22,6 +22,7 @@ const STATIC_PATHS: StaticEntry[] = [
   { path: "tools/webp-converter", priority: 0.75, freq: "weekly" },
   { path: "tools/image-metadata-viewer", priority: 0.7, freq: "weekly" },
   { path: "privacy-proof", priority: 0.7, freq: "monthly" },
+  { path: "api", priority: 0.8, freq: "monthly" },
 
   // Phase 3 — 30 English SEO landing pages.
   // Platform-based (high commercial intent).

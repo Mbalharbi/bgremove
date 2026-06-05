@@ -1,12 +1,17 @@
 // Cloudflare Workers config for bgremovers.org.
 //
-// Combines a small Worker entrypoint (handles the www → apex redirect) with
-// the static asset binding (serves the /out directory). No OpenNext, no
-// Next.js SSR runtime, no version constraint on Next.js.
+// Worker entrypoint:
+//   • 301 redirect www → apex
+//   • REST API at /api/v1/* (background removal with 100/day per-IP rate limit)
+//   • Static asset binding for everything else
 //
-// Trigger by pushing to main; Cloudflare runs `npm run build` (producing
-// /out via `next export`) then `npx wrangler deploy` reads this file,
-// bundles `worker/index.ts`, and uploads it together with the assets.
+// Bindings needed for the REST API (added below):
+//   • RATE_LIMIT  (KV namespace) — IP→counter for daily rate limiting.
+//                 Create once via: `npx wrangler kv:namespace create RATE_LIMIT`
+//                 then paste the returned id into the placeholder below.
+//   • HF_TOKEN    (secret) — Hugging Face Inference API token. Without it
+//                 the REST API responds 503 and recommends the JS SDK.
+//                 Add via: `npx wrangler secret put HF_TOKEN`
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "bgremove",
@@ -18,5 +23,11 @@
     "run_worker_first": true,
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT",
+      "id": "REPLACE_WITH_KV_NAMESPACE_ID"
+    }
+  ]
 }

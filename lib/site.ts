@@ -43,6 +43,7 @@ export const FOOTER_LINKS = {
   Company: [
     { href: "/about", label: "About" },
     { href: "/blog", label: "Blog" },
+    { href: "/api", label: "API & SDK" },
     { href: "/contact", label: "Contact" },
   ],
   Legal: [
