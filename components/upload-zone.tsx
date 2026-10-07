@@ -3,7 +3,8 @@
 import * as React from "react";
 import { Upload, ImageIcon } from "lucide-react";
 import { cn, formatBytes } from "@/lib/utils";
-import { BG_REMOVAL_LIMITS, preloadSegmenter, validateImageFile } from "@/lib/bg-removal";
+import { BG_REMOVAL_LIMITS, preloadSegmenter } from "@/lib/bg-removal";
+import { useToolStrings } from "@/lib/tool-i18n";
 
 interface UploadZoneProps {
   onFile: (file: File) => void;
@@ -28,6 +29,8 @@ export function UploadZone({
   compact = false,
   disabled = false,
 }: UploadZoneProps) {
+  const t = useToolStrings();
+  const maxSize = formatBytes(BG_REMOVAL_LIMITS.maxFileBytes);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = React.useState(false);
   const dragCounter = React.useRef(0);
@@ -36,20 +39,19 @@ export function UploadZone({
     (fileList: FileList | File[]) => {
       const files = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
       if (files.length === 0) {
-        onError?.("No image files detected. Try JPG, PNG, or WebP.");
+        onError?.(t.errNoImage);
         return;
       }
       const valid: File[] = [];
       for (const f of files) {
-        const v = validateImageFile(f);
-        if (v.ok) valid.push(f);
-        else onError?.(v.reason);
+        if (f.size > BG_REMOVAL_LIMITS.maxFileBytes) onError?.(t.errTooBig(maxSize));
+        else valid.push(f);
       }
       if (valid.length === 0) return;
       if (multiple && onFiles) onFiles(valid);
       else onFile(valid[0]);
     },
-    [multiple, onFile, onFiles, onError]
+    [multiple, onFile, onFiles, onError, t, maxSize]
   );
 
   const onDrop = (e: React.DragEvent) => {
@@ -103,9 +105,7 @@ export function UploadZone({
       role="button"
       tabIndex={disabled ? -1 : 0}
       aria-disabled={disabled}
-      aria-label={multiple
-        ? "Drop images, paste, or tap to upload (removes the background)"
-        : "Drop an image, paste, or tap to upload (removes the background)"}
+      aria-label={multiple ? t.zoneAriaMany : t.zoneAriaOne}
       onClick={disabled ? undefined : onClick}
       onKeyDown={disabled ? undefined : onKeyDown}
       onDrop={onDrop}
@@ -129,7 +129,7 @@ export function UploadZone({
         type="file"
         accept={accept}
         multiple={multiple}
-        aria-label={multiple ? "Choose image files to upload" : "Choose an image file to upload"}
+        aria-label={multiple ? t.inputAriaMany : t.inputAriaOne}
         className="sr-only"
         onChange={(e) => {
           if (e.target.files) handleFiles(e.target.files);
@@ -149,19 +149,15 @@ export function UploadZone({
         )}
       </div>
       <p className={cn("mt-4 font-semibold text-foreground", compact ? "text-base" : "text-lg sm:text-xl")}>
-        {dragActive
-          ? "Drop to upload"
-          : multiple
-            ? "Drop images, paste, or tap to upload"
-            : "Drop an image, paste, or tap to upload"}
+        {dragActive ? t.dropping : multiple ? t.dropMany : t.dropOne}
       </p>
       <p className="mt-1.5 text-sm text-muted-foreground">
-        JPG, PNG, or WebP &middot; up to {formatBytes(BG_REMOVAL_LIMITS.maxFileBytes)}
-        {multiple && " each"}
+        {t.formats(maxSize)}
+        {multiple && t.formatsEach}
       </p>
       <p className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 px-2.5 py-1 text-xs text-muted-foreground">
         <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-        Processed in your browser &middot; never uploaded
+        {t.private}
       </p>
     </div>
   );

@@ -13,8 +13,13 @@
  * after a dismiss. State lives in localStorage (wrapped — private windows
  * just behave as first-time visitors).
  *
+ * Language: the page's own language when the visitor is on a translated
+ * page (/zh/, /ar/…); otherwise the browser's language; otherwise the
+ * visitor's country (/api/geo); otherwise English. The visitor can switch
+ * language inside the popup.
+ *
  * Privacy: answers go to POST /api/feedback (worker/index.ts). No image, no
- * IP, no cookies — only the answers, page language, path and country.
+ * IP, no cookies — only the answers, popup language, path and country.
  */
 
 import * as React from "react";
@@ -28,7 +33,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { detectLocale, type LocaleCode } from "@/lib/locales";
+import { detectLocale, LOCALES, type LocaleCode } from "@/lib/locales";
 import { cn, DOWNLOAD_EVENT, OPEN_FEEDBACK_EVENT } from "@/lib/utils";
 
 const STORAGE_KEY = "bgremove:feedback";
@@ -328,6 +333,53 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
 
 const RATING_EMOJI = ["😞", "🙁", "😐", "🙂", "😍"] as const;
 
+const SUPPORTED = new Set<string>(LOCALES.map((l) => l.code));
+
+// Countries whose visitors most likely read one of our non-English locales.
+// India is left out on purpose: most Indian visitors browse in English.
+const COUNTRY_LOCALE: Record<string, LocaleCode> = {
+  CN: "zh", TW: "zh", HK: "zh", MO: "zh",
+  SA: "ar", AE: "ar", EG: "ar", KW: "ar", QA: "ar", BH: "ar", OM: "ar", JO: "ar",
+  IQ: "ar", SY: "ar", LB: "ar", PS: "ar", YE: "ar", LY: "ar", TN: "ar", DZ: "ar",
+  MA: "ar", SD: "ar", MR: "ar",
+  ES: "es", MX: "es", AR: "es", CO: "es", CL: "es", PE: "es", VE: "es", EC: "es",
+  GT: "es", CU: "es", BO: "es", DO: "es", HN: "es", PY: "es", SV: "es", NI: "es",
+  CR: "es", PA: "es", UY: "es",
+  BR: "pt", PT: "pt", AO: "pt", MZ: "pt",
+  DE: "de", AT: "de", LI: "de",
+  ID: "id",
+};
+
+/** Browser language → supported locale, e.g. "zh-TW" → "zh", "in" (old Indonesian) → "id". */
+function browserLocale(): LocaleCode | null {
+  const langs = typeof navigator === "undefined" ? [] : navigator.languages ?? [navigator.language];
+  for (const tag of langs) {
+    let base = tag.toLowerCase().split("-")[0];
+    if (base === "in") base = "id";
+    if (base === "en") return "en"; // explicit English preference wins over country
+    if (SUPPORTED.has(base)) return base as LocaleCode;
+  }
+  return null;
+}
+
+async function countryLocale(): Promise<{ locale: LocaleCode | null; country: string | null }> {
+  try {
+    const res = await fetch("/api/geo", { cache: "no-store" });
+    const { country } = (await res.json()) as { country: string | null };
+    return { locale: (country && COUNTRY_LOCALE[country]) || null, country };
+  } catch {
+    return { locale: null, country: null };
+  }
+}
+
+/** The language the popup should open in for this visitor on this page. */
+async function resolveLocale(pageLocale: LocaleCode): Promise<LocaleCode> {
+  if (pageLocale !== "en") return pageLocale;
+  const fromBrowser = browserLocale();
+  if (fromBrowser) return fromBrowser;
+  return (await countryLocale()).locale ?? "en";
+}
+
 interface StoredState {
   submittedAt?: number;
   dismissedAt?: number;
@@ -385,10 +437,13 @@ function Chip({
 
 export function FeedbackDialog() {
   const pathname = usePathname();
-  const locale = detectLocale(pathname);
-  const t = FEEDBACK_STRINGS[locale.code];
+  const pageLocale = detectLocale(pathname).code;
 
   const [open, setOpen] = React.useState(false);
+  const [lang, setLang] = React.useState<LocaleCode>(pageLocale);
+  const langPicked = React.useRef(false);
+  const locale = LOCALES.find((l) => l.code === lang) ?? LOCALES[0];
+  const t = FEEDBACK_STRINGS[lang];
   const [useCase, setUseCase] = React.useState<UseCase | null>(null);
   const [needs, setNeeds] = React.useState<Need[]>([]);
   const [rating, setRating] = React.useState<number | null>(null);
@@ -415,6 +470,17 @@ export function FeedbackDialog() {
     };
   }, []);
 
+  React.useEffect(() => {
+    if (!open || langPicked.current) return;
+    let cancelled = false;
+    void resolveLocale(pageLocale).then((l) => {
+      if (!cancelled && !langPicked.current) setLang(l);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, pageLocale]);
+
   const onOpenChange = (next: boolean) => {
     if (!next && phase !== "done") writeState({ dismissedAt: Date.now() });
     setOpen(next);
@@ -436,7 +502,7 @@ export function FeedbackDialog() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          locale: locale.code,
+          locale: lang,
           path: pathname,
           useCase,
           needs,
@@ -457,6 +523,7 @@ export function FeedbackDialog() {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         dir={locale.dir}
+        lang={locale.bcp47}
         className="max-h-[90vh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-xl"
       >
         {phase === "done" ? (
@@ -480,6 +547,29 @@ export function FeedbackDialog() {
               </DialogTitle>
               <DialogDescription>{t.description}</DialogDescription>
             </DialogHeader>
+
+            <div className="-mt-2 flex flex-wrap gap-1" role="group" aria-label="Language">
+              {LOCALES.map((l) => (
+                <button
+                  key={l.code}
+                  type="button"
+                  lang={l.bcp47}
+                  aria-pressed={lang === l.code}
+                  onClick={() => {
+                    langPicked.current = true;
+                    setLang(l.code);
+                  }}
+                  className={cn(
+                    "rounded-md px-2 py-0.5 text-xs transition-colors",
+                    lang === l.code
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  {l.nativeName}
+                </button>
+              ))}
+            </div>
 
             <fieldset className="grid gap-2">
               <legend className="mb-2 text-sm font-semibold">1. {t.useCaseQ}</legend>

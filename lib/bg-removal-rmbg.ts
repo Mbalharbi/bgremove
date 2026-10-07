@@ -81,56 +81,112 @@ async function pickDevice(_T: TransformersNS): Promise<DeviceChoice> {
   return { device: "wasm", dtype: "q8" };
 }
 
+// Loading is shared: the upload zone pre-warms the model on hover, so the
+// call that actually processes an image usually joins a load already in
+// flight. Every caller subscribes here and gets the current stage and byte
+// counts replayed, then live updates until the model is ready.
+interface LoadListener {
+  stage?: (stage: LoadStage) => void;
+  download?: (loaded: number, total: number) => void;
+}
+const listeners = new Set<LoadListener>();
+let lastStage: LoadStage | null = null;
+const fileBytes = new Map<string, { loaded: number; total: number }>();
+
+function emitStage(stage: LoadStage) {
+  lastStage = stage;
+  listeners.forEach((l) => l.stage?.(stage));
+}
+
+function downloadTotals(): { loaded: number; total: number } {
+  let loaded = 0;
+  let total = 0;
+  fileBytes.forEach((f) => {
+    loaded += f.loaded;
+    total += f.total;
+  });
+  return { loaded, total };
+}
+
+function onTransformersProgress(p: { status?: string; file?: string; loaded?: number; total?: number }) {
+  // Only the weights are big enough to be worth showing.
+  if (!p.file?.endsWith(".onnx") || !p.total) return;
+  if (p.status === "progress" || p.status === "done") {
+    fileBytes.set(p.file, { loaded: p.status === "done" ? p.total : p.loaded ?? 0, total: p.total });
+    const { loaded, total } = downloadTotals();
+    listeners.forEach((l) => l.download?.(loaded, total));
+  }
+}
+
+let rmbgReady = false;
+
 export async function getRmbgPipeline(
-  onProgress?: (stage: LoadStage) => void
+  onProgress?: (stage: LoadStage) => void,
+  onDownload?: (loaded: number, total: number) => void
 ): Promise<{ model: any; processor: any; T: TransformersNS }> {
   if (typeof window === "undefined") {
     throw new Error("RMBG-1.4 is only available in the browser.");
   }
-  if (modelPromise) return modelPromise;
 
-  modelPromise = (async () => {
-    try {
-      onProgress?.("loading-wasm");
-      const T = await loadTransformers();
-      T.env.allowLocalModels = false;
-      // `${remoteHost}${remotePathTemplate}<file>` → /m/rmbg-1.4/onnx/model_quantized.onnx
-      T.env.remoteHost = `${window.location.origin}${ASSET_BASE}`;
-      T.env.remotePathTemplate = MODEL_DIR;
-      T.env.backends.onnx.wasm.wasmPaths = `${window.location.origin}${ASSET_BASE}${TRANSFORMERS_DIR}`;
+  const listener: LoadListener = { stage: onProgress, download: onDownload };
+  if (!rmbgReady && (onProgress || onDownload)) {
+    listeners.add(listener);
+    if (lastStage) onProgress?.(lastStage);
+    const { loaded, total } = downloadTotals();
+    if (total) onDownload?.(loaded, total);
+  }
 
-      onProgress?.("loading-model");
-      const { device, dtype } = await pickDevice(T);
+  if (!modelPromise) {
+    modelPromise = (async () => {
+      try {
+        emitStage("loading-wasm");
+        const T = await loadTransformers();
+        T.env.allowLocalModels = false;
+        // `${remoteHost}${remotePathTemplate}<file>` → /m/rmbg-1.4/onnx/model_fp16.onnx
+        T.env.remoteHost = `${window.location.origin}${ASSET_BASE}`;
+        T.env.remotePathTemplate = MODEL_DIR;
+        T.env.backends.onnx.wasm.wasmPaths = `${window.location.origin}${ASSET_BASE}${TRANSFORMERS_DIR}`;
 
-      const model = await T.AutoModel.from_pretrained(MODEL_ID, {
-        // @ts-ignore — transformers.js accepts these
-        device,
-        // @ts-ignore
-        dtype,
-      });
-      const processor = await T.AutoProcessor.from_pretrained(MODEL_ID, {
-        // @ts-ignore — supplying explicit config because the model repo lacks one
-        config: {
-          do_normalize: true,
-          do_pad: false,
-          do_rescale: true,
-          do_resize: true,
-          image_mean: [0.5, 0.5, 0.5],
-          image_std: [1, 1, 1],
-          resample: 2,
-          rescale_factor: 1 / 255,
-          size: { width: 1024, height: 1024 },
-        },
-      });
+        emitStage("loading-model");
+        const { device, dtype } = await pickDevice(T);
 
-      onProgress?.("ready");
-      return { model, processor, T };
-    } catch (err) {
-      modelPromise = null;
-      onProgress?.("error");
-      throw err;
-    }
-  })();
+        const model = await T.AutoModel.from_pretrained(MODEL_ID, {
+          // @ts-ignore — transformers.js accepts these
+          device,
+          // @ts-ignore
+          dtype,
+          // @ts-ignore
+          progress_callback: onTransformersProgress,
+        });
+        const processor = await T.AutoProcessor.from_pretrained(MODEL_ID, {
+          // @ts-ignore — supplying explicit config because the model repo lacks one
+          config: {
+            do_normalize: true,
+            do_pad: false,
+            do_rescale: true,
+            do_resize: true,
+            image_mean: [0.5, 0.5, 0.5],
+            image_std: [1, 1, 1],
+            resample: 2,
+            rescale_factor: 1 / 255,
+            size: { width: 1024, height: 1024 },
+          },
+        });
+
+        rmbgReady = true;
+        emitStage("ready");
+        return { model, processor, T };
+      } catch (err) {
+        modelPromise = null;
+        fileBytes.clear();
+        emitStage("error");
+        throw err;
+      } finally {
+        listeners.clear();
+        lastStage = null;
+      }
+    })();
+  }
 
   return modelPromise;
 }
@@ -162,7 +218,8 @@ export async function removeBackgroundRmbg(
   opts: RemoveOptions = {}
 ): Promise<RemoveResult> {
   const start = performance.now();
-  const { model, processor, T } = await getRmbgPipeline(opts.onProgress);
+  const { model, processor, T } = await getRmbgPipeline(opts.onProgress, opts.onDownloadProgress);
+  opts.onProgress?.("ready");
 
   // Decode into HTMLImageElement so we know the original dimensions.
   const img = await blobToImage(file);

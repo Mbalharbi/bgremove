@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ChevronsLeftRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToolStrings } from "@/lib/tool-i18n";
 
 interface ImagePreviewProps {
   beforeUrl: string;
@@ -26,6 +27,7 @@ export function ImagePreview({
   width,
   height,
 }: ImagePreviewProps) {
+  const t = useToolStrings();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [position, setPosition] = React.useState(50);
   const [dragging, setDragging] = React.useState(false);
@@ -84,7 +86,7 @@ export function ImagePreview({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={afterUrl}
-          alt={`${alt} — background removed`}
+          alt={`${alt} — ${t.altRemoved}`}
           width={width}
           height={height}
           className="block h-full w-full object-contain"
@@ -100,7 +102,7 @@ export function ImagePreview({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={beforeUrl}
-          alt={`${alt} — original`}
+          alt={`${alt} — ${t.altOriginal}`}
           width={width}
           height={height}
           className="block h-full w-full object-contain"
@@ -110,17 +112,17 @@ export function ImagePreview({
 
       {/* Labels */}
       <div className="pointer-events-none absolute left-3 top-3 rounded-md bg-background/80 px-2 py-1 text-xs font-medium text-foreground backdrop-blur-sm">
-        Before
+        {t.before}
       </div>
       <div className="pointer-events-none absolute right-3 top-3 rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground">
-        After
+        {t.after}
       </div>
 
       {/* Drag handle line */}
       <div
         role="slider"
         tabIndex={0}
-        aria-label="Compare before and after"
+        aria-label={t.compareAria}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(position)}

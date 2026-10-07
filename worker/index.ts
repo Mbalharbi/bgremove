@@ -415,6 +415,13 @@ export default {
       return handleRemoveBackground(request, env);
     }
 
+    // Visitor country (from Cloudflare) — lets the feedback popup pick a
+    // language when the browser's language isn't one we support.
+    if (url.pathname === "/api/geo") {
+      const country = (request as Request & { cf?: { country?: string } }).cf?.country ?? null;
+      return jsonOk({ country });
+    }
+
     // On-site feedback popup.
     if (url.pathname === "/api/feedback") {
       if (request.method === "POST") return handleFeedbackPost(request, env);

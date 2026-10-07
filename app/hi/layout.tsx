@@ -4,7 +4,7 @@ import { SITE } from "@/lib/site";
 import { SITE_HI } from "@/lib/site-hi";
 
 export const metadata: Metadata = {
-  title: { default: SITE_HI.title, template: `%s | ${SITE.name}` },
+  title: { absolute: SITE_HI.title, template: `%s | ${SITE.name}` },
   description: SITE_HI.description,
   alternates: {
     canonical: SITE_HI.url,

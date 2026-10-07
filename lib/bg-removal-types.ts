@@ -33,6 +33,9 @@ export interface RemoveOptions {
   onProgress?: (stage: LoadStage) => void;
   /** Set "mediapipe-selfie" to force the fallback engine (e.g. for people-only batches). */
   preferEngine?: Engine;
+  /** Model download progress in bytes (RMBG only; fires while weights download). */
+  onDownloadProgress?: (loaded: number, total: number) => void;
+
 }
 
 export const BG_REMOVAL_LIMITS = {

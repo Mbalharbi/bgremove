@@ -3,7 +3,7 @@ import { SITE } from "@/lib/site";
 import { SITE_DE } from "@/lib/site-de";
 
 export const metadata: Metadata = {
-  title: { default: SITE_DE.title, template: `%s | ${SITE.name}` },
+  title: { absolute: SITE_DE.title, template: `%s | ${SITE.name}` },
   description: SITE_DE.description,
   alternates: {
     canonical: SITE_DE.url,

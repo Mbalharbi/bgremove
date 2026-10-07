@@ -12,11 +12,19 @@ import {
   type LoadStage,
   type RemoveResult,
 } from "@/lib/bg-removal";
+import { useToolStrings, type ToolStrings } from "@/lib/tool-i18n";
 import { changeExtension, formatBytes, formatMs } from "@/lib/utils";
+
+interface Progress {
+  stage: LoadStage;
+  /** Bytes of model weights downloaded so far (first visit only). */
+  loaded?: number;
+  total?: number;
+}
 
 type Status =
   | { kind: "idle" }
-  | { kind: "loading"; stage: LoadStage }
+  | { kind: "loading"; progress: Progress }
   | { kind: "ready"; src: BeforeAfter }
   | { kind: "error"; message: string };
 
@@ -28,15 +36,26 @@ interface BeforeAfter {
   inputSize: number;
 }
 
-const STAGE_LABEL: Record<LoadStage, string> = {
-  idle: "Preparing…",
-  "loading-wasm": "Loading runtime (one-time, ~1 MB)…",
-  "loading-model": "Loading AI model (one-time download, cached after)…",
-  ready: "Removing background…",
-  error: "Something went wrong",
-};
+const toMb = (bytes: number) => (bytes / 1024 / 1024).toFixed(0);
+
+function stageLabel(t: ToolStrings, p: Progress): string {
+  if (p.total && p.loaded !== undefined && p.loaded < p.total) {
+    return t.downloading(toMb(p.loaded), toMb(p.total));
+  }
+  switch (p.stage) {
+    case "loading-wasm":
+      return t.loadingRuntime;
+    case "loading-model":
+      return p.total ? t.loadingRuntime : t.loadingModel; // weights done → session warm-up
+    case "ready":
+      return t.removing;
+    default:
+      return t.preparing;
+  }
+}
 
 export function BgRemover() {
+  const t = useToolStrings();
   const { toast } = useToast();
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
 
@@ -61,17 +80,23 @@ export function BgRemover() {
 
   const process = React.useCallback(
     async (file: File) => {
-      setStatus({ kind: "loading", stage: "loading-wasm" });
+      const update = (patch: Partial<Progress>) =>
+        setStatus((prev) =>
+          prev.kind === "loading" ? { kind: "loading", progress: { ...prev.progress, ...patch } } : prev
+        );
+
+      setStatus({ kind: "loading", progress: { stage: "loading-wasm" } });
       const beforeUrl = URL.createObjectURL(file);
       try {
         const result = await removeBackground(file, {
-          onProgress: (stage) => setStatus({ kind: "loading", stage }),
+          onProgress: (stage) => update({ stage }),
+          onDownloadProgress: (loaded, total) => update({ loaded, total }),
         });
         const afterUrl = URL.createObjectURL(result.blob);
         if (result.downscaled) {
           toast({
-            title: "Image downscaled",
-            description: `Resized to ${result.width}×${result.height} for performance.`,
+            title: t.downscaledTitle,
+            description: t.downscaledDesc(result.width, result.height),
           });
         }
         setStatus({
@@ -88,14 +113,10 @@ export function BgRemover() {
         URL.revokeObjectURL(beforeUrl);
         const message = err instanceof Error ? err.message : "Unknown error.";
         setStatus({ kind: "error", message });
-        toast({
-          title: "Couldn't remove background",
-          description: message,
-          variant: "destructive",
-        });
+        toast({ title: t.errorTitle, description: message, variant: "destructive" });
       }
     },
-    [toast]
+    [toast, t]
   );
 
   if (status.kind === "ready") {
@@ -110,12 +131,12 @@ export function BgRemover() {
           height={result.height}
         />
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground" dir="ltr">
             <span className="rounded-md bg-muted px-2 py-1 font-mono">
               {result.width}×{result.height}
             </span>
             <span className="rounded-md bg-muted px-2 py-1 font-mono">
-              in {formatMs(result.processingMs)}
+              {formatMs(result.processingMs)}
             </span>
             <span className="rounded-md bg-muted px-2 py-1 font-mono">
               {formatBytes(inputSize)} → {formatBytes(result.blob.size)}
@@ -124,9 +145,9 @@ export function BgRemover() {
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="lg" onClick={reset}>
               <RefreshCw className="h-4 w-4" />
-              New image
+              {t.newImage}
             </Button>
-            <DownloadButton blob={result.blob} filename={filename} />
+            <DownloadButton blob={result.blob} filename={filename} label={t.downloadPng} />
           </div>
         </div>
       </div>
@@ -134,20 +155,39 @@ export function BgRemover() {
   }
 
   if (status.kind === "loading") {
+    const p = status.progress;
+    const pct = p.total ? Math.min(100, Math.round(((p.loaded ?? 0) / p.total) * 100)) : null;
+    const downloading = pct !== null && pct < 100;
     return (
-      <div className="flex min-h-[480px] w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-primary/40 bg-card/60 p-10 sm:p-16">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex min-h-[480px] w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-primary/40 bg-card/60 p-10 sm:p-16"
+      >
         <div className="relative">
           <div className="absolute inset-0 animate-ping rounded-full bg-primary/30" />
           <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Loader2 className="h-7 w-7 animate-spin" />
           </div>
         </div>
-        <p className="text-base font-semibold text-foreground">
-          {STAGE_LABEL[status.stage]}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Cached after first run — next image will be near-instant.
-        </p>
+        <p className="text-center text-base font-semibold text-foreground">{stageLabel(t, p)}</p>
+        {pct !== null && (
+          <div className="w-full max-w-sm">
+            <div
+              className="h-2 w-full overflow-hidden rounded-full bg-muted"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={pct}
+            >
+              <div className="h-2 rounded-full bg-primary transition-[width] duration-300" style={{ width: `${pct}%` }} />
+            </div>
+            <p className="mt-1 text-center font-mono text-xs text-muted-foreground" dir="ltr">
+              {pct}%
+            </p>
+          </div>
+        )}
+        {downloading && <p className="text-center text-sm text-muted-foreground">{t.firstTimeHint}</p>}
       </div>
     );
   }
@@ -156,20 +196,20 @@ export function BgRemover() {
     <div className="flex min-h-[480px] flex-col gap-4">
       <UploadZone
         onFile={process}
-        onError={(message) => toast({ title: "Upload error", description: message, variant: "destructive" })}
+        onError={(message) => toast({ title: t.uploadErrorTitle, description: message, variant: "destructive" })}
       />
       <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
         <div className="flex items-center gap-2 rounded-lg border border-border bg-card/60 p-3">
           <Lock className="h-4 w-4 text-primary" />
-          <span>Files never leave your device</span>
+          <span>{t.pillPrivate}</span>
         </div>
         <div className="flex items-center gap-2 rounded-lg border border-border bg-card/60 p-3">
           <Zap className="h-4 w-4 text-primary" />
-          <span>Typically ~3 seconds per image</span>
+          <span>{t.pillSpeed}</span>
         </div>
         <div className="flex items-center gap-2 rounded-lg border border-border bg-card/60 p-3">
           <Sparkles className="h-4 w-4 text-primary" />
-          <span>Free, unlimited, no signup</span>
+          <span>{t.pillFree}</span>
         </div>
       </div>
     </div>

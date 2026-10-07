@@ -13,7 +13,7 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: { default: SITE_AR.title, template: `%s | ${SITE.name}` },
+  title: { absolute: SITE_AR.title, template: `%s | ${SITE.name}` },
   description: SITE_AR.description,
   alternates: {
     canonical: SITE_AR.url,

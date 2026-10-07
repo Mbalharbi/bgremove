@@ -270,7 +270,7 @@ export function FeedbackAdmin() {
         <BarList title="لأي غرض يستخدمون الأداة" rows={useCases} total={total} />
         <BarList title="التقييم" rows={ratings} total={rated.length} />
         <BarList title="الدول" rows={countries} total={total} />
-        <BarList title="لغة الصفحة" rows={langs} total={total} />
+        <BarList title="لغة الرد" rows={langs} total={total} />
       </div>
 
       <div className="rounded-xl border border-border bg-card p-5">
