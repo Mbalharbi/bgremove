@@ -19,6 +19,10 @@ interface Env {
   ASSETS: { fetch: (req: Request) => Promise<Response> };
   RATE_LIMIT?: KVNamespace;
   HF_TOKEN?: string;
+  /** Stores answers from the on-site feedback popup (components/feedback-dialog.tsx). */
+  FEEDBACK?: KVNamespace;
+  /** Bearer token for GET /api/feedback (export). Unset → export disabled. */
+  FEEDBACK_ADMIN_KEY?: string;
 }
 
 interface ExecutionContext {
@@ -28,6 +32,11 @@ interface ExecutionContext {
 interface KVNamespace {
   get(key: string): Promise<string | null>;
   put(key: string, value: string, opts?: { expirationTtl?: number }): Promise<void>;
+  list(opts?: { prefix?: string; cursor?: string; limit?: number }): Promise<{
+    keys: { name: string }[];
+    list_complete: boolean;
+    cursor?: string;
+  }>;
 }
 
 const APEX_HOST = "bgremovers.org";
@@ -270,6 +279,114 @@ async function handleModelAsset(request: Request, url: URL, ctx: ExecutionContex
   return new Response(direct.body, { headers });
 }
 
+// ── Feedback popup ──────────────────────────────────────────────────────────
+// Answers are stored as one KV entry each: `fb:<ISO time>:<random>`.
+// No IP is stored; a salted daily hash is used only for the per-day cap.
+
+const FEEDBACK_DAILY_LIMIT = 5;
+const FEEDBACK_MAX_BODY = 4 * 1024;
+const FEEDBACK_LOCALES = ["en", "hi", "id", "pt", "es", "ar", "de", "zh"];
+const FEEDBACK_USE_CASES = ["product", "portrait", "logo", "document", "social", "other"];
+const FEEDBACK_NEEDS = [
+  "change-bg", "touch-up", "better-edges", "faster", "hd", "resize", "passport", "mobile-app",
+];
+
+function jsonOk(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+  });
+}
+
+async function sha256Hex(text: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function handleFeedbackPost(req: Request, env: Env): Promise<Response> {
+  if (!env.FEEDBACK) {
+    return jsonError(503, "feedback_not_configured", "Feedback storage is not configured.");
+  }
+  // Same-origin only: the popup is the sole intended client.
+  const origin = req.headers.get("origin");
+  let originHost: string | null = null;
+  try {
+    originHost = origin ? new URL(origin).hostname : null;
+  } catch {
+    originHost = "invalid";
+  }
+  if (originHost && originHost !== APEX_HOST && originHost !== "localhost") {
+    return jsonError(403, "forbidden_origin", "Feedback is accepted from bgremovers.org only.");
+  }
+
+  const raw = await req.text();
+  if (raw.length > FEEDBACK_MAX_BODY) return jsonError(413, "too_large", "Feedback is too long.");
+  let body: Record<string, unknown>;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    return jsonError(400, "invalid_json", "Body must be JSON.");
+  }
+
+  const pick = (v: unknown, allowed: string[]) =>
+    typeof v === "string" && allowed.includes(v) ? v : null;
+  const needs = Array.isArray(body.needs)
+    ? Array.from(new Set(body.needs.filter((n): n is string => typeof n === "string" && FEEDBACK_NEEDS.includes(n))))
+    : [];
+  const rating =
+    typeof body.rating === "number" && Number.isInteger(body.rating) && body.rating >= 1 && body.rating <= 5
+      ? body.rating
+      : null;
+  const message = typeof body.message === "string" ? body.message.trim().slice(0, 500) : "";
+  const entry = {
+    at: new Date().toISOString(),
+    locale: pick(body.locale, FEEDBACK_LOCALES) ?? "en",
+    path: typeof body.path === "string" ? body.path.slice(0, 200) : "",
+    useCase: pick(body.useCase, FEEDBACK_USE_CASES),
+    needs,
+    rating,
+    message,
+    country: (req as Request & { cf?: { country?: string } }).cf?.country ?? null,
+  };
+  if (!entry.useCase && !needs.length && rating === null && !message) {
+    return jsonError(400, "empty_feedback", "Pick at least one answer.");
+  }
+
+  // Per-IP daily cap without keeping the IP itself.
+  const ip = req.headers.get("cf-connecting-ip") || "unknown";
+  const rlKey = `fbrl:${todayKey()}:${(await sha256Hex(`${todayKey()}|${ip}`)).slice(0, 24)}`;
+  const count = parseInt((await env.FEEDBACK.get(rlKey)) ?? "0", 10) || 0;
+  if (count >= FEEDBACK_DAILY_LIMIT) {
+    return jsonError(429, "rate_limit_exceeded", "Thanks — we already have your feedback for today.");
+  }
+  await env.FEEDBACK.put(rlKey, String(count + 1), { expirationTtl: SECONDS_IN_DAY + 60 });
+
+  const id = `fb:${entry.at}:${crypto.randomUUID().slice(0, 8)}`;
+  await env.FEEDBACK.put(id, JSON.stringify(entry));
+  return jsonOk({ ok: true }, 201);
+}
+
+/** GET /api/feedback with `Authorization: Bearer <FEEDBACK_ADMIN_KEY>` → all entries as JSON. */
+async function handleFeedbackExport(req: Request, env: Env): Promise<Response> {
+  if (!env.FEEDBACK || !env.FEEDBACK_ADMIN_KEY) {
+    return jsonError(404, "not_found", "Not found.");
+  }
+  if (req.headers.get("authorization") !== `Bearer ${env.FEEDBACK_ADMIN_KEY}`) {
+    return jsonError(401, "unauthorized", "Missing or wrong admin key.");
+  }
+  const entries: unknown[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await env.FEEDBACK.list({ prefix: "fb:", cursor });
+    for (const k of page.keys) {
+      const v = await env.FEEDBACK.get(k.name);
+      if (v) entries.push(JSON.parse(v));
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return jsonOk({ count: entries.length, entries });
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -296,6 +413,13 @@ export default {
         return jsonError(405, "method_not_allowed", "Use POST.");
       }
       return handleRemoveBackground(request, env);
+    }
+
+    // On-site feedback popup.
+    if (url.pathname === "/api/feedback") {
+      if (request.method === "POST") return handleFeedbackPost(request, env);
+      if (request.method === "GET") return handleFeedbackExport(request, env);
+      return jsonError(405, "method_not_allowed", "Use POST.");
     }
 
     // API health/info endpoint.

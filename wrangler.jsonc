@@ -6,9 +6,11 @@
 //   • Static asset binding for everything else
 //
 // Bindings needed for the REST API (added below):
-//   • RATE_LIMIT  (KV namespace) — IP→counter for daily rate limiting.
-//                 Create once via: `npx wrangler kv:namespace create RATE_LIMIT`
-//                 then paste the returned id into the placeholder below.
+//   • RATE_LIMIT  (KV namespace, optional) — IP→counter for daily rate
+//                 limiting. Not bound yet: a placeholder id here made every
+//                 deploy fail. To enable, create it
+//                 (`npx wrangler kv namespace create RATE_LIMIT`) and add
+//                 { "binding": "RATE_LIMIT", "id": "<id>" } below.
 //   • HF_TOKEN    (secret) — Hugging Face Inference API token. Without it
 //                 the REST API responds 503 and recommends the JS SDK.
 //                 Add via: `npx wrangler secret put HF_TOKEN`
@@ -26,8 +28,12 @@
   },
   "kv_namespaces": [
     {
-      "binding": "RATE_LIMIT",
-      "id": "REPLACE_WITH_KV_NAMESPACE_ID"
+      // Feedback popup answers (POST /api/feedback).
+      // Create once via: `npx wrangler kv namespace create FEEDBACK`
+      // Read answers at /admin/feedback/ — needs the FEEDBACK_ADMIN_KEY secret
+      // (Worker → Settings → Variables and Secrets).
+      "binding": "FEEDBACK",
+      "id": "REPLACE_WITH_FEEDBACK_KV_NAMESPACE_ID"
     }
   ]
 }

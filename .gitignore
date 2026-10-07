@@ -47,6 +47,7 @@ Thumbs.db
 
 # Cloudflare Pages
 .wrangler/
+.dev.vars
 
 # Lighthouse audits
 /lh-*.json

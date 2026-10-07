@@ -13,6 +13,7 @@ import { FOOTER_LINKS_ZH, SITE_ZH } from "@/lib/site-zh";
 import { FOOTER_LINKS_HI, SITE_HI } from "@/lib/site-hi";
 import { FOOTER_LINKS_ID, SITE_ID } from "@/lib/site-id";
 import { detectLocale, type LocaleCode } from "@/lib/locales";
+import { FeedbackLink } from "@/components/feedback-dialog";
 
 type FooterLinkGroup = Readonly<Record<string, ReadonlyArray<{ href: string; label: string }>>>;
 
@@ -130,6 +131,8 @@ export function Footer() {
         </div>
         <div className="mt-12 flex flex-col-reverse items-start justify-between gap-4 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center">
           <p>{f.copyright(year)}</p>
+          <FeedbackLink />
+
           <p className="inline-flex items-center gap-1.5">
             {f.madeWith} <Heart className="h-3.5 w-3.5 fill-primary text-primary" /> {f.tagSuffix}
           </p>
