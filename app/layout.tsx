@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/toaster";
+import { FeedbackDialog } from "@/components/feedback-dialog";
 import { SITE } from "@/lib/site";
 
 const inter = Inter({
@@ -151,6 +152,7 @@ export default function RootLayout({
             <Footer />
           </div>
           <Toaster />
+          <FeedbackDialog />
         </ThemeProvider>
 
         {/*

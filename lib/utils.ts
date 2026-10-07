@@ -27,7 +27,14 @@ export function downloadBlob(blob: Blob, filename: string): void {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  // Lets the feedback popup ask for an opinion right after a successful result.
+  window.dispatchEvent(new CustomEvent(DOWNLOAD_EVENT));
 }
+
+/** Fired on every successful download (see components/feedback-dialog.tsx). */
+export const DOWNLOAD_EVENT = "bgremove:downloaded";
+/** Dispatch this to open the feedback popup manually (e.g. footer link). */
+export const OPEN_FEEDBACK_EVENT = "bgremove:open-feedback";
 
 export function changeExtension(filename: string, newExt: string): string {
   const dot = filename.lastIndexOf(".");

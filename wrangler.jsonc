@@ -28,6 +28,13 @@
     {
       "binding": "RATE_LIMIT",
       "id": "REPLACE_WITH_KV_NAMESPACE_ID"
+    },
+    {
+      // Feedback popup answers (POST /api/feedback).
+      // Create once via: `npx wrangler kv namespace create FEEDBACK`
+      // Optional export endpoint: `npx wrangler secret put FEEDBACK_ADMIN_KEY`
+      "binding": "FEEDBACK",
+      "id": "REPLACE_WITH_FEEDBACK_KV_NAMESPACE_ID"
     }
   ]
 }
