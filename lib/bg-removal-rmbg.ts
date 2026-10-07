@@ -14,16 +14,26 @@ import type { LoadStage, RemoveOptions, RemoveResult } from "./bg-removal-types"
 
 const MODEL_ID = "briaai/RMBG-1.4";
 
-// Load transformers.js from CDN at runtime. Two reasons we avoid the npm
-// package: (1) it pulls onnxruntime-node, which webpack chokes on under
-// Next.js static export, and (2) shipping ~1MB of JS in our bundle for a
-// feature triggered by user action would tank initial load.
-const TRANSFORMERS_CDN =
-  "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/dist/transformers.min.js";
+// Load transformers.js at runtime rather than bundling it. Two reasons we
+// avoid the npm package: (1) it pulls onnxruntime-node, which webpack chokes
+// on under Next.js static export, and (2) shipping ~1MB of JS in our bundle
+// for a feature triggered by user action would tank initial load.
+//
+// Runtime, WASM and weights are all served from our own domain under /m/
+// (see worker/index.ts) so the tool works where huggingface.co / jsdelivr
+// are blocked or slow, e.g. mainland China.
+const ASSET_BASE = "/m/";
+const TRANSFORMERS_DIR = "transformers-3.0.2/";
+const MODEL_DIR = "rmbg-1.4/";
 
 // Minimal slice of the transformers.js namespace we actually use.
 type TransformersNS = {
-  env: { allowLocalModels: boolean };
+  env: {
+    allowLocalModels: boolean;
+    remoteHost: string;
+    remotePathTemplate: string;
+    backends: { onnx: { wasm: { wasmPaths: string } } };
+  };
   AutoModel: { from_pretrained: (id: string, opts?: any) => Promise<any> };
   AutoProcessor: { from_pretrained: (id: string, opts?: any) => Promise<any> };
   RawImage: {
@@ -38,23 +48,37 @@ let modelPromise: Promise<{ model: any; processor: any; T: TransformersNS }> | n
 function loadTransformers(): Promise<TransformersNS> {
   if (modulePromise) return modulePromise;
   // Use webpackIgnore so Next.js doesn't try to bundle the CDN URL.
-  modulePromise = import(/* webpackIgnore: true */ TRANSFORMERS_CDN) as Promise<TransformersNS>;
+  const url = `${window.location.origin}${ASSET_BASE}${TRANSFORMERS_DIR}transformers.min.js`;
+  modulePromise = (import(/* webpackIgnore: true */ url) as Promise<TransformersNS>).catch((err) => {
+    modulePromise = null; // allow a retry after a network blip
+    throw err;
+  });
   return modulePromise;
 }
 
-async function pickDevice(_T: TransformersNS): Promise<"webgpu" | "wasm"> {
+type DeviceChoice = { device: "webgpu" | "wasm"; dtype: "fp16" | "fp32" | "q8" };
+
+/**
+ * Pick the runtime + weight precision. Measured on the same machine (1024px):
+ *   WebGPU fp16 ≈ 1.2 s (88 MB) · WebGPU fp32 ≈ 1.4 s (176 MB)
+ *   WebGPU q8 ≈ 19.5 s (int8 ops fall back to CPU) · WASM q8 ≈ 20 s (44 MB)
+ * Masks from fp16 and q8 match fp32 at ≥ 99.95% IoU, so we take the smallest
+ * file that is fast on each device.
+ */
+async function pickDevice(_T: TransformersNS): Promise<DeviceChoice> {
   try {
     // @ts-ignore - navigator.gpu may not exist in TS lib
     if (typeof navigator !== "undefined" && (navigator as any).gpu) {
-      // Minimal capability check — just request an adapter.
       // @ts-ignore
       const adapter = await (navigator as any).gpu.requestAdapter();
-      if (adapter) return "webgpu";
+      if (adapter) {
+        return { device: "webgpu", dtype: adapter.features.has("shader-f16") ? "fp16" : "fp32" };
+      }
     }
   } catch {
     /* fall through */
   }
-  return "wasm";
+  return { device: "wasm", dtype: "q8" };
 }
 
 export async function getRmbgPipeline(
@@ -70,15 +94,19 @@ export async function getRmbgPipeline(
       onProgress?.("loading-wasm");
       const T = await loadTransformers();
       T.env.allowLocalModels = false;
+      // `${remoteHost}${remotePathTemplate}<file>` → /m/rmbg-1.4/onnx/model_quantized.onnx
+      T.env.remoteHost = `${window.location.origin}${ASSET_BASE}`;
+      T.env.remotePathTemplate = MODEL_DIR;
+      T.env.backends.onnx.wasm.wasmPaths = `${window.location.origin}${ASSET_BASE}${TRANSFORMERS_DIR}`;
 
       onProgress?.("loading-model");
-      const device = await pickDevice(T);
+      const { device, dtype } = await pickDevice(T);
 
       const model = await T.AutoModel.from_pretrained(MODEL_ID, {
         // @ts-ignore — transformers.js accepts these
         device,
         // @ts-ignore
-        dtype: "fp32",
+        dtype,
       });
       const processor = await T.AutoProcessor.from_pretrained(MODEL_ID, {
         // @ts-ignore — supplying explicit config because the model repo lacks one

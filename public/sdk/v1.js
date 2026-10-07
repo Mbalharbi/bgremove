@@ -15,8 +15,11 @@
 (function (global) {
   "use strict";
 
-  const TRANSFORMERS_CDN =
-    "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/dist/transformers.min.js";
+  // Runtime + weights are served by bgremovers.org itself (CORS-enabled), so
+  // the SDK works where huggingface.co / jsdelivr are blocked.
+  const ASSET_BASE = "https://bgremovers.org/m/";
+  const TRANSFORMERS_DIR = "transformers-3.0.2/";
+  const TRANSFORMERS_CDN = ASSET_BASE + TRANSFORMERS_DIR + "transformers.min.js";
   const MODEL_ID = "briaai/RMBG-1.4";
 
   let modulePromise = null;
@@ -32,10 +35,12 @@
     try {
       if (typeof navigator !== "undefined" && navigator.gpu) {
         const adapter = await navigator.gpu.requestAdapter();
-        if (adapter) return "webgpu";
+        // fp16 where supported: same mask as fp32 at half the download.
+        if (adapter) return { device: "webgpu", dtype: adapter.features.has("shader-f16") ? "fp16" : "fp32" };
       }
     } catch (_) {}
-    return "wasm";
+    // Int8 is ~4x smaller and fastest on CPU/WASM.
+    return { device: "wasm", dtype: "q8" };
   }
 
   async function getPipeline(onProgress) {
@@ -45,13 +50,16 @@
         onProgress && onProgress({ stage: "loading-runtime" });
         const T = await loadTransformers();
         T.env.allowLocalModels = false;
+        T.env.remoteHost = ASSET_BASE;
+        T.env.remotePathTemplate = "rmbg-1.4/";
+        T.env.backends.onnx.wasm.wasmPaths = ASSET_BASE + TRANSFORMERS_DIR;
 
-        const device = await pickDevice();
+        const { device, dtype } = await pickDevice();
         onProgress && onProgress({ stage: "loading-model", device });
 
         const model = await T.AutoModel.from_pretrained(MODEL_ID, {
           device,
-          dtype: "fp32",
+          dtype,
           progress_callback: (p) =>
             onProgress && onProgress({ stage: "downloading", progress: p }),
         });

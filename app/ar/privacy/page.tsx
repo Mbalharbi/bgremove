@@ -85,9 +85,9 @@ export default function ArPrivacyPage() {
           <h2>خدمات الطرف الثالث</h2>
           <ul>
             <li>
-              <strong>نموذج Google MediaPipe + WASM runtime</strong> — يُجلَب من{" "}
-              <code>storage.googleapis.com</code> و <code>cdn.jsdelivr.net</code> في الزيارة
-              الأولى. يطبَّق تسجيل CDN القياسي.
+              <strong>نماذج الذكاء الاصطناعي + WASM runtime</strong> (RMBG-1.4 وMediaPipe) — تُجلَب من{" "}
+              <code>bgremovers.org/m/</code> عبر Cloudflare عند أول استخدام، دون أي طلب إلى
+              Hugging Face أو Google أو jsdelivr. يطبَّق تسجيل CDN القياسي.
             </li>
             <li>
               <strong>Google Analytics 4</strong> — عند تفعيله، يضع كوكي <code>_ga</code>

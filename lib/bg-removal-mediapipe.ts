@@ -18,9 +18,10 @@ import type { LoadStage, RemoveOptions, RemoveResult } from "./bg-removal-types"
 import { BG_REMOVAL_LIMITS } from "./bg-removal-types";
 
 const MEDIAPIPE_VERSION = "0.10.35";
-const WASM_BASE_URL = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/wasm`;
-const MODEL_URL =
-  "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/1/selfie_segmenter.tflite";
+// Served from our own domain (see worker/index.ts, /m/*) so the fallback
+// engine also works where jsdelivr / storage.googleapis.com are blocked.
+const WASM_BASE_PATH = `/m/mediapipe-${MEDIAPIPE_VERSION}`;
+const MODEL_PATH = "/m/selfie-segmenter/selfie_segmenter.tflite";
 
 const MAX_DIMENSION_DEFAULT = BG_REMOVAL_LIMITS.maxDimension;
 const MAX_FILE_BYTES = BG_REMOVAL_LIMITS.maxFileBytes;
@@ -43,12 +44,12 @@ export async function getMediaPipeSegmenter(
   segmenterPromise = (async () => {
     try {
       onProgress?.("loading-wasm");
-      const vision = await FilesetResolver.forVisionTasks(WASM_BASE_URL);
+      const vision = await FilesetResolver.forVisionTasks(`${window.location.origin}${WASM_BASE_PATH}`);
 
       onProgress?.("loading-model");
       const segmenter = await ImageSegmenter.createFromOptions(vision, {
         baseOptions: {
-          modelAssetPath: MODEL_URL,
+          modelAssetPath: `${window.location.origin}${MODEL_PATH}`,
           delegate: "GPU",
         },
         runningMode: "IMAGE",

@@ -31,7 +31,7 @@ interface BeforeAfter {
 const STAGE_LABEL: Record<LoadStage, string> = {
   idle: "Preparing…",
   "loading-wasm": "Loading runtime (one-time, ~1 MB)…",
-  "loading-model": "Loading AI model (one-time, ~4 MB)…",
+  "loading-model": "Loading AI model (one-time download, cached after)…",
   ready: "Removing background…",
   error: "Something went wrong",
 };

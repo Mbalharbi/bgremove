@@ -21,6 +21,10 @@ interface Env {
   HF_TOKEN?: string;
 }
 
+interface ExecutionContext {
+  waitUntil(promise: Promise<unknown>): void;
+}
+
 interface KVNamespace {
   get(key: string): Promise<string | null>;
   put(key: string, value: string, opts?: { expirationTtl?: number }): Promise<void>;
@@ -177,14 +181,108 @@ async function handleRemoveBackground(req: Request, env: Env): Promise<Response>
   });
 }
 
+// ── Self-hosted AI model assets ─────────────────────────────────────────────
+// The browser engines load their runtime + weights from /m/* on our own
+// domain instead of huggingface.co / jsdelivr / storage.googleapis.com.
+// Those hosts are blocked or slow in several countries (notably mainland
+// China), which silently broke the tool there.
+//
+// The Worker fetches each file from its pinned upstream once per Cloudflare
+// data center, stores it in the edge cache, and serves it from there. All
+// upstreams are version-pinned, so responses are immutable. Only the files
+// matched below can be requested — this is not an open proxy.
+
+interface AssetSource {
+  upstream: string;
+  allow: RegExp;
+}
+
+const MODEL_ASSETS: Record<string, AssetSource> = {
+  "rmbg-1.4": {
+    // Pinned commit of briaai/RMBG-1.4 so the weights can never change under us.
+    upstream: "https://huggingface.co/briaai/RMBG-1.4/resolve/2ceba5a5efaec153162aedea169f76caf9b46cf8/",
+    // fp16 (WebGPU), fp32 (WebGPU without shader-f16), q8 (WASM) — see lib/bg-removal-rmbg.ts.
+    allow: /^(config\.json|preprocessor_config\.json|onnx\/model(_fp16|_quantized)?\.onnx)$/,
+  },
+  "transformers-3.0.2": {
+    upstream: "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/dist/",
+    allow: /^(transformers\.min\.js|ort-wasm[\w.-]*\.(wasm|mjs))$/,
+  },
+  "mediapipe-0.10.35": {
+    upstream: "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm/",
+    allow: /^vision_wasm\w*\.(js|wasm)$/,
+  },
+  "selfie-segmenter": {
+    upstream: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/1/",
+    allow: /^selfie_segmenter\.tflite$/,
+  },
+};
+
+const ASSET_TYPES: Record<string, string> = {
+  wasm: "application/wasm",
+  js: "text/javascript; charset=utf-8",
+  mjs: "text/javascript; charset=utf-8",
+  json: "application/json; charset=utf-8",
+};
+
+async function handleModelAsset(request: Request, url: URL, ctx: ExecutionContext): Promise<Response> {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return new Response("Method not allowed", { status: 405 });
+  }
+  // /m/<source>/<file path>
+  const [, , source, ...rest] = url.pathname.split("/");
+  const file = rest.join("/");
+  const asset = MODEL_ASSETS[source];
+  if (!asset || !asset.allow.test(file)) return new Response("Not found", { status: 404 });
+
+  const cache = (caches as unknown as { default: Cache }).default;
+  const cacheKey = new Request(`${url.origin}/m/${source}/${file}`);
+  const hit = await cache.match(cacheKey);
+  if (hit) return hit;
+
+  const upstream = await fetch(asset.upstream + file, { redirect: "follow" });
+  if (!upstream.ok || !upstream.body) {
+    return new Response("Upstream unavailable", { status: 502, headers: { "Cache-Control": "no-store" } });
+  }
+  const ext = file.split(".").pop() ?? "";
+  const headers = new Headers({
+    "Content-Type": ASSET_TYPES[ext] ?? "application/octet-stream",
+    "Cache-Control": "public, max-age=31536000, immutable",
+    "Access-Control-Allow-Origin": "*",
+    "Cross-Origin-Resource-Policy": "cross-origin",
+  });
+  const len = upstream.headers.get("content-length");
+  if (len) headers.set("Content-Length", len);
+
+  // Fill the edge cache first, then serve from it. Streaming the body into the
+  // cache (rather than tee-ing it to the visitor at the same time) keeps Worker
+  // memory flat even for the 176 MB fp32 file and slow connections. The
+  // datacenter→upstream copy takes a few seconds, once per data center.
+  try {
+    await cache.put(cacheKey, new Response(upstream.body, { headers }));
+    const cached = await cache.match(cacheKey);
+    if (cached) return cached;
+  } catch {
+    /* cache unavailable — fall through to a direct stream */
+  }
+  const direct = await fetch(asset.upstream + file, { redirect: "follow" });
+  if (!direct.ok) return new Response("Upstream unavailable", { status: 502 });
+  return new Response(direct.body, { headers });
+}
+
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     // 301 redirect www → apex.
     if (url.hostname === WWW_HOST) {
       url.hostname = APEX_HOST;
       return Response.redirect(url.toString(), 301);
+    }
+
+    // Self-hosted AI model + runtime files.
+    if (url.pathname.startsWith("/m/")) {
+      return handleModelAsset(request, url, ctx);
     }
 
     // CORS preflight for the API.

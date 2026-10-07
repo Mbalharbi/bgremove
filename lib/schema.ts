@@ -15,7 +15,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: "Why is the first removal slower than the next ones?",
-    a: "The first time you use the tool, your browser downloads a small (~4 MB) AI model. After that, it's cached locally — subsequent images process in under 3 seconds.",
+    a: "The first time you use the tool, your browser downloads the AI model once (44–88 MB depending on your device). After that, it's cached locally — on devices with WebGPU, subsequent images process in 1–3 seconds.",
   },
   {
     q: "Does it work on mobile?",

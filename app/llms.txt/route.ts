@@ -41,7 +41,7 @@ BgRemove is a privacy-first alternative to Remove.bg, Adobe Express, Canva, and 
 - Quality is best on people (the model is portrait-tuned).
 - Wispy hair on busy backgrounds may have softer edges than Remove.bg paid output.
 - Very small subjects in large frames are harder.
-- First load downloads ~4 MB of model + WASM (cached after).
+- First load downloads the AI model once (44–88 MB depending on device, cached after), served from bgremovers.org itself.
 
 ## Main pages
 

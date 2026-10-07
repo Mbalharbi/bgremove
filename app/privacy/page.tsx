@@ -80,9 +80,9 @@ export default function PrivacyPage() {
           <h2>Third-party services</h2>
           <ul>
             <li>
-              <strong>Google MediaPipe model + WASM runtime</strong> — fetched from{" "}
-              <code>storage.googleapis.com</code> and <code>cdn.jsdelivr.net</code> on first visit.
-              Standard CDN logging applies.
+              <strong>AI models + WASM runtime</strong> (RMBG-1.4, MediaPipe) — served from{" "}
+              <code>bgremovers.org/m/</code> via Cloudflare on first use. Your browser makes no
+              requests to Hugging Face, Google or jsdelivr. Standard CDN logging applies.
             </li>
             <li>
               <strong>Google Analytics 4</strong> — once enabled, sets a <code>_ga</code> cookie used
