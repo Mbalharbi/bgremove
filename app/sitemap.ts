@@ -45,6 +45,7 @@ const STATIC_PATHS: StaticEntry[] = [
   { path: "remove-background-from-watch", priority: 0.75, freq: "weekly" },
   { path: "remove-background-from-passport-photo", priority: 0.85, freq: "weekly" },
   { path: "remove-background-from-document", priority: 0.75, freq: "weekly" },
+  { path: "remove-background-from-signature", priority: 0.75, freq: "weekly" },
   { path: "remove-background-from-business-card", priority: 0.7, freq: "weekly" },
   { path: "remove-background-from-real-estate-photo", priority: 0.75, freq: "weekly" },
   // Alternative / comparison (high search intent for SEO).

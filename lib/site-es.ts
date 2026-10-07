@@ -15,8 +15,8 @@ export const SITE_ES = {
 export const NAV_LINKS_ES = [
   { href: "/es", label: "Quitar fondo" },
   { href: "/es/bulk", label: "Por lotes" },
-  { href: "/es/transparent-png-maker", label: "PNG Transparente" },
-  { href: "/es/portrait-background-remover", label: "Retratos" },
+  { href: "/transparent-png-maker", label: "PNG Transparente" },
+  { href: "/portrait-background-remover", label: "Retratos" },
   { href: "/es/about", label: "Acerca" },
 ] as const;
 
@@ -24,11 +24,11 @@ export const FOOTER_LINKS_ES = {
   "Herramientas": [
     { href: "/es", label: "Quitar Fondo" },
     { href: "/es/bulk", label: "Por Lotes" },
-    { href: "/es/transparent-png-maker", label: "Creador de PNG" },
+    { href: "/transparent-png-maker", label: "Creador de PNG" },
   ],
   "Usos": [
-    { href: "/es/portrait-background-remover", label: "Retratos" },
-    { href: "/es/product-photo-background-remover", label: "Productos" },
+    { href: "/portrait-background-remover", label: "Retratos" },
+    { href: "/product-photo-background-remover", label: "Productos" },
   ],
   "Sitio": [
     { href: "/es/about", label: "Acerca" },
@@ -54,10 +54,10 @@ export const HOW_IT_WORKS_ES = [
 ] as const;
 
 export const USE_CASES_ES = [
-  { title: "Fotos de perfil", description: "Headshots limpios y transparentes para LinkedIn, Slack, Notion.", href: "/es/portrait-background-remover" },
-  { title: "Fotos de productos", description: "Fondo blanco listo para Shopify, Mercado Libre e Instagram.", href: "/es/product-photo-background-remover" },
-  { title: "Logos y marcas", description: "Haz cualquier logo transparente para combinar con cualquier fondo.", href: "/es/logo-background-remover" },
-  { title: "PNG transparente", description: "PNG transparente con un clic — para diseño, slides, web.", href: "/es/transparent-png-maker" },
-  { title: "Capturas de pantalla", description: "Recorta sujetos de capturas para tutoriales y presentaciones.", href: "/es/screenshot-background-remover" },
+  { title: "Fotos de perfil", description: "Headshots limpios y transparentes para LinkedIn, Slack, Notion.", href: "/portrait-background-remover" },
+  { title: "Fotos de productos", description: "Fondo blanco listo para Shopify, Mercado Libre e Instagram.", href: "/product-photo-background-remover" },
+  { title: "Logos y marcas", description: "Haz cualquier logo transparente para combinar con cualquier fondo.", href: "/logo-background-remover" },
+  { title: "PNG transparente", description: "PNG transparente con un clic — para diseño, slides, web.", href: "/transparent-png-maker" },
+  { title: "Capturas de pantalla", description: "Recorta sujetos de capturas para tutoriales y presentaciones.", href: "/screenshot-background-remover" },
   { title: "Procesamiento por lotes", description: "Procesa hasta 20 imágenes a la vez y descárgalas como ZIP.", href: "/es/bulk" },
 ] as const;

@@ -16,8 +16,8 @@ export const SITE_ZH = {
 export const NAV_LINKS_ZH = [
   { href: "/zh", label: "抠图" },
   { href: "/zh/bulk", label: "批量处理" },
-  { href: "/zh/transparent-png-maker", label: "透明 PNG" },
-  { href: "/zh/portrait-background-remover", label: "人像" },
+  { href: "/transparent-png-maker", label: "透明 PNG" },
+  { href: "/portrait-background-remover", label: "人像" },
   { href: "/zh/about", label: "关于" },
 ] as const;
 
@@ -25,11 +25,11 @@ export const FOOTER_LINKS_ZH = {
   "工具": [
     { href: "/zh", label: "抠图工具" },
     { href: "/zh/bulk", label: "批量处理" },
-    { href: "/zh/transparent-png-maker", label: "透明 PNG 制作" },
+    { href: "/transparent-png-maker", label: "透明 PNG 制作" },
   ],
   "用途": [
-    { href: "/zh/portrait-background-remover", label: "人像照片" },
-    { href: "/zh/product-photo-background-remover", label: "产品图片" },
+    { href: "/portrait-background-remover", label: "人像照片" },
+    { href: "/product-photo-background-remover", label: "产品图片" },
   ],
   "网站": [
     { href: "/zh/about", label: "关于我们" },
@@ -55,10 +55,10 @@ export const HOW_IT_WORKS_ZH = [
 ] as const;
 
 export const USE_CASES_ZH = [
-  { title: "头像照片", description: "为 LinkedIn、微信、钉钉准备干净透明的头像。", href: "/zh/portrait-background-remover" },
-  { title: "产品图片", description: "为淘宝、京东、Shopify 准备白底产品图。", href: "/zh/product-photo-background-remover" },
-  { title: "Logo 和品牌", description: "让任何 Logo 透明，适应任何背景。", href: "/zh/logo-background-remover" },
-  { title: "透明 PNG", description: "一键生成透明 PNG — 用于设计、幻灯片、网页。", href: "/zh/transparent-png-maker" },
-  { title: "屏幕截图", description: "从截图中抠出主体，用于教程和演示。", href: "/zh/screenshot-background-remover" },
+  { title: "头像照片", description: "为 LinkedIn、微信、钉钉准备干净透明的头像。", href: "/portrait-background-remover" },
+  { title: "产品图片", description: "为淘宝、京东、Shopify 准备白底产品图。", href: "/product-photo-background-remover" },
+  { title: "Logo 和品牌", description: "让任何 Logo 透明，适应任何背景。", href: "/logo-background-remover" },
+  { title: "透明 PNG", description: "一键生成透明 PNG — 用于设计、幻灯片、网页。", href: "/transparent-png-maker" },
+  { title: "屏幕截图", description: "从截图中抠出主体，用于教程和演示。", href: "/screenshot-background-remover" },
   { title: "批量处理", description: "一次处理多达 20 张图片，打包下载为 ZIP。", href: "/zh/bulk" },
 ] as const;
