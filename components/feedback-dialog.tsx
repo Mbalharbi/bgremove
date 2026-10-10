@@ -333,6 +333,21 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
 
 const RATING_EMOJI = ["😞", "🙁", "😐", "🙂", "😍"] as const;
 
+/**
+ * How the visitor's last image was processed, attached to their answers so a
+ * complaint can be traced to the engine / precision / device that produced it.
+ */
+interface LastRun {
+  engine?: string;
+  dtype?: string;
+  device?: string;
+  edited?: boolean;
+}
+let lastRun: LastRun = {};
+export function setLastRun(patch: LastRun) {
+  lastRun = { ...lastRun, ...patch };
+}
+
 const SUPPORTED = new Set<string>(LOCALES.map((l) => l.code));
 
 // Countries whose visitors most likely read one of our non-English locales.
@@ -508,6 +523,7 @@ export function FeedbackDialog() {
           needs,
           rating,
           message: message.trim().slice(0, MAX_MESSAGE),
+          ...lastRun,
         }),
       });
       if (!res.ok) throw new Error(String(res.status));

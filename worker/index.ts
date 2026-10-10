@@ -23,6 +23,22 @@ interface Env {
   FEEDBACK?: KVNamespace;
   /** Bearer token for GET /api/feedback (export). Unset → export disabled. */
   FEEDBACK_ADMIN_KEY?: string;
+  /** Anonymous usage counters (lib/track.ts → POST /api/event). */
+  USAGE?: D1Database;
+}
+
+interface D1Result<T> {
+  results: T[];
+}
+interface D1Stmt {
+  bind(...v: unknown[]): D1Stmt;
+  run(): Promise<unknown>;
+  all<T = Record<string, unknown>>(): Promise<D1Result<T>>;
+  first<T = Record<string, unknown>>(): Promise<T | null>;
+}
+interface D1Database {
+  prepare(sql: string): D1Stmt;
+  batch(stmts: D1Stmt[]): Promise<unknown>;
 }
 
 interface ExecutionContext {
@@ -347,6 +363,11 @@ async function handleFeedbackPost(req: Request, env: Env): Promise<Response> {
     rating,
     message,
     country: (req as Request & { cf?: { country?: string } }).cf?.country ?? null,
+    // How the visitor's last image was processed (see setLastRun in the popup).
+    engine: pick(body.engine, ["rmbg-1.4", "mediapipe-selfie"]),
+    dtype: pick(body.dtype, ["fp16", "fp32", "q8"]),
+    device: pick(body.device, ["webgpu", "wasm"]),
+    edited: body.edited === true,
   };
   if (!entry.useCase && !needs.length && rating === null && !message) {
     return jsonError(400, "empty_feedback", "Pick at least one answer.");
@@ -387,6 +408,114 @@ async function handleFeedbackExport(req: Request, env: Env): Promise<Response> {
   return jsonOk({ count: entries.length, entries });
 }
 
+// ── Anonymous usage counters ────────────────────────────────────────────────
+// One row per event in D1. No IP, no IDs; a salted daily hash of the IP is
+// kept only in `event_rl` (today's rows) to cap abuse, and pruned daily.
+
+const EVENT_TOOLS = ["remove", "bulk", "compress", "resize", "webp", "qr", "metadata"];
+const EVENT_NAMES = ["upload", "success", "fail", "download", "edit_open", "edit_apply"];
+const EVENT_REASONS = ["too-large", "decode", "model-load", "memory", "gpu", "other"];
+const EVENTS_PER_IP_PER_DAY = 400;
+
+let schemaReady: Promise<unknown> | null = null;
+function ensureSchema(db: D1Database) {
+  schemaReady ??= db.batch([
+    db.prepare(`CREATE TABLE IF NOT EXISTS events (
+      day TEXT NOT NULL, tool TEXT NOT NULL, event TEXT NOT NULL,
+      engine TEXT, dtype TEXT, device TEXT, ms INTEGER, count INTEGER,
+      reason TEXT, locale TEXT, country TEXT, is_return INTEGER)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS events_day ON events(day)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS event_rl (day TEXT NOT NULL, h TEXT NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (day, h))`),
+  ]).catch((e) => {
+    schemaReady = null;
+    throw e;
+  });
+  return schemaReady;
+}
+
+async function handleEvent(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  if (!env.USAGE) return new Response(null, { status: 204 });
+  const raw = await req.text();
+  if (raw.length > 1024) return new Response(null, { status: 413 });
+  let b: Record<string, unknown>;
+  try {
+    b = JSON.parse(raw);
+  } catch {
+    return new Response(null, { status: 400 });
+  }
+  const pick = (v: unknown, allowed: string[]) => (typeof v === "string" && allowed.includes(v) ? v : null);
+  const int = (v: unknown, max: number) =>
+    typeof v === "number" && Number.isFinite(v) && v >= 0 ? Math.min(Math.round(v), max) : null;
+  const tool = pick(b.tool, EVENT_TOOLS);
+  const event = pick(b.event, EVENT_NAMES);
+  if (!tool || !event) return new Response(null, { status: 400 });
+
+  const db = env.USAGE;
+  await ensureSchema(db);
+  const day = todayKey();
+  const ip = req.headers.get("cf-connecting-ip") || "unknown";
+  const h = (await sha256Hex(`${day}|ev|${ip}`)).slice(0, 20);
+  const rl = await db
+    .prepare(`INSERT INTO event_rl (day, h, n) VALUES (?, ?, 1)
+              ON CONFLICT(day, h) DO UPDATE SET n = n + 1 RETURNING n`)
+    .bind(day, h)
+    .first<{ n: number }>();
+  if ((rl?.n ?? 0) > EVENTS_PER_IP_PER_DAY) return new Response(null, { status: 429 });
+
+  await db
+    .prepare(`INSERT INTO events (day, tool, event, engine, dtype, device, ms, count, reason, locale, country, is_return)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .bind(
+      day, tool, event,
+      pick(b.engine, ["rmbg-1.4", "mediapipe-selfie"]),
+      pick(b.dtype, ["fp16", "fp32", "q8"]),
+      pick(b.device, ["webgpu", "wasm"]),
+      int(b.ms, 600000),
+      int(b.count, 1000),
+      pick(b.reason, EVENT_REASONS),
+      pick(b.locale, FEEDBACK_LOCALES),
+      (req as Request & { cf?: { country?: string } }).cf?.country ?? null,
+      b.returning === true ? 1 : 0
+    )
+    .run();
+
+  // Housekeeping, ~1% of writes: drop old rate-limit rows and events > 400 days.
+  if (Math.random() < 0.01) {
+    ctx.waitUntil(
+      db.batch([
+        db.prepare(`DELETE FROM event_rl WHERE day < ?`).bind(day),
+        db.prepare(`DELETE FROM events WHERE day < date('now', '-400 days')`),
+      ])
+    );
+  }
+  return new Response(null, { status: 204 });
+}
+
+/** GET /api/usage?days=30 (admin) → aggregates for the dashboard. */
+async function handleUsage(req: Request, url: URL, env: Env): Promise<Response> {
+  if (!env.USAGE || !env.FEEDBACK_ADMIN_KEY) return jsonError(404, "not_found", "Not found.");
+  if (req.headers.get("authorization") !== `Bearer ${env.FEEDBACK_ADMIN_KEY}`) {
+    return jsonError(401, "unauthorized", "Missing or wrong admin key.");
+  }
+  const db = env.USAGE;
+  await ensureSchema(db);
+  const days = Math.min(Math.max(parseInt(url.searchParams.get("days") ?? "30", 10) || 30, 1), 400);
+  const since = new Date(Date.now() - (days - 1) * 86400000).toISOString().slice(0, 10);
+  const q = <T,>(sql: string) => db.prepare(sql).bind(since).all<T>().then((r) => r.results);
+  const [byToolEvent, perDay, engines, reasons, countries, locales, returning] = await Promise.all([
+    q(`SELECT tool, event, COUNT(*) AS n, SUM(COALESCE(count, 1)) AS items FROM events WHERE day >= ? GROUP BY tool, event`),
+    q(`SELECT day, event, COUNT(*) AS n FROM events WHERE day >= ? GROUP BY day, event ORDER BY day`),
+    q(`SELECT COALESCE(engine,'?') AS engine, COALESCE(dtype,'?') AS dtype, COALESCE(device,'?') AS device,
+              COUNT(*) AS n, CAST(AVG(ms) AS INTEGER) AS avg_ms
+       FROM events WHERE day >= ? AND event = 'success' GROUP BY 1, 2, 3 ORDER BY n DESC`),
+    q(`SELECT tool, COALESCE(reason,'?') AS reason, COUNT(*) AS n FROM events WHERE day >= ? AND event = 'fail' GROUP BY 1, 2 ORDER BY n DESC`),
+    q(`SELECT COALESCE(country,'?') AS country, COUNT(*) AS n FROM events WHERE day >= ? AND event = 'success' GROUP BY 1 ORDER BY n DESC LIMIT 15`),
+    q(`SELECT COALESCE(locale,'?') AS locale, COUNT(*) AS n FROM events WHERE day >= ? AND event = 'success' GROUP BY 1 ORDER BY n DESC`),
+    q(`SELECT is_return, COUNT(*) AS n FROM events WHERE day >= ? AND event = 'upload' GROUP BY 1`),
+  ]);
+  return jsonOk({ days, since, byToolEvent, perDay, engines, reasons, countries, locales, returning });
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -420,6 +549,14 @@ export default {
     if (url.pathname === "/api/geo") {
       const country = (request as Request & { cf?: { country?: string } }).cf?.country ?? null;
       return jsonOk({ country });
+    }
+
+    // Anonymous usage counters.
+    if (url.pathname === "/api/event" && request.method === "POST") {
+      return handleEvent(request, env, ctx);
+    }
+    if (url.pathname === "/api/usage" && request.method === "GET") {
+      return handleUsage(request, url, env);
     }
 
     // On-site feedback popup.

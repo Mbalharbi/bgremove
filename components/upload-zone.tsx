@@ -5,6 +5,7 @@ import { Upload, ImageIcon } from "lucide-react";
 import { cn, formatBytes } from "@/lib/utils";
 import { BG_REMOVAL_LIMITS, preloadSegmenter } from "@/lib/bg-removal";
 import { useToolStrings } from "@/lib/tool-i18n";
+import { toolFromPath, track } from "@/lib/track";
 
 interface UploadZoneProps {
   onFile: (file: File) => void;
@@ -48,6 +49,7 @@ export function UploadZone({
         else valid.push(f);
       }
       if (valid.length === 0) return;
+      track(toolFromPath(window.location.pathname), "upload", { count: valid.length });
       if (multiple && onFiles) onFiles(valid);
       else onFile(valid[0]);
     },

@@ -36,6 +36,8 @@ export default function PtPrivacyPage() {
         <div className="prose prose-slate max-w-none dark:prose-invert">
           <h2>A versão técnica</h2>
           <p>Quando você visita {SITE.domain}, seu navegador baixa o aplicativo BgRemove (HTML, CSS, JavaScript) junto com um pequeno modelo de IA (~44 MB) de um CDN público. <strong>Nenhuma solicitação de rede carrega dados das suas imagens.</strong> Verifique você mesmo: abra DevTools → aba Network, solte uma imagem no BgRemove e observe — não ocorre upload.</p>
+          <h2>Estatísticas de uso anônimas</h2>
+          <p>Contamos de forma anônima qual ferramenta foi usada, se o processamento deu certo, quanto tempo levou, qual motor de IA rodou e se o resultado foi baixado. Sem imagens, nomes de arquivos, endereços IP ou cookies; no seu navegador fica apenas uma marca de “já usou antes”. Se você enviar sua opinião, ela inclui como sua última imagem foi processada (motor e tipo de dispositivo).</p>
           <h2>Contato</h2>
           <p>Dúvidas? Envie um email para <Link href={`mailto:${SITE.email}`}>{SITE.email}</Link>.</p>
           <p className="text-xs text-muted-foreground">Última atualização: {new Date().toISOString().split("T")[0]}</p>

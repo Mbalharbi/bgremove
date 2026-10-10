@@ -27,7 +27,42 @@ interface Entry {
   rating: number | null;
   message: string;
   country: string | null;
+  engine?: string | null;
+  dtype?: string | null;
+  device?: string | null;
+  edited?: boolean;
 }
+
+interface Usage {
+  days: number;
+  byToolEvent: { tool: string; event: string; n: number; items: number }[];
+  perDay: { day: string; event: string; n: number }[];
+  engines: { engine: string; dtype: string; device: string; n: number; avg_ms: number }[];
+  reasons: { tool: string; reason: string; n: number }[];
+  countries: { country: string; n: number }[];
+  locales: { locale: string; n: number }[];
+  returning: { is_return: number; n: number }[];
+}
+
+const TOOL_AR: Record<string, string> = {
+  remove: "إزالة الخلفية",
+  bulk: "المعالجة الجماعية",
+  compress: "ضغط الصور",
+  resize: "تغيير المقاس",
+  webp: "تحويل WebP",
+  qr: "مولّد QR",
+  metadata: "بيانات الصورة",
+};
+const REASON_AR: Record<string, string> = {
+  "too-large": "الملف كبير",
+  decode: "تعذّر فتح الصورة",
+  "model-load": "فشل تحميل النموذج",
+  memory: "نفاد الذاكرة",
+  gpu: "مشكلة كرت الشاشة",
+  other: "أخرى",
+  "?": "غير معروف",
+};
+const RANGE_DAYS: Record<string, number> = { "7": 7, "30": 30, all: 400 };
 
 type Range = "7" | "30" | "all";
 
@@ -103,6 +138,7 @@ export function FeedbackAdmin() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [range, setRange] = React.useState<Range>("30");
+  const [usage, setUsage] = React.useState<Usage | null>(null);
 
   const load = React.useCallback(async (k: string) => {
     setLoading(true);
@@ -115,6 +151,11 @@ export function FeedbackAdmin() {
       if (!res.ok) throw new Error(`خطأ غير متوقع (${res.status}).`);
       const data = (await res.json()) as { entries: Entry[] };
       setEntries(data.entries.slice().reverse()); // newest first
+      // Usage counters are optional (D1 may not be set up yet).
+      fetch(`/api/usage?days=400`, { headers: { Authorization: `Bearer ${k}` } })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((u) => setUsage(u))
+        .catch(() => setUsage(null));
       try {
         sessionStorage.setItem(KEY_STORAGE, k);
       } catch {
@@ -259,6 +300,9 @@ export function FeedbackAdmin() {
         </div>
       </div>
 
+      <UsageSection usage={usage} range={range} />
+
+      <h2 className="mt-4 text-xl font-bold">آراء المستخدمين</h2>
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="عدد الردود" value={total} />
         <Stat label="متوسط التقييم" value={avg === null ? "—" : `${avg.toFixed(1)} / 5`} />
@@ -289,6 +333,8 @@ export function FeedbackAdmin() {
                   {localeName(e.locale)}
                   {e.rating ? ` · ${"★".repeat(e.rating)}` : ""}
                   {e.needs.length ? ` · ${e.needs.map(needLabel).join("، ")}` : ""}
+                  {e.engine ? ` · ${e.engine}${e.dtype ? "/" + e.dtype : ""}${e.device ? "/" + e.device : ""}` : ""}
+                  {e.edited ? " · استخدم الفرشاة" : ""}
                 </p>
               </li>
             ))}
@@ -296,5 +342,89 @@ export function FeedbackAdmin() {
         )}
       </div>
     </div>
+  );
+}
+
+/** "Usage" block: which tools people use and how well processing works. */
+function UsageSection({ usage, range }: { usage: Usage | null; range: Range }) {
+  if (!usage) {
+    return (
+      <div className="rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+        إحصاءات الاستخدام غير متاحة بعد (قاعدة البيانات لم تُفعّل أو لا توجد بيانات).
+      </div>
+    );
+  }
+  // The API returns up to 400 days; filter to the selected range client-side.
+  const since = new Date(Date.now() - (RANGE_DAYS[range] - 1) * 86400000).toISOString().slice(0, 10);
+  const days = usage.perDay.filter((d) => d.day >= since);
+  const total = (ev: string) => days.filter((d) => d.event === ev).reduce((a, d) => a + d.n, 0);
+  const uploads = total("upload"), ok = total("success"), fail = total("fail"), dls = total("download");
+  const editOpen = total("edit_open"), editApply = total("edit_apply");
+  const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : "—");
+  // Tool popularity and engine stats come from the all-time aggregates.
+  const toolRows = Object.entries(
+    usage.byToolEvent.filter((r) => r.event === "upload").reduce<Record<string, number>>((m, r) => {
+      m[r.tool] = (m[r.tool] ?? 0) + r.items;
+      return m;
+    }, {})
+  )
+    .sort((a, b) => b[1] - a[1])
+    .map(([t, n]) => [TOOL_AR[t] ?? t, n] as [string, number]);
+  const toolTotal = toolRows.reduce((a, [, n]) => a + n, 0);
+  const ret = usage.returning.find((r) => r.is_return === 1)?.n ?? 0;
+  const retAll = usage.returning.reduce((a, r) => a + r.n, 0);
+  const reasonRows = usage.reasons.map((r) => [`${TOOL_AR[r.tool] ?? r.tool}: ${REASON_AR[r.reason] ?? r.reason}`, r.n] as [string, number]);
+  const countryRows = usage.countries.map((c) => [c.country === "?" ? "غير معروف" : countryName(c.country), c.n] as [string, number]);
+  const okTotal = usage.countries.reduce((a, c) => a + c.n, 0);
+  const byDay = Array.from(new Set(days.map((d) => d.day))).map((day) => ({
+    day,
+    n: days.filter((d) => d.day === day && d.event === "upload").reduce((a, d) => a + d.n, 0),
+  }));
+  const maxDay = Math.max(1, ...byDay.map((d) => d.n));
+
+  return (
+    <section className="grid gap-4">
+      <h2 className="text-xl font-bold">الاستخدام</h2>
+      <div className="grid gap-4 sm:grid-cols-4">
+        <Stat label="محاولات رفع" value={uploads} />
+        <Stat label="نجاح المعالجة" value={`${ok} (${pct(ok, ok + fail)})`} />
+        <Stat label="تنزيلات" value={`${dls} (${pct(dls, ok)} من الناجحة)`} />
+        <Stat label="استخدام الفرشاة" value={`${editApply} / ${editOpen} فُتحت`} />
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <BarList title="الأدوات الأكثر استخدامًا (عدد الصور، كل الفترة)" rows={toolRows} total={toolTotal} />
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h3 className="mb-4 text-sm font-semibold">محاولات الرفع يوميًا</h3>
+          {byDay.length === 0 ? (
+            <p className="text-sm text-muted-foreground">لا توجد بيانات بعد.</p>
+          ) : (
+            <div className="flex h-32 items-end gap-1" dir="ltr">
+              {byDay.map((d) => (
+                <div key={d.day} title={`${d.day}: ${d.n}`} className="flex-1 rounded-t bg-primary" style={{ height: `${(d.n / maxDay) * 100}%` }} />
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h3 className="mb-4 text-sm font-semibold">المحرك والجهاز (الناجحة، كل الفترة)</h3>
+          <table className="w-full text-sm" dir="ltr">
+            <thead className="text-muted-foreground">
+              <tr><th className="text-left">engine</th><th className="text-left">dtype</th><th className="text-left">device</th><th className="text-right">n</th><th className="text-right">avg</th></tr>
+            </thead>
+            <tbody>
+              {usage.engines.map((e) => (
+                <tr key={e.engine + e.dtype + e.device}>
+                  <td>{e.engine}</td><td>{e.dtype}</td><td>{e.device}</td><td className="text-right">{e.n}</td>
+                  <td className="text-right">{e.avg_ms ? `${(e.avg_ms / 1000).toFixed(1)}s` : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <BarList title="أسباب الفشل (كل الفترة)" rows={reasonRows} total={reasonRows.reduce((a, [, n]) => a + n, 0)} />
+        <BarList title="الدول (المعالجات الناجحة)" rows={countryRows} total={okTotal} />
+        <Stat label="زوار عائدون (من محاولات الرفع)" value={pct(ret, retAll)} />
+      </div>
+    </section>
   );
 }

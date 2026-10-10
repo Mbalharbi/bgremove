@@ -63,8 +63,15 @@ export default function PrivacyPage() {
           <h2>What we do collect</h2>
           <ul>
             <li>
-              <strong>Anonymous analytics</strong> (page views, browser type, country) via Google
-              Analytics 4. We do not collect IP addresses in identifiable form.
+              <strong>Anonymous analytics</strong> (page views, browser type, country) via Cloudflare
+              Web Analytics, which sets no cookies.
+            </li>
+            <li>
+              <strong>Anonymous usage counts</strong> — which tool was used, whether processing
+              succeeded, how long it took, which AI engine ran, and whether you downloaded the result.
+              No images, file names, IP addresses or cookies; a single &ldquo;used before&rdquo; flag
+              is kept in your browser. If you send feedback, it includes how your last image was
+              processed (engine and device type).
             </li>
             <li>
               <strong>Standard server logs</strong> from our static host (Cloudflare Pages) for the

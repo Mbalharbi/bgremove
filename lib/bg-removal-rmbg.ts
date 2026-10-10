@@ -119,6 +119,7 @@ function onTransformersProgress(p: { status?: string; file?: string; loaded?: nu
 }
 
 let rmbgReady = false;
+let chosen: DeviceChoice | null = null;
 
 export async function getRmbgPipeline(
   onProgress?: (stage: LoadStage) => void,
@@ -149,6 +150,7 @@ export async function getRmbgPipeline(
 
         emitStage("loading-model");
         const { device, dtype } = await pickDevice(T);
+        chosen = { device, dtype };
 
         const model = await T.AutoModel.from_pretrained(MODEL_ID, {
           // @ts-ignore — transformers.js accepts these
@@ -277,5 +279,7 @@ export async function removeBackgroundRmbg(
     processingMs: performance.now() - start,
     downscaled,
     engine: "rmbg-1.4",
+    dtype: chosen?.dtype,
+    device: chosen?.device,
   };
 }

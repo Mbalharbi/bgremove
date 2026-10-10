@@ -24,6 +24,9 @@ export interface RemoveResult {
   downscaled: boolean;
   /** Which engine actually produced this result. */
   engine: Engine;
+  /** RMBG only: weight precision and runtime actually used. */
+  dtype?: "fp16" | "fp32" | "q8";
+  device?: "webgpu" | "wasm";
 }
 
 export interface RemoveOptions {

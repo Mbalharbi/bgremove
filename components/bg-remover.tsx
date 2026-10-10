@@ -14,6 +14,8 @@ import {
   type RemoveResult,
 } from "@/lib/bg-removal";
 import { useToolStrings, type ToolStrings } from "@/lib/tool-i18n";
+import { errorReason, toolFromPath, track } from "@/lib/track";
+import { setLastRun } from "@/components/feedback-dialog";
 import { changeExtension, formatBytes, formatMs } from "@/lib/utils";
 
 interface Progress {
@@ -100,6 +102,9 @@ export function BgRemover() {
           onProgress: (stage) => update({ stage }),
           onDownloadProgress: (loaded, total) => update({ loaded, total }),
         });
+        const tool = toolFromPath(window.location.pathname);
+        track(tool, "success", { engine: result.engine, dtype: result.dtype, device: result.device, ms: result.processingMs });
+        setLastRun({ engine: result.engine, dtype: result.dtype, device: result.device });
         const afterUrl = URL.createObjectURL(result.blob);
         if (result.downscaled) {
           toast({
@@ -120,6 +125,7 @@ export function BgRemover() {
       } catch (err) {
         URL.revokeObjectURL(beforeUrl);
         const message = err instanceof Error ? err.message : "Unknown error.";
+        track(toolFromPath(window.location.pathname), "fail", { reason: errorReason(err) });
         setStatus({ kind: "error", message });
         toast({ title: t.errorTitle, description: message, variant: "destructive" });
       }
@@ -146,6 +152,8 @@ export function BgRemover() {
               };
             });
             setEditing(false);
+            track(toolFromPath(window.location.pathname), "edit_apply");
+            setLastRun({ edited: true });
           }}
         />
       );
@@ -176,7 +184,14 @@ export function BgRemover() {
               <RefreshCw className="h-4 w-4" />
               {t.newImage}
             </Button>
-            <Button variant="outline" size="lg" onClick={() => setEditing(true)}>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                setEditing(true);
+                track(toolFromPath(window.location.pathname), "edit_open");
+              }}
+            >
               <Brush className="h-4 w-4" />
               {t.editButton}
             </Button>
