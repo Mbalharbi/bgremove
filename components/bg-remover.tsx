@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, RefreshCw, Sparkles, Zap, Lock } from "lucide-react";
+import { Loader2, RefreshCw, Sparkles, Zap, Lock, Brush } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { UploadZone } from "@/components/upload-zone";
 import { ImagePreview } from "@/components/image-preview";
 import { DownloadButton } from "@/components/download-button";
+import { MaskEditor } from "@/components/mask-editor";
 import { Button } from "@/components/ui/button";
 import {
   removeBackground,
@@ -58,6 +59,7 @@ export function BgRemover() {
   const t = useToolStrings();
   const { toast } = useToast();
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
+  const [editing, setEditing] = React.useState(false);
 
   const reset = React.useCallback(() => {
     setStatus((prev) => {
@@ -67,16 +69,22 @@ export function BgRemover() {
       }
       return { kind: "idle" };
     });
+    setEditing(false);
   }, []);
 
+  // Release the current images only when the tool unmounts. (Releasing on
+  // every status change would break edits, which keep beforeUrl.)
+  const statusRef = React.useRef(status);
+  statusRef.current = status;
   React.useEffect(() => {
     return () => {
-      if (status.kind === "ready") {
-        URL.revokeObjectURL(status.src.beforeUrl);
-        URL.revokeObjectURL(status.src.afterUrl);
+      const s = statusRef.current;
+      if (s.kind === "ready") {
+        URL.revokeObjectURL(s.src.beforeUrl);
+        URL.revokeObjectURL(s.src.afterUrl);
       }
     };
-  }, [status]);
+  }, []);
 
   const process = React.useCallback(
     async (file: File) => {
@@ -121,6 +129,27 @@ export function BgRemover() {
 
   if (status.kind === "ready") {
     const { beforeUrl, afterUrl, filename, result, inputSize } = status.src;
+    if (editing) {
+      return (
+        <MaskEditor
+          originalUrl={beforeUrl}
+          resultBlob={result.blob}
+          onCancel={() => setEditing(false)}
+          onDone={(blob) => {
+            // Swap in the touched-up PNG; the old object URL is released.
+            setStatus((prev) => {
+              if (prev.kind !== "ready") return prev;
+              URL.revokeObjectURL(prev.src.afterUrl);
+              return {
+                kind: "ready",
+                src: { ...prev.src, afterUrl: URL.createObjectURL(blob), result: { ...prev.src.result, blob } },
+              };
+            });
+            setEditing(false);
+          }}
+        />
+      );
+    }
     return (
       <div className="flex min-h-[480px] flex-col gap-4">
         <ImagePreview
@@ -146,6 +175,10 @@ export function BgRemover() {
             <Button variant="outline" size="lg" onClick={reset}>
               <RefreshCw className="h-4 w-4" />
               {t.newImage}
+            </Button>
+            <Button variant="outline" size="lg" onClick={() => setEditing(true)}>
+              <Brush className="h-4 w-4" />
+              {t.editButton}
             </Button>
             <DownloadButton blob={result.blob} filename={filename} label={t.downloadPng} />
           </div>

@@ -50,6 +50,21 @@ export interface ToolStrings {
   compareAria: string;
   altOriginal: string;
   altRemoved: string;
+  // Manual touch-up (components/mask-editor.tsx)
+  editButton: string;
+  editTitle: string;
+  erase: string;
+  restore: string;
+  brushSize: string;
+  undo: string;
+  redo: string;
+  zoomIn: string;
+  zoomOut: string;
+  zoomFit: string;
+  showOriginal: string;
+  editHint: string;
+  cancel: string;
+  applyEdits: string;
 }
 
 const MB = "MB";
@@ -88,6 +103,20 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     compareAria: "Compare before and after",
     altOriginal: "original",
     altRemoved: "background removed",
+    editButton: "Touch up",
+    editTitle: "Touch-up brush",
+    erase: "Erase",
+    restore: "Restore",
+    brushSize: "Size",
+    undo: "Undo",
+    redo: "Redo",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    zoomFit: "Fit to screen",
+    showOriginal: "Show original underneath",
+    editHint: "Erase removes leftovers; Restore brings back parts that were cut off. Zoom in for fine detail. Ctrl+Z to undo.",
+    cancel: "Cancel",
+    applyEdits: "Apply",
   },
   ar: {
     dropOne: "اسحب صورة أو الصقها أو اضغط للرفع",
@@ -122,6 +151,20 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     compareAria: "قارن قبل وبعد",
     altOriginal: "الأصلية",
     altRemoved: "بعد إزالة الخلفية",
+    editButton: "تعديل يدوي",
+    editTitle: "فرشاة التعديل",
+    erase: "مسح",
+    restore: "استرجاع",
+    brushSize: "الحجم",
+    undo: "تراجع",
+    redo: "إعادة",
+    zoomIn: "تكبير",
+    zoomOut: "تصغير",
+    zoomFit: "ملاءمة الشاشة",
+    showOriginal: "إظهار الأصلية تحتها",
+    editHint: "«مسح» يزيل البقايا، و«استرجاع» يعيد الأجزاء المقصوصة بالخطأ. كبّر للتفاصيل الدقيقة. Ctrl+Z للتراجع.",
+    cancel: "إلغاء",
+    applyEdits: "تطبيق",
   },
   zh: {
     dropOne: "拖放、粘贴或点击上传图片",
@@ -156,6 +199,20 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     compareAria: "对比处理前后",
     altOriginal: "原图",
     altRemoved: "已去除背景",
+    editButton: "手动修整",
+    editTitle: "修整画笔",
+    erase: "擦除",
+    restore: "恢复",
+    brushSize: "大小",
+    undo: "撤销",
+    redo: "重做",
+    zoomIn: "放大",
+    zoomOut: "缩小",
+    zoomFit: "适应屏幕",
+    showOriginal: "底层显示原图",
+    editHint: "“擦除”去掉残留背景，“恢复”找回被误删的部分。放大可处理细节。Ctrl+Z 撤销。",
+    cancel: "取消",
+    applyEdits: "应用",
   },
   es: {
     dropOne: "Suelta una imagen, pégala o toca para subir",
@@ -190,6 +247,20 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     compareAria: "Comparar antes y después",
     altOriginal: "original",
     altRemoved: "sin fondo",
+    editButton: "Retocar",
+    editTitle: "Pincel de retoque",
+    erase: "Borrar",
+    restore: "Restaurar",
+    brushSize: "Tamaño",
+    undo: "Deshacer",
+    redo: "Rehacer",
+    zoomIn: "Acercar",
+    zoomOut: "Alejar",
+    zoomFit: "Ajustar a pantalla",
+    showOriginal: "Mostrar original debajo",
+    editHint: "Borrar quita restos; Restaurar recupera partes recortadas por error. Acerca para detalles finos. Ctrl+Z para deshacer.",
+    cancel: "Cancelar",
+    applyEdits: "Aplicar",
   },
   pt: {
     dropOne: "Solte uma imagem, cole ou toque para enviar",
@@ -224,6 +295,20 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     compareAria: "Comparar antes e depois",
     altOriginal: "original",
     altRemoved: "sem fundo",
+    editButton: "Retocar",
+    editTitle: "Pincel de retoque",
+    erase: "Apagar",
+    restore: "Restaurar",
+    brushSize: "Tamanho",
+    undo: "Desfazer",
+    redo: "Refazer",
+    zoomIn: "Ampliar",
+    zoomOut: "Reduzir",
+    zoomFit: "Ajustar à tela",
+    showOriginal: "Mostrar original por baixo",
+    editHint: "Apagar remove sobras; Restaurar traz de volta partes cortadas por engano. Amplie para detalhes finos. Ctrl+Z para desfazer.",
+    cancel: "Cancelar",
+    applyEdits: "Aplicar",
   },
   de: {
     dropOne: "Bild ablegen, einfügen oder tippen zum Hochladen",
@@ -258,6 +343,20 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     compareAria: "Vorher und nachher vergleichen",
     altOriginal: "Original",
     altRemoved: "ohne Hintergrund",
+    editButton: "Nachbessern",
+    editTitle: "Korrekturpinsel",
+    erase: "Radieren",
+    restore: "Wiederherstellen",
+    brushSize: "Größe",
+    undo: "Rückgängig",
+    redo: "Wiederholen",
+    zoomIn: "Vergrößern",
+    zoomOut: "Verkleinern",
+    zoomFit: "An Bildschirm anpassen",
+    showOriginal: "Original darunter zeigen",
+    editHint: "Radieren entfernt Reste; Wiederherstellen holt fälschlich entfernte Teile zurück. Zum Arbeiten an Details vergrößern. Strg+Z zum Rückgängigmachen.",
+    cancel: "Abbrechen",
+    applyEdits: "Übernehmen",
   },
   hi: {
     dropOne: "इमेज ड्रॉप करें, पेस्ट करें या अपलोड के लिए टैप करें",
@@ -292,6 +391,20 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     compareAria: "पहले और बाद की तुलना करें",
     altOriginal: "ओरिजिनल",
     altRemoved: "बैकग्राउंड हटाया गया",
+    editButton: "हाथ से सुधारें",
+    editTitle: "सुधार ब्रश",
+    erase: "मिटाएँ",
+    restore: "वापस लाएँ",
+    brushSize: "साइज़",
+    undo: "पूर्ववत",
+    redo: "फिर से करें",
+    zoomIn: "ज़ूम इन",
+    zoomOut: "ज़ूम आउट",
+    zoomFit: "स्क्रीन में फ़िट",
+    showOriginal: "नीचे ओरिजिनल दिखाएँ",
+    editHint: "“मिटाएँ” बचा हुआ बैकग्राउंड हटाता है; “वापस लाएँ” गलती से कटे हिस्से लौटाता है। बारीक काम के लिए ज़ूम करें। Ctrl+Z से पूर्ववत।",
+    cancel: "रद्द करें",
+    applyEdits: "लागू करें",
   },
   id: {
     dropOne: "Tarik gambar, tempel, atau ketuk untuk unggah",
@@ -326,6 +439,20 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     compareAria: "Bandingkan sebelum dan sesudah",
     altOriginal: "asli",
     altRemoved: "latar dihapus",
+    editButton: "Rapikan manual",
+    editTitle: "Kuas perapian",
+    erase: "Hapus",
+    restore: "Pulihkan",
+    brushSize: "Ukuran",
+    undo: "Urungkan",
+    redo: "Ulangi",
+    zoomIn: "Perbesar",
+    zoomOut: "Perkecil",
+    zoomFit: "Pas layar",
+    showOriginal: "Tampilkan asli di bawah",
+    editHint: "Hapus membuang sisa latar; Pulihkan mengembalikan bagian yang terpotong. Perbesar untuk detail halus. Ctrl+Z untuk mengurungkan.",
+    cancel: "Batal",
+    applyEdits: "Terapkan",
   },
 };
 
