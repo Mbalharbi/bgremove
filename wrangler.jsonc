@@ -35,10 +35,13 @@
       "binding": "FEEDBACK",
       "id": "b2b675880a1043ada88c5a30fa0ebafd"
     }
+  ],
+  "d1_databases": [
+    {
+      // Anonymous usage counters (POST /api/event, GET /api/usage).
+      "binding": "USAGE",
+      "database_name": "bgremove-usage",
+      "database_id": "18c0a918-be82-4a75-b3d5-22c2b6ad73a3"
+    }
   ]
-  // Usage counters (POST /api/event, GET /api/usage) need a D1 database:
-  // create "bgremove-usage" in the dashboard, then add:
-  // "d1_databases": [{ "binding": "USAGE", "database_name": "bgremove-usage", "database_id": "<id>" }]
-  // Until then the Worker accepts events and drops them (204).
-
 }
