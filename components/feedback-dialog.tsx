@@ -388,7 +388,7 @@ async function countryLocale(): Promise<{ locale: LocaleCode | null; country: st
 }
 
 /** The language the popup should open in for this visitor on this page. */
-async function resolveLocale(pageLocale: LocaleCode): Promise<LocaleCode> {
+export async function resolveLocale(pageLocale: LocaleCode): Promise<LocaleCode> {
   if (pageLocale !== "en") return pageLocale;
   const fromBrowser = browserLocale();
   if (fromBrowser) return fromBrowser;
