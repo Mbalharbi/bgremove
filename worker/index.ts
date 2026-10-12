@@ -25,6 +25,10 @@ interface Env {
   FEEDBACK_ADMIN_KEY?: string;
   /** Anonymous usage counters (lib/track.ts → POST /api/event). */
   USAGE?: D1Database;
+  /** Read-only Cloudflare API token (Account Analytics: Read) for the nightly copy. */
+  CF_ANALYTICS_TOKEN?: string;
+  /** Account that owns the Web Analytics site (wrangler.jsonc vars). */
+  CF_ACCOUNT_ID?: string;
 }
 
 interface D1Result<T> {
@@ -417,6 +421,10 @@ const EVENT_NAMES = ["upload", "success", "fail", "download", "edit_open", "edit
 const EVENT_REASONS = ["too-large", "decode", "model-load", "memory", "gpu", "other"];
 const EVENTS_PER_IP_PER_DAY = 400;
 
+// Automated browsers and crawlers that run JavaScript (incl. our own test runs).
+const BOT_UA = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|phantom|puppeteer|playwright|selenium|preview|monitor|uptime/i;
+const isBot = (req: Request) => BOT_UA.test(req.headers.get("user-agent") || "");
+
 let schemaReady: Promise<unknown> | null = null;
 function ensureSchema(db: D1Database) {
   schemaReady ??= db.batch([
@@ -426,6 +434,16 @@ function ensureSchema(db: D1Database) {
       reason TEXT, locale TEXT, country TEXT, is_return INTEGER)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS events_day ON events(day)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS event_rl (day TEXT NOT NULL, h TEXT NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (day, h))`),
+    // One row per page view (kept indefinitely — this is the long-term history).
+    db.prepare(`CREATE TABLE IF NOT EXISTS pageviews (
+      day TEXT NOT NULL, path TEXT NOT NULL, ref TEXT NOT NULL, device TEXT, browser TEXT,
+      locale TEXT, country TEXT, new_day INTEGER, new_month INTEGER, new_ever INTEGER)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS pageviews_day ON pageviews(day)`),
+    // Nightly copy of Cloudflare Web Analytics (dim = total|country|ref|path|device).
+    db.prepare(`CREATE TABLE IF NOT EXISTS cf_daily (
+      day TEXT NOT NULL, dim TEXT NOT NULL, key TEXT NOT NULL, views INTEGER, visits INTEGER,
+      PRIMARY KEY (day, dim, key))`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)`),
   ]).catch((e) => {
     schemaReady = null;
     throw e;
@@ -434,7 +452,7 @@ function ensureSchema(db: D1Database) {
 }
 
 async function handleEvent(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-  if (!env.USAGE) return new Response(null, { status: 204 });
+  if (!env.USAGE || isBot(req)) return new Response(null, { status: 204 });
   const raw = await req.text();
   if (raw.length > 1024) return new Response(null, { status: 413 });
   let b: Record<string, unknown>;
@@ -484,7 +502,7 @@ async function handleEvent(req: Request, env: Env, ctx: ExecutionContext): Promi
     ctx.waitUntil(
       db.batch([
         db.prepare(`DELETE FROM event_rl WHERE day < ?`).bind(day),
-        db.prepare(`DELETE FROM events WHERE day < date('now', '-400 days')`),
+        db.prepare(`DELETE FROM events WHERE day < date('now', '-1100 days')`),
       ])
     );
   }
@@ -516,7 +534,172 @@ async function handleUsage(req: Request, url: URL, env: Env): Promise<Response> 
   return jsonOk({ days, since, byToolEvent, perDay, engines, reasons, countries, locales, returning });
 }
 
+// ── Page views (long-term traffic history) ──────────────────────────────────
+// Sent once per page by components/usage-tracker.tsx. "Visitor" counts come
+// from per-browser flags (first view today / this month / ever) kept in
+// localStorage — no IDs, cookies or IPs.
+
+const PV_DEVICES = ["mobile", "tablet", "desktop"];
+const PV_BROWSERS = ["Chrome", "Edge", "Safari", "Firefox", "Samsung", "Opera", "Other"];
+const PV_PER_IP_PER_DAY = 300;
+
+function cleanPath(v: unknown): string | null {
+  if (typeof v !== "string" || !v.startsWith("/")) return null;
+  let p = v.split(/[?#]/)[0].slice(0, 120).toLowerCase();
+  if (!/^[a-z0-9/_\-.]*$/.test(p)) return null;
+  if (!p.endsWith("/") && !p.includes(".")) p += "/";
+  return p;
+}
+
+function cleanRef(v: unknown): string {
+  if (typeof v !== "string" || !v) return "(direct)";
+  const h = v.toLowerCase().replace(/^www\./, "").slice(0, 60);
+  return /^[a-z0-9.\-]+$/.test(h) && h !== APEX_HOST ? h : "(direct)";
+}
+
+async function handlePageview(req: Request, env: Env): Promise<Response> {
+  if (!env.USAGE || isBot(req)) return new Response(null, { status: 204 });
+  const raw = await req.text();
+  if (raw.length > 1024) return new Response(null, { status: 413 });
+  let b: Record<string, unknown>;
+  try {
+    b = JSON.parse(raw);
+  } catch {
+    return new Response(null, { status: 400 });
+  }
+  const path = cleanPath(b.path);
+  if (!path) return new Response(null, { status: 400 });
+  const pick = (v: unknown, allowed: string[]) => (typeof v === "string" && allowed.includes(v) ? v : null);
+  const db = env.USAGE;
+  await ensureSchema(db);
+  const day = todayKey();
+  const ip = req.headers.get("cf-connecting-ip") || "unknown";
+  const h = (await sha256Hex(`${day}|pv|${ip}`)).slice(0, 20);
+  const rl = await db
+    .prepare(`INSERT INTO event_rl (day, h, n) VALUES (?, ?, 1) ON CONFLICT(day, h) DO UPDATE SET n = n + 1 RETURNING n`)
+    .bind(day, h)
+    .first<{ n: number }>();
+  if ((rl?.n ?? 0) > PV_PER_IP_PER_DAY) return new Response(null, { status: 429 });
+  await db
+    .prepare(`INSERT INTO pageviews (day, path, ref, device, browser, locale, country, new_day, new_month, new_ever)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .bind(
+      day, path, cleanRef(b.ref),
+      pick(b.device, PV_DEVICES), pick(b.browser, PV_BROWSERS), pick(b.locale, FEEDBACK_LOCALES),
+      (req as Request & { cf?: { country?: string } }).cf?.country ?? null,
+      b.newDay === true ? 1 : 0, b.newMonth === true ? 1 : 0, b.newEver === true ? 1 : 0
+    )
+    .run();
+  return new Response(null, { status: 204 });
+}
+
+// ── Nightly copy of Cloudflare Web Analytics ─────────────────────────────────
+// Cloudflare only shows recent history; we store its daily numbers in D1 so
+// they're kept for good. Needs CF_ANALYTICS_TOKEN (Account Analytics: Read).
+
+const CF_DIMS: [string, string][] = [
+  ["total", "date"],
+  ["country", "countryName"],
+  ["ref", "refererHost"],
+  ["path", "requestPath"],
+  ["device", "deviceType"],
+];
+
+async function cfQuery(env: Env, from: string, to: string, excludeBots: boolean) {
+  const filter = `{date_geq: $from, date_leq: $to, requestHost: "${APEX_HOST}"${excludeBots ? ", bot: 0" : ""}}`;
+  const parts = CF_DIMS.map(([alias, dim]) =>
+    `${alias}: rumPageloadEventsAdaptiveGroups(limit: 5000, filter: ${filter}) { count sum { visits } dimensions { date ${dim === "date" ? "" : dim} } }`
+  ).join("\n");
+  const query = `query($acct: string!, $from: Date!, $to: Date!) { viewer { accounts(filter: {accountTag: $acct}) { ${parts} } } }`;
+  const res = await fetch("https://api.cloudflare.com/client/v4/graphql", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.CF_ANALYTICS_TOKEN}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ query, variables: { acct: env.CF_ACCOUNT_ID, from, to } }),
+  });
+  return (await res.json()) as {
+    data?: { viewer: { accounts: Record<string, { count: number; sum: { visits: number }; dimensions: Record<string, string> }[]>[] } };
+    errors?: { message: string }[];
+  };
+}
+
+async function syncCloudflare(env: Env, days: number): Promise<{ ok: boolean; rows?: number; botsExcluded?: boolean; error?: string }> {
+  if (!env.USAGE) return { ok: false, error: "D1 not bound" };
+  if (!env.CF_ANALYTICS_TOKEN || !env.CF_ACCOUNT_ID) return { ok: false, error: "CF_ANALYTICS_TOKEN / CF_ACCOUNT_ID not set" };
+  const db = env.USAGE;
+  await ensureSchema(db);
+  const to = new Date(Date.now() - 86400000).toISOString().slice(0, 10); // yesterday (complete day)
+  const from = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+  let excludeBots = true;
+  let r = await cfQuery(env, from, to, true);
+  if (r.errors?.some((e) => /bot/i.test(e.message))) {
+    excludeBots = false; // older schema without the bot field — store what Cloudflare gives
+    r = await cfQuery(env, from, to, false);
+  }
+  const result: { ok: boolean; rows?: number; botsExcluded?: boolean; error?: string } = r.errors?.length || !r.data
+    ? { ok: false, error: (r.errors ?? [{ message: "no data" }]).map((e) => e.message).join("; ").slice(0, 300) }
+    : { ok: true, rows: 0, botsExcluded: excludeBots };
+  if (result.ok) {
+    const acct = r.data!.viewer.accounts[0] ?? {};
+    const stmts: D1Stmt[] = [];
+    for (const [alias, dim] of CF_DIMS) {
+      for (const g of acct[alias] ?? []) {
+        const key = alias === "total" ? "" : String(g.dimensions[dim] ?? "?").slice(0, 120);
+        stmts.push(
+          db.prepare(`INSERT INTO cf_daily (day, dim, key, views, visits) VALUES (?, ?, ?, ?, ?)
+                      ON CONFLICT(day, dim, key) DO UPDATE SET views = excluded.views, visits = excluded.visits`)
+            .bind(g.dimensions.date, alias, key, g.count, g.sum.visits)
+        );
+      }
+    }
+    for (let i = 0; i < stmts.length; i += 50) await db.batch(stmts.slice(i, i + 50));
+    result.rows = stmts.length;
+  }
+  await db.prepare(`INSERT INTO meta (k, v) VALUES ('cf_sync', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v`)
+    .bind(JSON.stringify({ at: new Date().toISOString(), ...result }))
+    .run();
+  return result;
+}
+
+const isAdmin = (req: Request, env: Env) =>
+  !!env.FEEDBACK_ADMIN_KEY && req.headers.get("authorization") === `Bearer ${env.FEEDBACK_ADMIN_KEY}`;
+
+/** GET /api/traffic?days=90 (admin) → monthly + daily series and top lists, ours and Cloudflare's. */
+async function handleTraffic(req: Request, url: URL, env: Env): Promise<Response> {
+  if (!env.USAGE || !env.FEEDBACK_ADMIN_KEY) return jsonError(404, "not_found", "Not found.");
+  if (!isAdmin(req, env)) return jsonError(401, "unauthorized", "Missing or wrong admin key.");
+  const db = env.USAGE;
+  await ensureSchema(db);
+  const days = Math.min(Math.max(parseInt(url.searchParams.get("days") ?? "90", 10) || 90, 1), 3650);
+  const since = new Date(Date.now() - (days - 1) * 86400000).toISOString().slice(0, 10);
+  const all = <T,>(sql: string, ...b: unknown[]) => db.prepare(sql).bind(...b).all<T>().then((r) => r.results);
+  const top = (col: string) =>
+    all(`SELECT ${col} AS key, COUNT(*) AS views, SUM(new_day) AS visitors FROM pageviews WHERE day >= ? GROUP BY 1 ORDER BY views DESC LIMIT 12`, since);
+  const cfTop = (dim: string) =>
+    all(`SELECT key, SUM(views) AS views, SUM(visits) AS visits FROM cf_daily WHERE dim = ? AND day >= ? GROUP BY key ORDER BY visits DESC LIMIT 12`, dim, since);
+  const [monthly, daily, refs, countries, paths, devices, browsers, locales, cfMonthly, cfDaily, cfRefs, cfCountries, cfPaths, cfDevices, sync, firstDay] =
+    await Promise.all([
+      all(`SELECT substr(day, 1, 7) AS month, COUNT(*) AS views, SUM(new_month) AS visitors, SUM(new_ever) AS new_visitors FROM pageviews GROUP BY 1 ORDER BY 1`),
+      all(`SELECT day, COUNT(*) AS views, SUM(new_day) AS visitors FROM pageviews WHERE day >= ? GROUP BY 1 ORDER BY 1`, since),
+      top("ref"), top("COALESCE(country, '?')"), top("path"), top("COALESCE(device, '?')"), top("COALESCE(browser, '?')"), top("COALESCE(locale, '?')"),
+      all(`SELECT substr(day, 1, 7) AS month, SUM(views) AS views, SUM(visits) AS visits FROM cf_daily WHERE dim = 'total' GROUP BY 1 ORDER BY 1`),
+      all(`SELECT day, views, visits FROM cf_daily WHERE dim = 'total' AND day >= ? ORDER BY day`, since),
+      cfTop("ref"), cfTop("country"), cfTop("path"), cfTop("device"),
+      db.prepare(`SELECT v FROM meta WHERE k = 'cf_sync'`).first<{ v: string }>(),
+      db.prepare(`SELECT MIN(day) AS d FROM pageviews`).first<{ d: string | null }>(),
+    ]);
+  return jsonOk({
+    days, since, trackingSince: firstDay?.d ?? null,
+    own: { monthly, daily, refs, countries, paths, devices, browsers, locales },
+    cf: { monthly: cfMonthly, daily: cfDaily, refs: cfRefs, countries: cfCountries, paths: cfPaths, devices: cfDevices,
+          lastSync: sync ? JSON.parse(sync.v) : null, configured: !!(env.CF_ANALYTICS_TOKEN && env.CF_ACCOUNT_ID) },
+  });
+}
+
 export default {
+  async scheduled(_event: unknown, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(syncCloudflare(env, 3));
+  },
+
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
@@ -554,6 +737,17 @@ export default {
     // Anonymous usage counters.
     if (url.pathname === "/api/event" && request.method === "POST") {
       return handleEvent(request, env, ctx);
+    }
+    if (url.pathname === "/api/pv" && request.method === "POST") {
+      return handlePageview(request, env);
+    }
+    if (url.pathname === "/api/traffic" && request.method === "GET") {
+      return handleTraffic(request, url, env);
+    }
+    if (url.pathname === "/api/admin/cf-sync" && request.method === "POST") {
+      if (!isAdmin(request, env)) return jsonError(401, "unauthorized", "Missing or wrong admin key.");
+      const days = Math.min(Math.max(parseInt(url.searchParams.get("days") ?? "31", 10) || 31, 1), 365);
+      return jsonOk(await syncCloudflare(env, days));
     }
     if (url.pathname === "/api/usage" && request.method === "GET") {
       return handleUsage(request, url, env);

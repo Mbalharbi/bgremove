@@ -37,7 +37,7 @@ export default function IdPrivacyPage() {
           <h2>Versi teknis</h2>
           <p>Saat Anda mengunjungi {SITE.domain}, browser Anda mengunduh aplikasi BgRemove (HTML, CSS, JavaScript) bersama model AI kecil (~44 MB) dari CDN publik. <strong>Tidak ada permintaan jaringan yang membawa data gambar Anda.</strong> Anda dapat memverifikasi sendiri: buka DevTools → tab Network, tarik gambar ke BgRemove, dan amati — tidak ada upload.</p>
           <h2>Statistik penggunaan anonim</h2>
-          <p>Kami menghitung secara anonim alat mana yang dipakai, apakah pemrosesan berhasil, berapa lama, mesin AI mana yang berjalan, dan apakah hasilnya diunduh. Tanpa gambar, nama file, alamat IP, atau cookie; di browser Anda hanya disimpan satu penanda “pernah memakai”. Jika Anda mengirim masukan, masukan itu menyertakan cara gambar terakhir Anda diproses (mesin dan jenis perangkat).</p>
+          <p>Kami menghitung secara anonim alat mana yang dipakai, apakah pemrosesan berhasil, berapa lama, mesin AI mana yang berjalan, dan apakah hasilnya diunduh. Kami juga menghitung kunjungan halaman secara anonim (halaman mana, domain situs perujuk, jenis perangkat, dan browser). Tanpa gambar, nama file, alamat IP, atau cookie; di browser Anda hanya disimpan satu penanda “pernah memakai”. Jika Anda mengirim masukan, masukan itu menyertakan cara gambar terakhir Anda diproses (mesin dan jenis perangkat).</p>
           <h2>Kontak</h2>
           <p>Pertanyaan? Kirim email ke <Link href={`mailto:${SITE.email}`}>{SITE.email}</Link>.</p>
           <p className="text-xs text-muted-foreground">Terakhir diperbarui: {new Date().toISOString().split("T")[0]}</p>

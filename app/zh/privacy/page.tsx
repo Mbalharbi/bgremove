@@ -37,7 +37,7 @@ export default function ZhPrivacyPage() {
           <h2>技术细节</h2>
           <p>当您访问 {SITE.domain} 时，您的浏览器会从公共 CDN 下载 BgRemove Web 应用（HTML、CSS、JavaScript）以及一个小型 AI 模型（约 44 MB）。<strong>没有网络请求会传输您的图片数据。</strong>您可以自己验证：打开 DevTools → 网络选项卡，将图片拖入 BgRemove 并观察 — 不会发生上传。</p>
           <h2>匿名使用统计</h2>
-          <p>我们会统计匿名的使用情况：使用了哪个工具、处理是否成功、耗时多久、运行的是哪个 AI 引擎，以及是否下载了结果。不包含图片、文件名、IP 地址或 Cookie；浏览器中只保存一个“曾经使用过”的标记。如果您提交反馈，会附带最后一张图片的处理方式（引擎和设备类型）。</p>
+          <p>我们会统计匿名的使用情况：使用了哪个工具、处理是否成功、耗时多久、运行的是哪个 AI 引擎，以及是否下载了结果。我们也会匿名统计页面浏览（哪个页面、来源网站域名、设备类型和浏览器）。不包含图片、文件名、IP 地址或 Cookie；浏览器中只保存一个“曾经使用过”的标记。如果您提交反馈，会附带最后一张图片的处理方式（引擎和设备类型）。</p>
           <h2>联系</h2>
           <p>有问题？发送邮件到 <Link href={`mailto:${SITE.email}`}>{SITE.email}</Link>。</p>
           <p className="text-xs text-muted-foreground">最后更新：{new Date().toISOString().split("T")[0]}</p>

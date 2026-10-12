@@ -36,6 +36,10 @@
       "id": "b2b675880a1043ada88c5a30fa0ebafd"
     }
   ],
+  // Nightly copy of Cloudflare Web Analytics into D1 (worker/index.ts → scheduled).
+  // Needs two Worker secrets set in the dashboard: CF_ANALYTICS_TOKEN
+  // (Account Analytics: Read) and CF_ACCOUNT_ID.
+  "triggers": { "crons": ["30 1 * * *"] },
   "d1_databases": [
     {
       // Anonymous usage counters (POST /api/event, GET /api/usage).

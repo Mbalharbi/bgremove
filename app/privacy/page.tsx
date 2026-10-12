@@ -69,7 +69,7 @@ export default function PrivacyPage() {
             <li>
               <strong>Anonymous usage counts</strong> — which tool was used, whether processing
               succeeded, how long it took, which AI engine ran, and whether you downloaded the result.
-              No images, file names, IP addresses or cookies; a single &ldquo;used before&rdquo; flag
+              We also count anonymous page views (which page, the referring site&apos;s domain, device type and browser). No images, file names, IP addresses or cookies; a single &ldquo;used before&rdquo; flag
               is kept in your browser. If you send feedback, it includes how your last image was
               processed (engine and device type).
             </li>

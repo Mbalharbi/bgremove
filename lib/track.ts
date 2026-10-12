@@ -84,3 +84,61 @@ export function errorReason(err: unknown): string {
   if (/webgpu|gpu|device/.test(m)) return "gpu";
   return "other";
 }
+
+// ── Page views ──────────────────────────────────────────────────────────────
+// Visitor counts without IDs: this browser remembers only the date of its
+// last view, so each view can say "first today / first this month / first ever".
+
+const LAST_VIEW_KEY = "bgremove:lastView";
+
+function visitFlags(): { newDay: boolean; newMonth: boolean; newEver: boolean } {
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    const last = localStorage.getItem(LAST_VIEW_KEY);
+    localStorage.setItem(LAST_VIEW_KEY, today);
+    return { newDay: last !== today, newMonth: !last || last.slice(0, 7) !== today.slice(0, 7), newEver: !last };
+  } catch {
+    return { newDay: false, newMonth: false, newEver: false }; // storage blocked: count the view, not a visitor
+  }
+}
+
+function deviceType(): "mobile" | "tablet" | "desktop" {
+  const ua = navigator.userAgent;
+  if (/iPad|Tablet|Nexus 7|Nexus 10|SM-T/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return "tablet";
+  return /Mobi|Android|iPhone|iPod/i.test(ua) ? "mobile" : "desktop";
+}
+
+function browserFamily(): string {
+  const ua = navigator.userAgent;
+  if (/SamsungBrowser/.test(ua)) return "Samsung";
+  if (/OPR\/|Opera/.test(ua)) return "Opera";
+  if (/Edg\//.test(ua)) return "Edge";
+  if (/Firefox\//.test(ua)) return "Firefox";
+  if (/Chrome\//.test(ua) || /CriOS/.test(ua)) return "Chrome";
+  if (/Safari\//.test(ua)) return "Safari";
+  return "Other";
+}
+
+export function trackPageview(path: string, referrer: string): void {
+  if (typeof window === "undefined") return;
+  let ref = "";
+  try {
+    ref = referrer ? new URL(referrer).hostname : "";
+  } catch {
+    /* malformed referrer → direct */
+  }
+  const body = JSON.stringify({
+    path,
+    ref,
+    device: deviceType(),
+    browser: browserFamily(),
+    locale: detectLocale(path).code,
+    ...visitFlags(),
+  });
+  try {
+    const ok = navigator.sendBeacon?.("/api/pv", new Blob([body], { type: "application/json" }));
+    if (!ok) void fetch("/api/pv", { method: "POST", body, keepalive: true, headers: { "Content-Type": "application/json" } });
+  } catch {
+    /* analytics must never break the site */
+  }
+}

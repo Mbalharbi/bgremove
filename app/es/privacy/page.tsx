@@ -37,7 +37,7 @@ export default function EsPrivacyPage() {
           <h2>La versión técnica</h2>
           <p>Cuando visitas {SITE.domain}, tu navegador descarga la aplicación BgRemove (HTML, CSS, JavaScript) junto con un pequeño modelo de IA (~44 MB) de un CDN público. <strong>Ninguna solicitud de red lleva los datos de tus imágenes.</strong> Puedes verificarlo: abre DevTools → pestaña Network, suelta una imagen en BgRemove y observa — no ocurre subida.</p>
           <h2>Estadísticas de uso anónimas</h2>
-          <p>Contamos de forma anónima qué herramienta se usó, si el procesamiento funcionó, cuánto tardó, qué motor de IA se ejecutó y si se descargó el resultado. Sin imágenes, nombres de archivo, direcciones IP ni cookies; en tu navegador solo se guarda una marca de «ya lo usó antes». Si envías tu opinión, incluye cómo se procesó tu última imagen (motor y tipo de dispositivo).</p>
+          <p>Contamos de forma anónima qué herramienta se usó, si el procesamiento funcionó, cuánto tardó, qué motor de IA se ejecutó y si se descargó el resultado. También contamos visitas a páginas de forma anónima (qué página, el dominio del sitio de origen, tipo de dispositivo y navegador). Sin imágenes, nombres de archivo, direcciones IP ni cookies; en tu navegador solo se guarda una marca de «ya lo usó antes». Si envías tu opinión, incluye cómo se procesó tu última imagen (motor y tipo de dispositivo).</p>
           <h2>Contacto</h2>
           <p>¿Preguntas? Envía un correo a <Link href={`mailto:${SITE.email}`}>{SITE.email}</Link>.</p>
           <p className="text-xs text-muted-foreground">Última actualización: {new Date().toISOString().split("T")[0]}</p>

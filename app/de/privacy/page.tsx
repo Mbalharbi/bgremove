@@ -37,7 +37,7 @@ export default function DePrivacyPage() {
           <h2>Die technische Version</h2>
           <p>Wenn Sie {SITE.domain} besuchen, lädt Ihr Browser die BgRemove-Web-App (HTML, CSS, JavaScript) zusammen mit einem kleinen KI-Modell (~44 MB) von einem öffentlichen CDN herunter. <strong>Keine Netzwerkanfrage trägt Ihre Bilddaten.</strong> Sie können dies selbst überprüfen: öffnen Sie die DevTools → Netzwerk-Tab, ziehen Sie ein Bild in BgRemove und beobachten Sie — es findet kein Upload statt.</p>
           <h2>Anonyme Nutzungsstatistik</h2>
-          <p>Wir zählen anonym, welches Werkzeug genutzt wurde, ob die Verarbeitung geklappt hat, wie lange sie dauerte, welche KI-Engine lief und ob das Ergebnis heruntergeladen wurde. Keine Bilder, Dateinamen, IP-Adressen oder Cookies; im Browser wird nur ein Merker „schon einmal genutzt“ gespeichert. Wenn Sie Feedback senden, enthält es, wie Ihr letztes Bild verarbeitet wurde (Engine und Gerätetyp).</p>
+          <p>Wir zählen anonym, welches Werkzeug genutzt wurde, ob die Verarbeitung geklappt hat, wie lange sie dauerte, welche KI-Engine lief und ob das Ergebnis heruntergeladen wurde. Außerdem zählen wir anonym Seitenaufrufe (welche Seite, Domain der verweisenden Website, Gerätetyp und Browser). Keine Bilder, Dateinamen, IP-Adressen oder Cookies; im Browser wird nur ein Merker „schon einmal genutzt“ gespeichert. Wenn Sie Feedback senden, enthält es, wie Ihr letztes Bild verarbeitet wurde (Engine und Gerätetyp).</p>
           <h2>DSGVO-Konformität</h2>
           <p>BgRemove erfüllt die DSGVO durch Design: keine personenbezogenen Daten werden erhoben, gespeichert oder übertragen, weil keine Daten unsere Server erreichen.</p>
           <h2>Kontakt</h2>
