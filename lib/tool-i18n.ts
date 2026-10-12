@@ -65,6 +65,18 @@ export interface ToolStrings {
   editHint: string;
   cancel: string;
   applyEdits: string;
+  // New background + solid-colour mode
+  bgLabel: string;
+  bgTransparent: string;
+  bgCustom: string;
+  bgImage: string;
+  solidButton: string;
+  solidTitle: string;
+  solidColor: string;
+  solidTolerance: string;
+  solidKeepInside: string;
+  solidPickHint: string;
+  solidSuggest: string;
 }
 
 const MB = "MB";
@@ -117,6 +129,17 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     editHint: "Erase removes leftovers; Restore brings back parts that were cut off. Zoom in for fine detail. Ctrl+Z to undo.",
     cancel: "Cancel",
     applyEdits: "Apply",
+    bgLabel: "Background",
+    bgTransparent: "Transparent",
+    bgCustom: "Custom colour",
+    bgImage: "Photo…",
+    solidButton: "Solid-colour mode",
+    solidTitle: "Remove a solid-colour background",
+    solidColor: "Colour to remove",
+    solidTolerance: "Tolerance",
+    solidKeepInside: "Keep this colour inside the subject",
+    solidPickHint: "Click the image to pick the background colour. Raise the tolerance if traces remain.",
+    solidSuggest: "This image has a plain background. Solid-colour mode keeps text and logos 100% intact.",
   },
   ar: {
     dropOne: "اسحب صورة أو الصقها أو اضغط للرفع",
@@ -165,6 +188,17 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     editHint: "«مسح» يزيل البقايا، و«استرجاع» يعيد الأجزاء المقصوصة بالخطأ. كبّر للتفاصيل الدقيقة. Ctrl+Z للتراجع.",
     cancel: "إلغاء",
     applyEdits: "تطبيق",
+    bgLabel: "الخلفية",
+    bgTransparent: "شفافة",
+    bgCustom: "لون مخصص",
+    bgImage: "صورة…",
+    solidButton: "وضع اللون الواحد",
+    solidTitle: "إزالة خلفية بلون واحد",
+    solidColor: "اللون المراد إزالته",
+    solidTolerance: "درجة التسامح",
+    solidKeepInside: "احتفظ بهذا اللون داخل العنصر",
+    solidPickHint: "اضغط على الصورة لاختيار لون الخلفية. ارفع درجة التسامح إذا بقيت آثار.",
+    solidSuggest: "خلفية هذه الصورة بلون واحد. «وضع اللون الواحد» يحافظ على النصوص والشعارات كاملة.",
   },
   zh: {
     dropOne: "拖放、粘贴或点击上传图片",
@@ -213,6 +247,17 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     editHint: "“擦除”去掉残留背景，“恢复”找回被误删的部分。放大可处理细节。Ctrl+Z 撤销。",
     cancel: "取消",
     applyEdits: "应用",
+    bgLabel: "背景",
+    bgTransparent: "透明",
+    bgCustom: "自定义颜色",
+    bgImage: "图片…",
+    solidButton: "纯色模式",
+    solidTitle: "去除纯色背景",
+    solidColor: "要去除的颜色",
+    solidTolerance: "容差",
+    solidKeepInside: "保留主体内部的此颜色",
+    solidPickHint: "点击图片选取背景色。如有残留，请调高容差。",
+    solidSuggest: "这张图片是纯色背景。“纯色模式”可完整保留文字和 Logo。",
   },
   es: {
     dropOne: "Suelta una imagen, pégala o toca para subir",
@@ -261,6 +306,17 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     editHint: "Borrar quita restos; Restaurar recupera partes recortadas por error. Acerca para detalles finos. Ctrl+Z para deshacer.",
     cancel: "Cancelar",
     applyEdits: "Aplicar",
+    bgLabel: "Fondo",
+    bgTransparent: "Transparente",
+    bgCustom: "Color personalizado",
+    bgImage: "Foto…",
+    solidButton: "Modo color sólido",
+    solidTitle: "Quitar un fondo de color sólido",
+    solidColor: "Color a quitar",
+    solidTolerance: "Tolerancia",
+    solidKeepInside: "Conservar este color dentro del objeto",
+    solidPickHint: "Toca la imagen para elegir el color de fondo. Sube la tolerancia si quedan restos.",
+    solidSuggest: "Esta imagen tiene un fondo liso. El modo color sólido conserva textos y logos al 100 %.",
   },
   pt: {
     dropOne: "Solte uma imagem, cole ou toque para enviar",
@@ -309,6 +365,17 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     editHint: "Apagar remove sobras; Restaurar traz de volta partes cortadas por engano. Amplie para detalhes finos. Ctrl+Z para desfazer.",
     cancel: "Cancelar",
     applyEdits: "Aplicar",
+    bgLabel: "Fundo",
+    bgTransparent: "Transparente",
+    bgCustom: "Cor personalizada",
+    bgImage: "Foto…",
+    solidButton: "Modo cor sólida",
+    solidTitle: "Remover um fundo de cor sólida",
+    solidColor: "Cor a remover",
+    solidTolerance: "Tolerância",
+    solidKeepInside: "Manter esta cor dentro do objeto",
+    solidPickHint: "Toque na imagem para escolher a cor do fundo. Aumente a tolerância se sobrarem restos.",
+    solidSuggest: "Esta imagem tem fundo liso. O modo cor sólida mantém textos e logos 100% intactos.",
   },
   de: {
     dropOne: "Bild ablegen, einfügen oder tippen zum Hochladen",
@@ -357,6 +424,17 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     editHint: "Radieren entfernt Reste; Wiederherstellen holt fälschlich entfernte Teile zurück. Zum Arbeiten an Details vergrößern. Strg+Z zum Rückgängigmachen.",
     cancel: "Abbrechen",
     applyEdits: "Übernehmen",
+    bgLabel: "Hintergrund",
+    bgTransparent: "Transparent",
+    bgCustom: "Eigene Farbe",
+    bgImage: "Foto…",
+    solidButton: "Einfarbig-Modus",
+    solidTitle: "Einfarbigen Hintergrund entfernen",
+    solidColor: "Zu entfernende Farbe",
+    solidTolerance: "Toleranz",
+    solidKeepInside: "Diese Farbe im Motiv behalten",
+    solidPickHint: "Ins Bild tippen, um die Hintergrundfarbe zu wählen. Bei Resten die Toleranz erhöhen.",
+    solidSuggest: "Dieses Bild hat einen einfarbigen Hintergrund. Der Einfarbig-Modus erhält Texte und Logos zu 100 %.",
   },
   hi: {
     dropOne: "इमेज ड्रॉप करें, पेस्ट करें या अपलोड के लिए टैप करें",
@@ -405,6 +483,17 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     editHint: "“मिटाएँ” बचा हुआ बैकग्राउंड हटाता है; “वापस लाएँ” गलती से कटे हिस्से लौटाता है। बारीक काम के लिए ज़ूम करें। Ctrl+Z से पूर्ववत।",
     cancel: "रद्द करें",
     applyEdits: "लागू करें",
+    bgLabel: "बैकग्राउंड",
+    bgTransparent: "पारदर्शी",
+    bgCustom: "अपना रंग",
+    bgImage: "फ़ोटो…",
+    solidButton: "एक-रंग मोड",
+    solidTitle: "एक रंग का बैकग्राउंड हटाएँ",
+    solidColor: "हटाने वाला रंग",
+    solidTolerance: "टॉलरेंस",
+    solidKeepInside: "इस रंग को ऑब्जेक्ट के अंदर रखें",
+    solidPickHint: "बैकग्राउंड रंग चुनने के लिए इमेज पर क्लिक करें। निशान बचे रहें तो टॉलरेंस बढ़ाएँ।",
+    solidSuggest: "इस इमेज का बैकग्राउंड एक रंग का है। एक-रंग मोड टेक्स्ट और लोगो को पूरा सुरक्षित रखता है।",
   },
   id: {
     dropOne: "Tarik gambar, tempel, atau ketuk untuk unggah",
@@ -453,6 +542,17 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     editHint: "Hapus membuang sisa latar; Pulihkan mengembalikan bagian yang terpotong. Perbesar untuk detail halus. Ctrl+Z untuk mengurungkan.",
     cancel: "Batal",
     applyEdits: "Terapkan",
+    bgLabel: "Latar",
+    bgTransparent: "Transparan",
+    bgCustom: "Warna kustom",
+    bgImage: "Foto…",
+    solidButton: "Mode warna polos",
+    solidTitle: "Hapus latar warna polos",
+    solidColor: "Warna yang dihapus",
+    solidTolerance: "Toleransi",
+    solidKeepInside: "Pertahankan warna ini di dalam objek",
+    solidPickHint: "Klik gambar untuk memilih warna latar. Naikkan toleransi jika masih ada sisa.",
+    solidSuggest: "Gambar ini berlatar polos. Mode warna polos menjaga teks dan logo tetap utuh 100%.",
   },
 };
 

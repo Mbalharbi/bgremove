@@ -13,7 +13,7 @@
 import { detectLocale } from "@/lib/locales";
 
 export type Tool = "remove" | "bulk" | "compress" | "resize" | "webp" | "qr" | "metadata";
-export type UsageEvent = "upload" | "success" | "fail" | "download" | "edit_open" | "edit_apply";
+export type UsageEvent = "upload" | "success" | "fail" | "download" | "edit_open" | "edit_apply" | "bg_change" | "solid_apply";
 
 export interface EventDetails {
   engine?: string;

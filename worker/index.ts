@@ -364,7 +364,7 @@ async function handleFeedbackPost(req: Request, env: Env): Promise<Response> {
     message,
     country: (req as Request & { cf?: { country?: string } }).cf?.country ?? null,
     // How the visitor's last image was processed (see setLastRun in the popup).
-    engine: pick(body.engine, ["rmbg-1.4", "mediapipe-selfie"]),
+    engine: pick(body.engine, ["rmbg-1.4", "mediapipe-selfie", "solid-colour"]),
     dtype: pick(body.dtype, ["fp16", "fp32", "q8"]),
     device: pick(body.device, ["webgpu", "wasm"]),
     edited: body.edited === true,
@@ -413,7 +413,7 @@ async function handleFeedbackExport(req: Request, env: Env): Promise<Response> {
 // kept only in `event_rl` (today's rows) to cap abuse, and pruned daily.
 
 const EVENT_TOOLS = ["remove", "bulk", "compress", "resize", "webp", "qr", "metadata"];
-const EVENT_NAMES = ["upload", "success", "fail", "download", "edit_open", "edit_apply"];
+const EVENT_NAMES = ["upload", "success", "fail", "download", "edit_open", "edit_apply", "bg_change", "solid_apply"];
 const EVENT_REASONS = ["too-large", "decode", "model-load", "memory", "gpu", "other"];
 const EVENTS_PER_IP_PER_DAY = 400;
 

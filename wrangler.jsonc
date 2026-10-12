@@ -35,15 +35,10 @@
       "binding": "FEEDBACK",
       "id": "b2b675880a1043ada88c5a30fa0ebafd"
     }
-  ],
-  "d1_databases": [
-    {
-      // Anonymous usage counters (POST /api/event, GET /api/usage).
-      // MUST be replaced with the real id (dashboard → D1 → bgremove-usage)
-      // before deploying — a placeholder id fails the deploy.
-      "binding": "USAGE",
-      "database_name": "bgremove-usage",
-      "database_id": "00000000-0000-0000-0000-000000000000"
-    }
   ]
+  // Usage counters (POST /api/event, GET /api/usage) need a D1 database:
+  // create "bgremove-usage" in the dashboard, then add:
+  // "d1_databases": [{ "binding": "USAGE", "database_name": "bgremove-usage", "database_id": "<id>" }]
+  // Until then the Worker accepts events and drops them (204).
+
 }
