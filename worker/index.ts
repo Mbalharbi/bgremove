@@ -709,6 +709,22 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
 
+    // Permanent redirects for page URLs. Cloudflare's asset handler adds the
+    // trailing slash with a *temporary* 307, which makes Google keep both
+    // URLs ("Page with redirect" in Search Console). 301 consolidates them.
+    if (request.method === "GET" || request.method === "HEAD") {
+      const p = url.pathname;
+      if (p.endsWith("/index.html")) {
+        url.pathname = p.slice(0, -"index.html".length);
+        return Response.redirect(url.toString(), 301);
+      }
+      const last = p.split("/").pop() ?? "";
+      if (!p.endsWith("/") && !last.includes(".") && !p.startsWith("/api/") && !p.startsWith("/m/") && !p.startsWith("/__")) {
+        url.pathname = p + "/";
+        return Response.redirect(url.toString(), 301);
+      }
+    }
+
     // Self-hosted AI model + runtime files.
     if (url.pathname.startsWith("/m/")) {
       return handleModelAsset(request, url, ctx);
