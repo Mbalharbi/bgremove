@@ -15,7 +15,7 @@
  *   - vars: HF_TOKEN  (optional; if absent the API returns 503 + SDK suggestion)
  */
 
-interface Env {
+export interface Env {
   ASSETS: { fetch: (req: Request) => Promise<Response> };
   RATE_LIMIT?: KVNamespace;
   HF_TOKEN?: string;
@@ -29,18 +29,26 @@ interface Env {
   CF_ANALYTICS_TOKEN?: string;
   /** Account that owns the Web Analytics site (wrangler.jsonc vars). */
   CF_ACCOUNT_ID?: string;
+  /** Google Search Console service account (read-only) — worker/nightly.ts. */
+  GSC_CLIENT_EMAIL?: string;
+  GSC_PRIVATE_KEY?: string;
+  /** Optional: "https://bgremovers.org/" for a URL-prefix property (default sc-domain:). */
+  GSC_SITE?: string;
+  /** Bing Webmaster Tools API key — worker/nightly.ts. */
+  BING_API_KEY?: string;
+  BING_SITE?: string;
 }
 
 interface D1Result<T> {
   results: T[];
 }
-interface D1Stmt {
+export interface D1Stmt {
   bind(...v: unknown[]): D1Stmt;
   run(): Promise<unknown>;
   all<T = Record<string, unknown>>(): Promise<D1Result<T>>;
   first<T = Record<string, unknown>>(): Promise<T | null>;
 }
-interface D1Database {
+export interface D1Database {
   prepare(sql: string): D1Stmt;
   batch(stmts: D1Stmt[]): Promise<unknown>;
 }
@@ -60,6 +68,8 @@ interface KVNamespace {
 }
 
 const APEX_HOST = "bgremovers.org";
+
+import { healthReport, runNightlyStep, type NightlyDeps } from "./nightly";
 const WWW_HOST = "www.bgremovers.org";
 
 // Per-IP rate limit. Free, generous, prevents abuse.
@@ -660,6 +670,8 @@ async function syncCloudflare(env: Env, days: number): Promise<{ ok: boolean; ro
   return result;
 }
 
+const nightlyDeps = (): NightlyDeps => ({ todayKey, syncCloudflare, host: APEX_HOST });
+
 const isAdmin = (req: Request, env: Env) =>
   !!env.FEEDBACK_ADMIN_KEY && req.headers.get("authorization") === `Bearer ${env.FEEDBACK_ADMIN_KEY}`;
 
@@ -696,8 +708,10 @@ async function handleTraffic(req: Request, url: URL, env: Env): Promise<Response
 }
 
 export default {
+  // Every 5 minutes 01:00–03:55 UTC: one small step of the nightly job
+  // (Cloudflare copy → site check → Google → Bing). See worker/nightly.ts.
   async scheduled(_event: unknown, env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(syncCloudflare(env, 3));
+    if (env.USAGE) ctx.waitUntil(runNightlyStep(env, nightlyDeps()));
   },
 
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -759,6 +773,15 @@ export default {
     }
     if (url.pathname === "/api/traffic" && request.method === "GET") {
       return handleTraffic(request, url, env);
+    }
+    if (url.pathname === "/api/health-report" && request.method === "GET") {
+      if (!env.USAGE || !env.FEEDBACK_ADMIN_KEY) return jsonError(404, "not_found", "Not found.");
+      if (!isAdmin(request, env)) return jsonError(401, "unauthorized", "Missing or wrong admin key.");
+      return jsonOk(await healthReport(env, nightlyDeps()));
+    }
+    if (url.pathname === "/api/admin/nightly-step" && request.method === "POST") {
+      if (!env.USAGE || !isAdmin(request, env)) return jsonError(401, "unauthorized", "Missing or wrong admin key.");
+      return jsonOk(await runNightlyStep(env, nightlyDeps(), url.searchParams.get("restart") === "1"));
     }
     if (url.pathname === "/api/admin/cf-sync" && request.method === "POST") {
       if (!isAdmin(request, env)) return jsonError(401, "unauthorized", "Missing or wrong admin key.");

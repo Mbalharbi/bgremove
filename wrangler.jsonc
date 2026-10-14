@@ -39,7 +39,10 @@
   // Nightly copy of Cloudflare Web Analytics into D1 (worker/index.ts → scheduled).
   // Needs two Worker secrets set in the dashboard: CF_ANALYTICS_TOKEN
   // (Account Analytics: Read) and CF_ACCOUNT_ID.
-  "triggers": { "crons": ["30 1 * * *"] },
+  // Nightly job in small steps (free-plan CPU limits): every 5 min, 01:00–03:55 UTC.
+  // Optional secrets: GSC_CLIENT_EMAIL + GSC_PRIVATE_KEY (Google Search Console),
+  // BING_API_KEY (Bing Webmaster).
+  "triggers": { "crons": ["*/5 1-3 * * *"] },
   "d1_databases": [
     {
       // Anonymous usage counters (POST /api/event, GET /api/usage).

@@ -15,6 +15,7 @@ import { FEEDBACK_STRINGS } from "@/components/feedback-dialog";
 import { LOCALES } from "@/lib/locales";
 import { RELEASES } from "@/lib/releases";
 import { BarChart, LineChart } from "@/components/admin-charts";
+import { HealthSection } from "@/components/admin-health";
 import { cn } from "@/lib/utils";
 
 const KEY_STORAGE = "bgremove:admin-key";
@@ -98,7 +99,7 @@ const REASON_AR: Record<string, string> = {
 const RANGE_DAYS: Record<string, number> = { "7": 7, "30": 30, "90": 90, "365": 365, all: 3650 };
 
 type Range = "7" | "30" | "90" | "365" | "all";
-type Tab = "traffic" | "feedback" | "actions" | "usage";
+type Tab = "traffic" | "health" | "feedback" | "actions" | "usage";
 
 function countBy<T extends string>(items: (T | null | undefined)[]): [T, number][] {
   const m = new Map<T, number>();
@@ -369,6 +370,7 @@ export function FeedbackAdmin() {
         {(
           [
             ["traffic", "الزيارات"],
+            ["health", "صحة الموقع والبحث"],
             ["feedback", "الآراء"],
             ["actions", "ماذا فعلنا بآرائكم"],
             ["usage", "الاستخدام"],
@@ -392,6 +394,7 @@ export function FeedbackAdmin() {
 
       {tab === "traffic" && <TrafficSection traffic={traffic} onSync={syncCloudflare} syncMsg={syncMsg} />}
       {tab === "usage" && <UsageSection usage={usage} range={range} />}
+      {tab === "health" && <HealthSection adminKey={key} />}
       {tab === "actions" && <ActionsSection entries={entries} usage={usage} />}
       {tab === "feedback" && (
         <>
