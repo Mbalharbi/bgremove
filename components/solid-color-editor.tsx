@@ -18,6 +18,8 @@ interface Props {
   originalUrl: string;
   onDone: (blob: Blob) => void;
   onCancel: () => void;
+  /** Replaces "Cancel" (e.g. "Use AI instead" when the page started in solid mode). */
+  cancelLabel?: string;
 }
 
 async function pixels(url: string, maxDim?: number): Promise<ImageData> {
@@ -40,7 +42,7 @@ async function pixels(url: string, maxDim?: number): Promise<ImageData> {
 
 const hex = (c: RGB) => "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
 
-export function SolidColorEditor({ originalUrl, onDone, onCancel }: Props) {
+export function SolidColorEditor({ originalUrl, onDone, onCancel, cancelLabel }: Props) {
   const t = useToolStrings();
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const rootRef = React.useRef<HTMLDivElement>(null);
@@ -154,7 +156,7 @@ export function SolidColorEditor({ originalUrl, onDone, onCancel }: Props) {
       <div className="flex flex-wrap justify-end gap-2">
         <Button type="button" variant="outline" size="lg" onClick={onCancel}>
           <X className="h-4 w-4" />
-          {t.cancel}
+          {cancelLabel ?? t.cancel}
         </Button>
         <Button type="button" size="lg" onClick={apply} disabled={!small || busy}>
           <Check className="h-4 w-4" />

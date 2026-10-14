@@ -12,7 +12,14 @@ export const metadata: Metadata = {
     canonical: `${SITE.url}/ar/privacy/`,
     languages: {
       "en-US": `${SITE.url}/privacy/`,
+      "hi-IN": `${SITE.url}/hi/privacy/`,
+      "id-ID": `${SITE.url}/id/privacy/`,
+      "pt-BR": `${SITE.url}/pt/privacy/`,
+      "es-ES": `${SITE.url}/es/privacy/`,
       "ar": `${SITE.url}/ar/privacy/`,
+      "de-DE": `${SITE.url}/de/privacy/`,
+      "zh-CN": `${SITE.url}/zh/privacy/`,
+      "x-default": `${SITE.url}/privacy/`,
     },
   },
 };

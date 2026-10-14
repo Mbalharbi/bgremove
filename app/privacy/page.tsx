@@ -8,7 +8,20 @@ export const metadata: Metadata = {
   title: "Privacy Policy - Your Photos Never Leave Your Device",
   description:
     "BgRemove processes images entirely in your browser. We don't upload, store, or analyze your photos. Read our straight-talk privacy policy.",
-  alternates: { canonical: `${SITE.url}/privacy` },
+  alternates: {
+    canonical: `${SITE.url}/privacy/`,
+    languages: {
+      "en-US": `${SITE.url}/privacy/`,
+      "hi-IN": `${SITE.url}/hi/privacy/`,
+      "id-ID": `${SITE.url}/id/privacy/`,
+      "pt-BR": `${SITE.url}/pt/privacy/`,
+      "es-ES": `${SITE.url}/es/privacy/`,
+      "ar": `${SITE.url}/ar/privacy/`,
+      "de-DE": `${SITE.url}/de/privacy/`,
+      "zh-CN": `${SITE.url}/zh/privacy/`,
+      "x-default": `${SITE.url}/privacy/`,
+    },
+  },
 };
 
 const PROMISES = [

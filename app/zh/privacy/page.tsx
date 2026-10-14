@@ -7,7 +7,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "隐私政策 — 您的照片永远不会离开您的设备",
   description: "BgRemove 完全在您的浏览器中处理图片。我们不上传、不存储、不分析您的照片。",
-  alternates: { canonical: `${SITE.url}/zh/privacy/`, languages: { "en-US": `${SITE.url}/privacy/`, "zh-CN": `${SITE.url}/zh/privacy/` } },
+  alternates: {
+    canonical: `${SITE.url}/zh/privacy/`,
+    languages: {
+      "en-US": `${SITE.url}/privacy/`,
+      "hi-IN": `${SITE.url}/hi/privacy/`,
+      "id-ID": `${SITE.url}/id/privacy/`,
+      "pt-BR": `${SITE.url}/pt/privacy/`,
+      "es-ES": `${SITE.url}/es/privacy/`,
+      "ar": `${SITE.url}/ar/privacy/`,
+      "de-DE": `${SITE.url}/de/privacy/`,
+      "zh-CN": `${SITE.url}/zh/privacy/`,
+      "x-default": `${SITE.url}/privacy/`,
+    },
+  },
 };
 
 const PROMISES = [

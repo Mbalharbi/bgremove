@@ -8,7 +8,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "BgRemove के बारे में — ब्राउज़र-नेटिव बैकग्राउंड रिमूवर",
   description: "BgRemove एक फ्री बैकग्राउंड रिमूवर है जो आपकी फोटो आपके डिवाइस पर ही प्रोसेस करता है। ना अकाउंट, ना अपलोड, ना ट्रैकिंग।",
-  alternates: { canonical: `${SITE.url}/hi/about/`, languages: { "en-US": `${SITE.url}/about/`, "hi-IN": `${SITE.url}/hi/about/` } },
+  alternates: {
+    canonical: `${SITE.url}/hi/about/`,
+    languages: {
+      "en-US": `${SITE.url}/about/`,
+      "hi-IN": `${SITE.url}/hi/about/`,
+      "id-ID": `${SITE.url}/id/about/`,
+      "pt-BR": `${SITE.url}/pt/about/`,
+      "es-ES": `${SITE.url}/es/about/`,
+      "ar": `${SITE.url}/ar/about/`,
+      "de-DE": `${SITE.url}/de/about/`,
+      "zh-CN": `${SITE.url}/zh/about/`,
+      "x-default": `${SITE.url}/about/`,
+    },
+  },
 };
 
 const PRINCIPLES = [

@@ -2,7 +2,7 @@ export const SITE = {
   name: "BgRemove",
   domain: "bgremovers.org",
   url: "https://bgremovers.org",
-  title: "Free Background Remover - Remove Image Background Online | BgRemove",
+  title: "BgRemove: Free Background Remover — Remove Image Background Online",
   description:
     "Remove image backgrounds in seconds with AI. 100% browser-based — your photos never leave your device. Free, unlimited, no signup required.",
   tagline: "Remove backgrounds in seconds. 100% private. 100% free.",

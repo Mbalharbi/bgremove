@@ -24,7 +24,6 @@ export function webAppSchema(opts: {
     description: opts.description,
     isAccessibleForFree: true,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock" },
-    aggregateRating: { "@type": "AggregateRating", ratingValue: "4.9", ratingCount: "248", bestRating: "5", worstRating: "1" },
   };
 }
 

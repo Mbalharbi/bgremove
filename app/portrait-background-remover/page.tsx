@@ -12,7 +12,15 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  alternates: { canonical: `${SITE.url}/portrait-background-remover/` },
+  alternates: {
+    canonical: `${SITE.url}/portrait-background-remover/`,
+    languages: {
+      "en-US": `${SITE.url}/portrait-background-remover/`,
+      ar: `${SITE.url}/ar/portrait-background-remover/`,
+      "zh-CN": `${SITE.url}/zh/portrait-background-remover/`,
+      "x-default": `${SITE.url}/portrait-background-remover/`,
+    },
+  },
 };
 
 export default function Page() {

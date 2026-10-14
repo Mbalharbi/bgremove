@@ -118,6 +118,12 @@ const STATIC_PATHS: StaticEntry[] = [
   // Marketing/SEO surface, NOT every English page — keep crawl budget tight.
   { path: "ar", priority: 0.95, freq: "weekly" },
   { path: "ar/bulk", priority: 0.85, freq: "weekly" },
+  { path: "ar/remove-background-from-document", priority: 0.8, freq: "weekly" },
+  { path: "zh/logo-background-remover", priority: 0.8, freq: "weekly" },
+  { path: "zh/portrait-background-remover", priority: 0.8, freq: "weekly" },
+  { path: "zh/product-photo-background-remover", priority: 0.8, freq: "weekly" },
+  { path: "zh/screenshot-background-remover", priority: 0.8, freq: "weekly" },
+  { path: "zh/transparent-png-maker", priority: 0.8, freq: "weekly" },
   { path: "ar/portrait-background-remover", priority: 0.8, freq: "weekly" },
   { path: "ar/product-photo-background-remover", priority: 0.8, freq: "weekly" },
   { path: "ar/logo-background-remover", priority: 0.75, freq: "weekly" },

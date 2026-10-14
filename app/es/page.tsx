@@ -9,14 +9,14 @@ export default function SpanishHome() {
       <JsonLd
         data={[
           webAppSchema({ bcp47: "es-ES", url: SITE_ES.url, name: SITE_ES.name, description: SITE_ES.description }),
-          howToSchema({ bcp47: "es-ES", name: "Cómo quitar el fondo de una imagen en segundos", description: "Quita el fondo de cualquier imagen con una herramienta gratuita que funciona en el navegador.", steps: HOW_IT_WORKS_ES }),
+          howToSchema({ bcp47: "es-ES", name: "Cómo quitar el fondo de una imagen gratis en segundos", description: "Quita el fondo de cualquier imagen con una herramienta gratuita que funciona en el navegador.", steps: HOW_IT_WORKS_ES }),
           faqSchema({ bcp47: "es-ES", items: FAQ_ES }),
         ]}
       />
       <LocalizedHome
-        badge="IA 100% gratis en tu navegador"
+        badge="Quita fondos con IA — 100% gratis"
         title="Quita fondos de imágenes"
-        titleHighlight="en segundos"
+        titleHighlight="gratis, en segundos"
         subtitle="Gratis, sin límites y 100% privado — tus imágenes se procesan completamente en tu navegador. Sin subir, sin registro, sin marca de agua."
         trustPills={[
           { icon: "lock", label: "Funciona en el navegador" },

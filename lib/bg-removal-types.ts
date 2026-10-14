@@ -9,7 +9,7 @@ export type LoadStage =
   | "ready"
   | "error";
 
-export type Engine = "rmbg-1.4" | "mediapipe-selfie";
+export type Engine = "rmbg-1.4" | "mediapipe-selfie" | "solid-colour";
 
 export interface RemoveResult {
   /** PNG with transparent background. */

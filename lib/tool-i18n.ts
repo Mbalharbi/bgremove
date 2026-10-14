@@ -77,6 +77,7 @@ export interface ToolStrings {
   solidKeepInside: string;
   solidPickHint: string;
   solidSuggest: string;
+  solidUseAi: string;
 }
 
 const MB = "MB";
@@ -140,6 +141,7 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidKeepInside: "Keep this colour inside the subject",
     solidPickHint: "Click the image to pick the background colour. Raise the tolerance if traces remain.",
     solidSuggest: "This image has a plain background. Solid-colour mode keeps text and logos 100% intact.",
+    solidUseAi: "Use AI instead",
   },
   ar: {
     dropOne: "اسحب صورة أو الصقها أو اضغط للرفع",
@@ -199,6 +201,7 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidKeepInside: "احتفظ بهذا اللون داخل العنصر",
     solidPickHint: "اضغط على الصورة لاختيار لون الخلفية. ارفع درجة التسامح إذا بقيت آثار.",
     solidSuggest: "خلفية هذه الصورة بلون واحد. «وضع اللون الواحد» يحافظ على النصوص والشعارات كاملة.",
+    solidUseAi: "استخدم الذكاء الاصطناعي بدلاً منه",
   },
   zh: {
     dropOne: "拖放、粘贴或点击上传图片",
@@ -258,6 +261,7 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidKeepInside: "保留主体内部的此颜色",
     solidPickHint: "点击图片选取背景色。如有残留，请调高容差。",
     solidSuggest: "这张图片是纯色背景。“纯色模式”可完整保留文字和 Logo。",
+    solidUseAi: "改用 AI 抠图",
   },
   es: {
     dropOne: "Suelta una imagen, pégala o toca para subir",
@@ -317,6 +321,7 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidKeepInside: "Conservar este color dentro del objeto",
     solidPickHint: "Toca la imagen para elegir el color de fondo. Sube la tolerancia si quedan restos.",
     solidSuggest: "Esta imagen tiene un fondo liso. El modo color sólido conserva textos y logos al 100 %.",
+    solidUseAi: "Usar la IA en su lugar",
   },
   pt: {
     dropOne: "Solte uma imagem, cole ou toque para enviar",
@@ -376,6 +381,7 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidKeepInside: "Manter esta cor dentro do objeto",
     solidPickHint: "Toque na imagem para escolher a cor do fundo. Aumente a tolerância se sobrarem restos.",
     solidSuggest: "Esta imagem tem fundo liso. O modo cor sólida mantém textos e logos 100% intactos.",
+    solidUseAi: "Usar a IA em vez disso",
   },
   de: {
     dropOne: "Bild ablegen, einfügen oder tippen zum Hochladen",
@@ -435,6 +441,7 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidKeepInside: "Diese Farbe im Motiv behalten",
     solidPickHint: "Ins Bild tippen, um die Hintergrundfarbe zu wählen. Bei Resten die Toleranz erhöhen.",
     solidSuggest: "Dieses Bild hat einen einfarbigen Hintergrund. Der Einfarbig-Modus erhält Texte und Logos zu 100 %.",
+    solidUseAi: "Stattdessen KI verwenden",
   },
   hi: {
     dropOne: "इमेज ड्रॉप करें, पेस्ट करें या अपलोड के लिए टैप करें",
@@ -494,6 +501,7 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidKeepInside: "इस रंग को ऑब्जेक्ट के अंदर रखें",
     solidPickHint: "बैकग्राउंड रंग चुनने के लिए इमेज पर क्लिक करें। निशान बचे रहें तो टॉलरेंस बढ़ाएँ।",
     solidSuggest: "इस इमेज का बैकग्राउंड एक रंग का है। एक-रंग मोड टेक्स्ट और लोगो को पूरा सुरक्षित रखता है।",
+    solidUseAi: "इसके बजाय AI इस्तेमाल करें",
   },
   id: {
     dropOne: "Tarik gambar, tempel, atau ketuk untuk unggah",
@@ -553,6 +561,7 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidKeepInside: "Pertahankan warna ini di dalam objek",
     solidPickHint: "Klik gambar untuk memilih warna latar. Naikkan toleransi jika masih ada sisa.",
     solidSuggest: "Gambar ini berlatar polos. Mode warna polos menjaga teks dan logo tetap utuh 100%.",
+    solidUseAi: "Pakai AI saja",
   },
 };
 

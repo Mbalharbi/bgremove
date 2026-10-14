@@ -13,7 +13,14 @@ export const metadata: Metadata = {
     canonical: `${SITE.url}/ar/bulk/`,
     languages: {
       "en-US": `${SITE.url}/bulk/`,
+      "hi-IN": `${SITE.url}/hi/bulk/`,
+      "id-ID": `${SITE.url}/id/bulk/`,
+      "pt-BR": `${SITE.url}/pt/bulk/`,
+      "es-ES": `${SITE.url}/es/bulk/`,
       "ar": `${SITE.url}/ar/bulk/`,
+      "de-DE": `${SITE.url}/de/bulk/`,
+      "zh-CN": `${SITE.url}/zh/bulk/`,
+      "x-default": `${SITE.url}/bulk/`,
     },
   },
 };

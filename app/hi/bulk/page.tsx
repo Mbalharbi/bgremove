@@ -8,7 +8,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "बल्क बैकग्राउंड रिमूवर — एक साथ 20 इमेज तक",
   description: "एक बार में 20 इमेज का बैकग्राउंड हटाएं, सब आपके ब्राउज़र में। पूरा बैच ZIP में डाउनलोड करें। ना अपलोड, ना साइन-अप, फ्री।",
-  alternates: { canonical: `${SITE.url}/hi/bulk/`, languages: { "en-US": `${SITE.url}/bulk/`, "hi-IN": `${SITE.url}/hi/bulk/` } },
+  alternates: {
+    canonical: `${SITE.url}/hi/bulk/`,
+    languages: {
+      "en-US": `${SITE.url}/bulk/`,
+      "hi-IN": `${SITE.url}/hi/bulk/`,
+      "id-ID": `${SITE.url}/id/bulk/`,
+      "pt-BR": `${SITE.url}/pt/bulk/`,
+      "es-ES": `${SITE.url}/es/bulk/`,
+      "ar": `${SITE.url}/ar/bulk/`,
+      "de-DE": `${SITE.url}/de/bulk/`,
+      "zh-CN": `${SITE.url}/zh/bulk/`,
+      "x-default": `${SITE.url}/bulk/`,
+    },
+  },
 };
 
 export default function HiBulkPage() {

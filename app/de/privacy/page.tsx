@@ -7,7 +7,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Datenschutzerklärung — Ihre Fotos verlassen Ihr Gerät nie",
   description: "BgRemove verarbeitet Bilder komplett in Ihrem Browser. Wir laden Ihre Fotos nicht hoch, speichern oder analysieren sie nicht. DSGVO-konform.",
-  alternates: { canonical: `${SITE.url}/de/privacy/`, languages: { "en-US": `${SITE.url}/privacy/`, "de-DE": `${SITE.url}/de/privacy/` } },
+  alternates: {
+    canonical: `${SITE.url}/de/privacy/`,
+    languages: {
+      "en-US": `${SITE.url}/privacy/`,
+      "hi-IN": `${SITE.url}/hi/privacy/`,
+      "id-ID": `${SITE.url}/id/privacy/`,
+      "pt-BR": `${SITE.url}/pt/privacy/`,
+      "es-ES": `${SITE.url}/es/privacy/`,
+      "ar": `${SITE.url}/ar/privacy/`,
+      "de-DE": `${SITE.url}/de/privacy/`,
+      "zh-CN": `${SITE.url}/zh/privacy/`,
+      "x-default": `${SITE.url}/privacy/`,
+    },
+  },
 };
 
 const PROMISES = [

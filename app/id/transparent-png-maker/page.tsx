@@ -13,7 +13,17 @@ const faqs = [
   { q: "Kenapa bukan Photoshop?", a: "Magic Wand di Photoshop manual dan lambat. AI selesai dalam detik, terutama untuk detail tipis." },
   { q: "Apakah file tetap di saya?", a: "Ya. Semua proses di browser." },
 ];
-export const metadata: Metadata = { title: TITLE, description: DESC, alternates: { canonical: URL, languages: { "en-US": `${SITE.url}/transparent-png-maker/`, "id-ID": URL } } };
+export const metadata: Metadata = { title: TITLE, description: DESC, alternates: {
+    canonical: `${SITE.url}/id/transparent-png-maker/`,
+    languages: {
+      "en-US": `${SITE.url}/transparent-png-maker/`,
+      "ar": `${SITE.url}/ar/transparent-png-maker/`,
+      "zh-CN": `${SITE.url}/zh/transparent-png-maker/`,
+      "hi-IN": `${SITE.url}/hi/transparent-png-maker/`,
+      "id-ID": `${SITE.url}/id/transparent-png-maker/`,
+      "x-default": `${SITE.url}/transparent-png-maker/`,
+    },
+  } };
 export default function Page() {
   return (<><JsonLd data={[webAppSchema({ bcp47: "id-ID", url: URL, name: "BgRemove PNG Maker", description: DESC }), buildFaqSchema("id-ID", faqs)]} />
     <SeoLanding

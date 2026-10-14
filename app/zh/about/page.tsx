@@ -8,7 +8,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "关于 BgRemove — 浏览器原生抠图工具",
   description: "BgRemove 是一款免费的抠图工具，在您自己的设备上处理照片。无账户、无上传、无监控。",
-  alternates: { canonical: `${SITE.url}/zh/about/`, languages: { "en-US": `${SITE.url}/about/`, "zh-CN": `${SITE.url}/zh/about/` } },
+  alternates: {
+    canonical: `${SITE.url}/zh/about/`,
+    languages: {
+      "en-US": `${SITE.url}/about/`,
+      "hi-IN": `${SITE.url}/hi/about/`,
+      "id-ID": `${SITE.url}/id/about/`,
+      "pt-BR": `${SITE.url}/pt/about/`,
+      "es-ES": `${SITE.url}/es/about/`,
+      "ar": `${SITE.url}/ar/about/`,
+      "de-DE": `${SITE.url}/de/about/`,
+      "zh-CN": `${SITE.url}/zh/about/`,
+      "x-default": `${SITE.url}/about/`,
+    },
+  },
 };
 
 const PRINCIPLES = [

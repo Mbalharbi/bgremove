@@ -62,17 +62,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE.url,
     types: { "application/rss+xml": `${SITE.url}/feed.xml` },
-    languages: {
-      "en-US": SITE.url,
-      "hi-IN": `${SITE.url}/hi`,
-      "id-ID": `${SITE.url}/id`,
-      "pt-BR": `${SITE.url}/pt`,
-      "es-ES": `${SITE.url}/es`,
-      "ar": `${SITE.url}/ar`,
-      "de-DE": `${SITE.url}/de`,
-      "zh-CN": `${SITE.url}/zh`,
-      "x-default": SITE.url,
-    },
   },
   openGraph: {
     type: "website",

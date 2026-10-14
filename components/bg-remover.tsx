@@ -81,7 +81,24 @@ function stageLabel(t: ToolStrings, p: Progress): string {
   }
 }
 
-export function BgRemover() {
+interface BgRemoverProps {
+  /**
+   * "solid": skip the AI and open Solid-colour mode right after upload — for
+   * pages about scanned documents and signatures, where the AI can erase text.
+   * The visitor can still switch to the AI from there.
+   */
+  startMode?: "ai" | "solid";
+}
+
+/** Width/height of an image file without decoding it into a canvas. */
+async function imageSize(url: string): Promise<{ width: number; height: number }> {
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  return { width: img.naturalWidth, height: img.naturalHeight };
+}
+
+export function BgRemover({ startMode = "ai" }: BgRemoverProps = {}) {
   const t = useToolStrings();
   const { toast } = useToast();
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
@@ -91,6 +108,9 @@ export function BgRemover() {
   const [display, setDisplay] = React.useState<{ blob: Blob; url: string } | null>(null);
   const [plainBorder, setPlainBorder] = React.useState(false);
   const bgImageInput = React.useRef<HTMLInputElement>(null);
+  const lastFile = React.useRef<File | null>(null);
+  // True while a solid-mode start is waiting for its first Apply (Cancel then means "use the AI").
+  const [awaitingSolid, setAwaitingSolid] = React.useState(false);
 
   const reset = React.useCallback(() => {
     setStatus((prev) => {
@@ -101,6 +121,7 @@ export function BgRemover() {
       return { kind: "idle" };
     });
     setPanel("none");
+    setAwaitingSolid(false);
     setBg((prev) => {
       if (prev.kind === "image") URL.revokeObjectURL(prev.url);
       return { kind: "none" };
@@ -156,7 +177,30 @@ export function BgRemover() {
   }, []);
 
   const process = React.useCallback(
-    async (file: File) => {
+    async (file: File, mode: "ai" | "solid" = startMode) => {
+      lastFile.current = file;
+      if (mode === "solid") {
+        const beforeUrl = URL.createObjectURL(file);
+        try {
+          const { width, height } = await imageSize(beforeUrl);
+          setStatus({
+            kind: "ready",
+            src: {
+              beforeUrl,
+              afterUrl: URL.createObjectURL(file),
+              filename: changeExtension(file.name || "image.png", "png"),
+              result: { blob: file, width, height, processingMs: 0, downscaled: false, engine: "solid-colour" },
+              inputSize: file.size,
+            },
+          });
+          setAwaitingSolid(true);
+          setPanel("solid");
+        } catch {
+          URL.revokeObjectURL(beforeUrl);
+          toast({ title: t.errorTitle, description: t.errNoImage, variant: "destructive" });
+        }
+        return;
+      }
       const update = (patch: Partial<Progress>) =>
         setStatus((prev) =>
           prev.kind === "loading" ? { kind: "loading", progress: { ...prev.progress, ...patch } } : prev
@@ -197,7 +241,7 @@ export function BgRemover() {
         toast({ title: t.errorTitle, description: message, variant: "destructive" });
       }
     },
-    [toast, t]
+    [toast, t, startMode]
   );
 
   if (status.kind === "ready") {
@@ -230,10 +274,26 @@ export function BgRemover() {
       return (
         <SolidColorEditor
           originalUrl={beforeUrl}
-          onCancel={() => setPanel("none")}
+          cancelLabel={awaitingSolid ? t.solidUseAi : undefined}
+          onCancel={() => {
+            if (awaitingSolid && lastFile.current) {
+              // Started in solid mode and the visitor wants the AI instead.
+              setAwaitingSolid(false);
+              setPanel("none");
+              URL.revokeObjectURL(beforeUrl);
+              URL.revokeObjectURL(afterUrl);
+              void process(lastFile.current, "ai");
+              return;
+            }
+            setPanel("none");
+          }}
           onDone={(blob) => {
             replaceCutout(blob);
             setPanel("none");
+            if (awaitingSolid) {
+              setAwaitingSolid(false);
+              track(toolFromPath(window.location.pathname), "success", { engine: "solid-colour" });
+            }
             track(toolFromPath(window.location.pathname), "solid_apply");
             setLastRun({ engine: "solid-colour" });
           }}

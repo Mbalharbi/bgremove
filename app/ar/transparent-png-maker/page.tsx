@@ -17,6 +17,10 @@ export const metadata: Metadata = {
     languages: {
       "en-US": `${SITE.url}/transparent-png-maker/`,
       "ar": `${SITE.url}/ar/transparent-png-maker/`,
+      "zh-CN": `${SITE.url}/zh/transparent-png-maker/`,
+      "hi-IN": `${SITE.url}/hi/transparent-png-maker/`,
+      "id-ID": `${SITE.url}/id/transparent-png-maker/`,
+      "x-default": `${SITE.url}/transparent-png-maker/`,
     },
   },
 };

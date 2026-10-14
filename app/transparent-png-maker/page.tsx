@@ -11,7 +11,17 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  alternates: { canonical: `${SITE.url}/transparent-png-maker/` },
+  alternates: {
+    canonical: `${SITE.url}/transparent-png-maker/`,
+    languages: {
+      "en-US": `${SITE.url}/transparent-png-maker/`,
+      "ar": `${SITE.url}/ar/transparent-png-maker/`,
+      "zh-CN": `${SITE.url}/zh/transparent-png-maker/`,
+      "hi-IN": `${SITE.url}/hi/transparent-png-maker/`,
+      "id-ID": `${SITE.url}/id/transparent-png-maker/`,
+      "x-default": `${SITE.url}/transparent-png-maker/`,
+    },
+  },
 };
 
 export default function Page() {

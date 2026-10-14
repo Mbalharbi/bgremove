@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     languages: {
       "en-US": `${SITE.url}/screenshot-background-remover/`,
       "ar": `${SITE.url}/ar/screenshot-background-remover/`,
+      "zh-CN": `${SITE.url}/zh/screenshot-background-remover/`,
+      "x-default": `${SITE.url}/screenshot-background-remover/`,
     },
   },
 };

@@ -495,7 +495,7 @@ async function handleEvent(req: Request, env: Env, ctx: ExecutionContext): Promi
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
     .bind(
       day, tool, event,
-      pick(b.engine, ["rmbg-1.4", "mediapipe-selfie"]),
+      pick(b.engine, ["rmbg-1.4", "mediapipe-selfie", "solid-colour"]),
       pick(b.dtype, ["fp16", "fp32", "q8"]),
       pick(b.device, ["webgpu", "wasm"]),
       int(b.ms, 600000),

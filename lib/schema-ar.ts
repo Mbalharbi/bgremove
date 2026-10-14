@@ -19,13 +19,6 @@ export const webApplicationSchemaAr = {
     priceCurrency: "USD",
     availability: "https://schema.org/InStock",
   },
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "4.9",
-    ratingCount: "248",
-    bestRating: "5",
-    worstRating: "1",
-  },
 };
 
 export const howToSchemaAr = {

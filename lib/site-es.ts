@@ -5,15 +5,15 @@ export const SITE_ES = {
   name: SITE.name,
   domain: SITE.domain,
   url: `${SITE.url}/es`,
-  title: "Quitar Fondo de Imagen Gratis — Funciona en el Navegador, Sin Subir | BgRemove",
+  title: "Quita Fondos de Imágenes Gratis y Online — Sin Registro | BgRemove",
   description:
-    "Quita el fondo de cualquier imagen en segundos con IA. Funciona 100% en tu navegador — tus fotos nunca salen de tu dispositivo. Gratis, sin límites, sin registro.",
+    "Quita fondos de imágenes gratis y online en segundos. IA que funciona en tu navegador: tus fotos no se suben, sin registro y sin marca de agua. Descarga un PNG transparente.",
   tagline: "Quita fondos en segundos. 100% privado. 100% gratis.",
   ogImage: SITE.ogImage,
 } as const;
 
 export const NAV_LINKS_ES = [
-  { href: "/es", label: "Quitar fondo" },
+  { href: "/es", label: "Quita fondos" },
   { href: "/es/bulk", label: "Por lotes" },
   { href: "/transparent-png-maker", label: "PNG Transparente" },
   { href: "/portrait-background-remover", label: "Retratos" },

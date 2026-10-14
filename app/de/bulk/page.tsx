@@ -8,7 +8,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Stapel-Hintergrund-Entferner — Bis zu 20 Bilder gleichzeitig",
   description: "Entfernen Sie Hintergründe von bis zu 20 Bildern gleichzeitig, alles in Ihrem Browser. Alle Ergebnisse als ZIP herunterladen. Kein Upload, keine Anmeldung, kostenlos.",
-  alternates: { canonical: `${SITE.url}/de/bulk/`, languages: { "en-US": `${SITE.url}/bulk/`, "de-DE": `${SITE.url}/de/bulk/` } },
+  alternates: {
+    canonical: `${SITE.url}/de/bulk/`,
+    languages: {
+      "en-US": `${SITE.url}/bulk/`,
+      "hi-IN": `${SITE.url}/hi/bulk/`,
+      "id-ID": `${SITE.url}/id/bulk/`,
+      "pt-BR": `${SITE.url}/pt/bulk/`,
+      "es-ES": `${SITE.url}/es/bulk/`,
+      "ar": `${SITE.url}/ar/bulk/`,
+      "de-DE": `${SITE.url}/de/bulk/`,
+      "zh-CN": `${SITE.url}/zh/bulk/`,
+      "x-default": `${SITE.url}/bulk/`,
+    },
+  },
 };
 
 export default function DeBulkPage() {

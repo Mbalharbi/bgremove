@@ -12,7 +12,17 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  alternates: { canonical: `${SITE.url}/product-photo-background-remover/` },
+  alternates: {
+    canonical: `${SITE.url}/product-photo-background-remover/`,
+    languages: {
+      "en-US": `${SITE.url}/product-photo-background-remover/`,
+      "ar": `${SITE.url}/ar/product-photo-background-remover/`,
+      "zh-CN": `${SITE.url}/zh/product-photo-background-remover/`,
+      "hi-IN": `${SITE.url}/hi/remove-background-from-product-photo/`,
+      "id-ID": `${SITE.url}/id/remove-background-from-product-photo/`,
+      "x-default": `${SITE.url}/product-photo-background-remover/`,
+    },
+  },
 };
 
 export default function Page() {

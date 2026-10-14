@@ -9,7 +9,20 @@ export const metadata: Metadata = {
   title: "About BgRemove - The Browser-Native Background Remover",
   description:
     "BgRemove is a free, browser-only background remover that processes your photos on your own device. No accounts, no uploads, no surveillance.",
-  alternates: { canonical: `${SITE.url}/about` },
+  alternates: {
+    canonical: `${SITE.url}/about/`,
+    languages: {
+      "en-US": `${SITE.url}/about/`,
+      "hi-IN": `${SITE.url}/hi/about/`,
+      "id-ID": `${SITE.url}/id/about/`,
+      "pt-BR": `${SITE.url}/pt/about/`,
+      "es-ES": `${SITE.url}/es/about/`,
+      "ar": `${SITE.url}/ar/about/`,
+      "de-DE": `${SITE.url}/de/about/`,
+      "zh-CN": `${SITE.url}/zh/about/`,
+      "x-default": `${SITE.url}/about/`,
+    },
+  },
 };
 
 const PRINCIPLES = [

@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     languages: {
       "en-US": `${SITE.url}/portrait-background-remover/`,
       "ar": `${SITE.url}/ar/portrait-background-remover/`,
+      "zh-CN": `${SITE.url}/zh/portrait-background-remover/`,
+      "x-default": `${SITE.url}/portrait-background-remover/`,
     },
   },
 };

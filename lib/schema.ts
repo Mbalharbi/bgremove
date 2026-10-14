@@ -50,10 +50,27 @@ export const HOW_IT_WORKS = [
   },
 ] as const;
 
+// Brand aliases people search for ("bgremove", "bgremovers", the domain).
+const BRAND_ALIASES = ["BgRemovers", "bgremovers.org", "BG Remove", "bgremove"];
+
+/** Tells search engines the site's name (shown above results) and its aliases. */
+export const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE.url}/#website`,
+  name: SITE.name,
+  alternateName: BRAND_ALIASES,
+  url: `${SITE.url}/`,
+  inLanguage: ["en", "ar", "zh", "es", "pt", "de", "hi", "id"],
+  publisher: { "@id": `${SITE.url}/#organization` },
+};
+
 export const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": `${SITE.url}/#organization`,
   name: SITE.name,
+  alternateName: BRAND_ALIASES,
   url: SITE.url,
   logo: `${SITE.url}/icon-512.png`,
   description: SITE.description,
@@ -87,13 +104,6 @@ export const webApplicationSchema = {
     priceCurrency: "USD",
     availability: "https://schema.org/InStock",
     category: "Free",
-  },
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "4.9",
-    ratingCount: "248",
-    bestRating: "5",
-    worstRating: "1",
   },
   featureList: [
     "Browser-based background removal (no upload required)",

@@ -19,7 +19,17 @@ const faqs = [
 export const metadata: Metadata = {
   title: TITLE,
   description: DESC,
-  alternates: { canonical: URL, languages: { "en-US": `${SITE.url}/transparent-png-maker/`, "hi-IN": URL } },
+  alternates: {
+    canonical: `${SITE.url}/hi/transparent-png-maker/`,
+    languages: {
+      "en-US": `${SITE.url}/transparent-png-maker/`,
+      "ar": `${SITE.url}/ar/transparent-png-maker/`,
+      "zh-CN": `${SITE.url}/zh/transparent-png-maker/`,
+      "hi-IN": `${SITE.url}/hi/transparent-png-maker/`,
+      "id-ID": `${SITE.url}/id/transparent-png-maker/`,
+      "x-default": `${SITE.url}/transparent-png-maker/`,
+    },
+  },
 };
 
 export default function Page() {

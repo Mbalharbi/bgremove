@@ -8,7 +8,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Über BgRemove — Der browserbasierte Hintergrund-Entferner",
   description: "BgRemove ist ein kostenloser Hintergrund-Entferner, der Ihre Fotos auf Ihrem eigenen Gerät verarbeitet. Keine Konten, kein Upload, keine Überwachung. DSGVO-konform.",
-  alternates: { canonical: `${SITE.url}/de/about/`, languages: { "en-US": `${SITE.url}/about/`, "de-DE": `${SITE.url}/de/about/` } },
+  alternates: {
+    canonical: `${SITE.url}/de/about/`,
+    languages: {
+      "en-US": `${SITE.url}/about/`,
+      "hi-IN": `${SITE.url}/hi/about/`,
+      "id-ID": `${SITE.url}/id/about/`,
+      "pt-BR": `${SITE.url}/pt/about/`,
+      "es-ES": `${SITE.url}/es/about/`,
+      "ar": `${SITE.url}/ar/about/`,
+      "de-DE": `${SITE.url}/de/about/`,
+      "zh-CN": `${SITE.url}/zh/about/`,
+      "x-default": `${SITE.url}/about/`,
+    },
+  },
 };
 
 const PRINCIPLES = [

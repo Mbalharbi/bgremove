@@ -7,7 +7,7 @@ const URL = `${SITE.url}/remove-background-from-signature/`;
 const TITLE = "Remove Background from Signature — Free Transparent Signature PNG";
 const DESC = "Turn a photo of your handwritten signature into a transparent PNG for PDFs, contracts, and email. Free, private, runs in your browser.";
 const faqs = [
-  { q: "How do I get the best signature cutout?", a: "Sign with a dark pen on plain white paper, photograph it in even daylight from straight above, and crop close to the signature before uploading." },
+  { q: "How do I get the best signature cutout?", a: "Sign with a dark pen on plain white paper, photograph it in even daylight from straight above, and crop close to the signature before uploading. The tool starts in Solid-colour mode, which removes the paper colour and keeps every stroke; raise Tolerance if grey traces remain." },
   { q: "Can I add the PNG to a PDF?", a: "Yes. Most PDF editors (Adobe Acrobat, Preview on Mac, Microsoft Edge, many free web tools) let you insert an image — place the transparent PNG over the signature line." },
   { q: "Is my signature uploaded anywhere?", a: "No. The AI runs entirely in your browser, so your signature never reaches a server. You can confirm in DevTools → Network while you process it." },
   { q: "Does it work with blue ink?", a: "Yes. Ink color is kept as-is; only the paper background is removed." },
@@ -19,6 +19,7 @@ export default function Page() {
   return (<><JsonLd data={[webAppSchema({ bcp47: "en-US", url: URL, name: "Signature BG Remover", description: DESC }), buildFaqSchema("en-US", faqs)]} />
     <SeoLanding eyebrow="Signatures" title="Signature background remover"
       description="Photograph your signature on paper and get a clean transparent PNG to drop into PDFs, contracts, and email footers. Free and private."
+      toolMode="solid"
       trustPills={[{ icon: "lock", label: "Never uploaded" }, { icon: "zap", label: "Phone photos work" }, { icon: "sparkles", label: "Free" }]}
       bullets={[
         { title: "Transparent PNG", body: "Only the ink stays — paper, shadows, and texture are removed." },

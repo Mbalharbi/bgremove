@@ -9,7 +9,20 @@ export const metadata: Metadata = {
   title: "Bulk Background Remover - Process Up to 20 Images at Once",
   description:
     "Remove backgrounds from up to 20 images at once, all in your browser. Download every result as a single ZIP. No upload, no signup, free.",
-  alternates: { canonical: `${SITE.url}/bulk` },
+  alternates: {
+    canonical: `${SITE.url}/bulk/`,
+    languages: {
+      "en-US": `${SITE.url}/bulk/`,
+      "hi-IN": `${SITE.url}/hi/bulk/`,
+      "id-ID": `${SITE.url}/id/bulk/`,
+      "pt-BR": `${SITE.url}/pt/bulk/`,
+      "es-ES": `${SITE.url}/es/bulk/`,
+      "ar": `${SITE.url}/ar/bulk/`,
+      "de-DE": `${SITE.url}/de/bulk/`,
+      "zh-CN": `${SITE.url}/zh/bulk/`,
+      "x-default": `${SITE.url}/bulk/`,
+    },
+  },
 };
 
 export default function BulkPage() {

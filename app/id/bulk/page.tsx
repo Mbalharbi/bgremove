@@ -8,7 +8,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Penghapus Background Bulk — Hingga 20 Gambar Sekaligus",
   description: "Hapus background hingga 20 gambar sekaligus, semua di browser Anda. Unduh seluruh hasil sebagai ZIP. Tanpa upload, tanpa daftar, gratis.",
-  alternates: { canonical: `${SITE.url}/id/bulk/`, languages: { "en-US": `${SITE.url}/bulk/`, "id-ID": `${SITE.url}/id/bulk/` } },
+  alternates: {
+    canonical: `${SITE.url}/id/bulk/`,
+    languages: {
+      "en-US": `${SITE.url}/bulk/`,
+      "hi-IN": `${SITE.url}/hi/bulk/`,
+      "id-ID": `${SITE.url}/id/bulk/`,
+      "pt-BR": `${SITE.url}/pt/bulk/`,
+      "es-ES": `${SITE.url}/es/bulk/`,
+      "ar": `${SITE.url}/ar/bulk/`,
+      "de-DE": `${SITE.url}/de/bulk/`,
+      "zh-CN": `${SITE.url}/zh/bulk/`,
+      "x-default": `${SITE.url}/bulk/`,
+    },
+  },
 };
 
 export default function IdBulkPage() {

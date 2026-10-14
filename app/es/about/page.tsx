@@ -8,7 +8,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Acerca de BgRemove — Quitar Fondo desde el Navegador",
   description: "BgRemove es un quitador de fondo gratuito que procesa tus fotos en tu propio dispositivo. Sin cuentas, sin subir, sin vigilancia.",
-  alternates: { canonical: `${SITE.url}/es/about/`, languages: { "en-US": `${SITE.url}/about/`, "es-ES": `${SITE.url}/es/about/` } },
+  alternates: {
+    canonical: `${SITE.url}/es/about/`,
+    languages: {
+      "en-US": `${SITE.url}/about/`,
+      "hi-IN": `${SITE.url}/hi/about/`,
+      "id-ID": `${SITE.url}/id/about/`,
+      "pt-BR": `${SITE.url}/pt/about/`,
+      "es-ES": `${SITE.url}/es/about/`,
+      "ar": `${SITE.url}/ar/about/`,
+      "de-DE": `${SITE.url}/de/about/`,
+      "zh-CN": `${SITE.url}/zh/about/`,
+      "x-default": `${SITE.url}/about/`,
+    },
+  },
 };
 
 const PRINCIPLES = [

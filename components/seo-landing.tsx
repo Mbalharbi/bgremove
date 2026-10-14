@@ -36,6 +36,8 @@ export interface SeoLandingProps {
   ctaButton: string;
   ctaHref: string;
   dir?: "ltr" | "rtl";
+  /** How the embedded tool starts (see BgRemover startMode). */
+  toolMode?: "ai" | "solid";
 }
 
 function icon(n: "lock" | "zap" | "sparkles") {
@@ -48,7 +50,7 @@ export function SeoLanding(props: SeoLandingProps) {
   const {
     eyebrow, title, description, trustPills, bullets, sections,
     faqs, faqTitle, related, relatedTitle,
-    ctaTitle, ctaSubtitle, ctaButton, ctaHref, dir = "ltr",
+    ctaTitle, ctaSubtitle, ctaButton, ctaHref, dir = "ltr", toolMode = "ai",
   } = props;
   const [open, setOpen] = React.useState<number | null>(0);
   const rtl = dir === "rtl";
@@ -75,7 +77,7 @@ export function SeoLanding(props: SeoLandingProps) {
           </div>
 
           <div className="mx-auto mt-10 max-w-3xl animate-fade-in">
-            <BgRemover />
+            <BgRemover startMode={toolMode} />
           </div>
 
           <div className="mx-auto mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground">

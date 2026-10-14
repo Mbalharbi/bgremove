@@ -11,7 +11,17 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  alternates: { canonical: `${SITE.url}/logo-background-remover/` },
+  alternates: {
+    canonical: `${SITE.url}/logo-background-remover/`,
+    languages: {
+      "en-US": `${SITE.url}/logo-background-remover/`,
+      "ar": `${SITE.url}/ar/logo-background-remover/`,
+      "zh-CN": `${SITE.url}/zh/logo-background-remover/`,
+      "hi-IN": `${SITE.url}/hi/remove-background-from-logo/`,
+      "id-ID": `${SITE.url}/id/remove-background-from-logo/`,
+      "x-default": `${SITE.url}/logo-background-remover/`,
+    },
+  },
 };
 
 export default function Page() {

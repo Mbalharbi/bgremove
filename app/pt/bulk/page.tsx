@@ -8,7 +8,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Removedor de Fundo em Lote — Até 20 Imagens de Uma Vez",
   description: "Remova fundos de até 20 imagens de uma vez, tudo no seu navegador. Baixe tudo como ZIP. Sem upload, sem cadastro, grátis.",
-  alternates: { canonical: `${SITE.url}/pt/bulk/`, languages: { "en-US": `${SITE.url}/bulk/`, "pt-BR": `${SITE.url}/pt/bulk/` } },
+  alternates: {
+    canonical: `${SITE.url}/pt/bulk/`,
+    languages: {
+      "en-US": `${SITE.url}/bulk/`,
+      "hi-IN": `${SITE.url}/hi/bulk/`,
+      "id-ID": `${SITE.url}/id/bulk/`,
+      "pt-BR": `${SITE.url}/pt/bulk/`,
+      "es-ES": `${SITE.url}/es/bulk/`,
+      "ar": `${SITE.url}/ar/bulk/`,
+      "de-DE": `${SITE.url}/de/bulk/`,
+      "zh-CN": `${SITE.url}/zh/bulk/`,
+      "x-default": `${SITE.url}/bulk/`,
+    },
+  },
 };
 
 export default function PtBulkPage() {

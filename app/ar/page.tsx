@@ -41,9 +41,9 @@ export default function ArabicHomePage() {
               <span>ذكاء اصطناعي مجاني 100% يعمل في المتصفح</span>
             </div>
             <h1 className="mt-6 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-              أزِل خلفية الصور{" "}
+              إزالة خلفية الصور{" "}
               <span className="bg-gradient-to-l from-primary to-emerald-400 bg-clip-text text-transparent">
-                في ثوانٍ
+                مجاناً في ثوانٍ
               </span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">

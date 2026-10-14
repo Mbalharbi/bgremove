@@ -8,7 +8,20 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Quitar Fondo por Lotes — Hasta 20 Imágenes a la Vez",
   description: "Quita fondos de hasta 20 imágenes a la vez, todo en tu navegador. Descarga todo como ZIP. Sin subir, sin registro, gratis.",
-  alternates: { canonical: `${SITE.url}/es/bulk/`, languages: { "en-US": `${SITE.url}/bulk/`, "es-ES": `${SITE.url}/es/bulk/` } },
+  alternates: {
+    canonical: `${SITE.url}/es/bulk/`,
+    languages: {
+      "en-US": `${SITE.url}/bulk/`,
+      "hi-IN": `${SITE.url}/hi/bulk/`,
+      "id-ID": `${SITE.url}/id/bulk/`,
+      "pt-BR": `${SITE.url}/pt/bulk/`,
+      "es-ES": `${SITE.url}/es/bulk/`,
+      "ar": `${SITE.url}/ar/bulk/`,
+      "de-DE": `${SITE.url}/de/bulk/`,
+      "zh-CN": `${SITE.url}/zh/bulk/`,
+      "x-default": `${SITE.url}/bulk/`,
+    },
+  },
 };
 
 export default function EsBulkPage() {
