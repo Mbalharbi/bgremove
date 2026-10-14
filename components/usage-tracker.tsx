@@ -14,7 +14,8 @@ export function UsageTracker() {
   const firstView = React.useRef(true);
 
   React.useEffect(() => {
-    const onDownload = () => track(toolFromPath(window.location.pathname), "download");
+    const onDownload = (e: Event) =>
+      track(toolFromPath(window.location.pathname), "download", { count: (e as CustomEvent<{ images?: number }>).detail?.images ?? 1 });
     window.addEventListener(DOWNLOAD_EVENT, onDownload);
     return () => window.removeEventListener(DOWNLOAD_EVENT, onDownload);
   }, []);

@@ -20,6 +20,8 @@ export interface RemoveResult {
   height: number;
   /** Wall-clock ms from start of `removeBackground` to PNG encode. */
   processingMs: number;
+  /** Part of processingMs spent waiting for the model (download + warm-up); ~0 once loaded. */
+  loadMs?: number;
   /** Whether the source was downscaled to fit `maxDimension`. */
   downscaled: boolean;
   /** Which engine actually produced this result. */

@@ -34,14 +34,15 @@ interface Entry {
   dtype?: string | null;
   device?: string | null;
   edited?: boolean;
+  bgChanged?: boolean;
 }
 
 interface Usage {
   days: number;
   byToolEvent: { tool: string; event: string; n: number; items: number }[];
   perDay: { day: string; event: string; n: number }[];
-  engines: { engine: string; dtype: string; device: string; n: number; avg_ms: number }[];
-  reasons: { tool: string; reason: string; n: number }[];
+  engines: { engine: string; dtype: string; device: string; n: number; avg_ms: number; avg_process_ms: number | null; avg_first_load_ms: number | null; timed: number }[];
+  reasons: { tool: string; reason: string; file_type?: string; n: number }[];
   countries: { country: string; n: number }[];
   locales: { locale: string; n: number }[];
   returning: { is_return: number; n: number }[];
@@ -424,6 +425,16 @@ export function FeedbackAdmin() {
               <li key={e.at + e.message} className="py-3">
                 <p className="whitespace-pre-wrap text-sm" dir="auto">
                   {e.message}
+                  {e.locale !== "ar" && (
+                    <a
+                      href={`https://translate.google.com/?sl=auto&tl=ar&op=translate&text=${encodeURIComponent(e.message)}`}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="ms-2 text-xs text-primary underline"
+                    >
+                      ترجم
+                    </a>
+                  )}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {new Date(e.at).toLocaleString("ar")} · {e.country ? countryName(e.country) : "—"} ·{" "}
@@ -472,7 +483,9 @@ function UsageSection({ usage, range }: { usage: Usage | null; range: Range }) {
   const toolTotal = toolRows.reduce((a, [, n]) => a + n, 0);
   const ret = usage.returning.find((r) => r.is_return === 1)?.n ?? 0;
   const retAll = usage.returning.reduce((a, r) => a + r.n, 0);
-  const reasonRows = usage.reasons.map((r) => [`${TOOL_AR[r.tool] ?? r.tool}: ${REASON_AR[r.reason] ?? r.reason}`, r.n] as [string, number]);
+  const reasonRows = usage.reasons.map((r) => [`${TOOL_AR[r.tool] ?? r.tool}: ${REASON_AR[r.reason] ?? r.reason}${r.file_type && r.file_type !== "?" ? ` (${r.file_type})` : ""}`, r.n] as [string, number]);
+  const itemsOf = (tool: string, ev: string) => usage.byToolEvent.filter((r) => r.tool === tool && r.event === ev).reduce((a, r) => a + r.items, 0);
+  const downloadRates = ["remove", "bulk"].map((tool) => ({ tool, downloads: itemsOf(tool, "download"), successes: itemsOf(tool, "success") }));
   const countryRows = usage.countries.map((c) => [c.country === "?" ? "غير معروف" : countryName(c.country), c.n] as [string, number]);
   const okTotal = usage.countries.reduce((a, c) => a + c.n, 0);
   const byDay = Array.from(new Set(days.map((d) => d.day))).map((day) => ({
@@ -510,17 +523,37 @@ function UsageSection({ usage, range }: { usage: Usage | null; range: Range }) {
           <h3 className="mb-4 text-sm font-semibold">المحرك والجهاز (الناجحة، كل الفترة)</h3>
           <table className="w-full text-sm" dir="ltr">
             <thead className="text-muted-foreground">
-              <tr><th className="text-left">engine</th><th className="text-left">dtype</th><th className="text-left">device</th><th className="text-right">n</th><th className="text-right">avg</th></tr>
+              <tr><th className="text-left">engine</th><th className="text-left">dtype</th><th className="text-left">device</th><th className="text-right">n</th><th className="text-right">avg</th><th className="text-right" title="processing only">proc</th><th className="text-right" title="first image: model download + warm-up">1st load</th></tr>
             </thead>
             <tbody>
               {usage.engines.map((e) => (
                 <tr key={e.engine + e.dtype + e.device}>
                   <td>{e.engine}</td><td>{e.dtype}</td><td>{e.device}</td><td className="text-right">{e.n}</td>
                   <td className="text-right">{e.avg_ms ? `${(e.avg_ms / 1000).toFixed(1)}s` : "—"}</td>
+                  <td className="text-right">{e.avg_process_ms != null ? `${(e.avg_process_ms / 1000).toFixed(1)}s` : "—"}</td>
+                  <td className="text-right">{e.avg_first_load_ms != null ? `${(e.avg_first_load_ms / 1000).toFixed(1)}s` : "—"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          <p className="mt-2 text-xs text-muted-foreground" dir="rtl">
+            avg = الوقت الكلي · proc = المعالجة فقط · 1st load = تحميل النموذج لأول صورة. التقسيم متاح للمعالجات بعد 18 أكتوبر.
+          </p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h3 className="mb-4 text-sm font-semibold">معدل التنزيل لكل أداة (صور نُزّلت ÷ صور نجحت)</h3>
+          <table className="w-full text-sm">
+            <tbody>
+              {downloadRates.map((r) => (
+                <tr key={r.tool} className="border-t border-border">
+                  <td className="py-1">{TOOL_AR[r.tool] ?? r.tool}</td>
+                  <td className="text-center">{r.downloads} / {r.successes}</td>
+                  <td className="text-left font-semibold">{r.successes ? `${Math.round((r.downloads / r.successes) * 100)}%` : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-2 text-xs text-muted-foreground">تنزيلات الجماعي تُحسب بعدد الصور في ملف ZIP منذ 18 أكتوبر.</p>
         </div>
         <BarList title="أسباب الفشل (كل الفترة)" rows={reasonRows} total={reasonRows.reduce((a, [, n]) => a + n, 0)} />
         <BarList title="الدول (المعالجات الناجحة)" rows={countryRows} total={okTotal} />
@@ -709,6 +742,10 @@ function ActionsSection({ entries, usage }: { entries: Entry[]; usage: Usage | n
         const uses = r.events.reduce((a, ev) => a + evSince(ev, r.date), 0);
         const successes = evSince("success", r.date);
         const b = avg(before), a = avg(after);
+        const usedIt = (e: Entry) =>
+          r.usedFlag === "edited" ? !!e.edited : r.usedFlag === "bgChanged" ? !!e.bgChanged : r.usedFlag === "solid" ? e.engine === "solid-colour" : false;
+        const users = r.usedFlag ? after.filter(usedIt) : [];
+        const nonUsers = r.usedFlag ? after.filter((e) => !usedIt(e)) : [];
         const pct = (x: number, n: number) => (n ? `${Math.round((x / n) * 100)}%` : "—");
         return (
           <div key={r.id} className="rounded-xl border border-border bg-card p-5">
@@ -725,6 +762,16 @@ function ActionsSection({ entries, usage }: { entries: Entry[]; usage: Usage | n
                 value={r.events.length ? (usage ? `${uses} مرة (${pct(uses, successes)} من المعالجات)` : "—") : "—"}
               />
               <Stat label="متوسط التقييم" value={`قبل: ${b === null ? "—" : b.toFixed(1)} · بعد: ${a === null ? "—" : a.toFixed(1)}`} />
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <Stat
+                label={`تقييم من استخدمها (${users.length} رد)`}
+                value={r.usedFlag ? (avg(users) === null ? "—" : avg(users)!.toFixed(1)) : "—"}
+              />
+              <Stat
+                label={`تقييم من لم يستخدمها (${nonUsers.length} رد)`}
+                value={r.usedFlag ? (avg(nonUsers) === null ? "—" : avg(nonUsers)!.toFixed(1)) : "—"}
+              />
             </div>
           </div>
         );

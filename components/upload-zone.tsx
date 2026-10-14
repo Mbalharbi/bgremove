@@ -5,6 +5,8 @@ import { Upload, ImageIcon } from "lucide-react";
 import { cn, formatBytes } from "@/lib/utils";
 import { BG_REMOVAL_LIMITS, preloadSegmenter } from "@/lib/bg-removal";
 import { useToolStrings } from "@/lib/tool-i18n";
+import { isHeic, toBrowserImage } from "@/lib/heic";
+import { fileTypeOf } from "@/lib/track";
 import { toolFromPath, track } from "@/lib/track";
 
 interface UploadZoneProps {
@@ -18,7 +20,8 @@ interface UploadZoneProps {
   disabled?: boolean;
 }
 
-const DEFAULT_ACCEPT = "image/jpeg,image/png,image/webp";
+// HEIC/HEIF (iPhone) is converted to JPEG on upload (lib/heic.ts).
+const DEFAULT_ACCEPT = "image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif";
 
 export function UploadZone({
   onFile,
@@ -34,14 +37,31 @@ export function UploadZone({
   const maxSize = formatBytes(BG_REMOVAL_LIMITS.maxFileBytes);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = React.useState(false);
+  const [converting, setConverting] = React.useState(false);
   const dragCounter = React.useRef(0);
 
   const handleFiles = React.useCallback(
-    (fileList: FileList | File[]) => {
-      const files = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
+    async (fileList: FileList | File[]) => {
+      // Windows/Chrome often reports HEIC with an empty MIME type — accept by extension too.
+      // Copy now: the input is reset right after this call, which empties its FileList.
+      const picked = Array.from(fileList);
+      const firstType = picked[0] ? fileTypeOf(picked[0]) : "unknown";
+      let files = picked.filter((f) => f.type.startsWith("image/") || isHeic(f));
       if (files.length === 0) {
         onError?.(t.errNoImage);
         return;
+      }
+      if (files.some(isHeic)) {
+        setConverting(true);
+        try {
+          files = await Promise.all(files.map(toBrowserImage));
+        } catch {
+          onError?.(t.errHeic);
+          track(toolFromPath(window.location.pathname), "fail", { reason: "decode", fileType: "heic" });
+          return;
+        } finally {
+          setConverting(false);
+        }
       }
       const valid: File[] = [];
       for (const f of files) {
@@ -49,7 +69,7 @@ export function UploadZone({
         else valid.push(f);
       }
       if (valid.length === 0) return;
-      track(toolFromPath(window.location.pathname), "upload", { count: valid.length });
+      track(toolFromPath(window.location.pathname), "upload", { count: valid.length, fileType: firstType });
       if (multiple && onFiles) onFiles(valid);
       else onFile(valid[0]);
     },
@@ -151,7 +171,7 @@ export function UploadZone({
         )}
       </div>
       <p className={cn("mt-4 font-semibold text-foreground", compact ? "text-base" : "text-lg sm:text-xl")}>
-        {dragActive ? t.dropping : multiple ? t.dropMany : t.dropOne}
+        {converting ? t.heicConverting : dragActive ? t.dropping : multiple ? t.dropMany : t.dropOne}
       </p>
       <p className="mt-1.5 text-sm text-muted-foreground">
         {t.formats(maxSize)}

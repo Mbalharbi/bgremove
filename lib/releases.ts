@@ -18,6 +18,8 @@ export interface Release {
   needs: string[];
   /** Usage events that show the feature being used (lib/track.ts). */
   events: string[];
+  /** Feedback field that is true when that visitor used the feature (rating: users vs non-users). */
+  usedFlag?: "edited" | "bgChanged" | "solid";
 }
 
 export const RELEASES: Release[] = [
@@ -36,6 +38,7 @@ export const RELEASES: Release[] = [
     because: "طلب «فرشاة يدوية» وشكاوى ذيل النمر و«القص غير نظيف»",
     needs: ["touch-up", "better-edges"],
     events: ["edit_apply"],
+    usedFlag: "edited",
   },
   {
     id: "background",
@@ -44,6 +47,7 @@ export const RELEASES: Release[] = [
     because: "أكثر طلب في الآراء (8 من 17)",
     needs: ["change-bg"],
     events: ["bg_change"],
+    usedFlag: "bgChanged",
   },
   {
     id: "solid",
@@ -52,5 +56,6 @@ export const RELEASES: Release[] = [
     because: "شكوى: «نص أبيض على خلفية داكنة، نصفه انمسح»",
     needs: [],
     events: ["solid_apply"],
+    usedFlag: "solid",
   },
 ];

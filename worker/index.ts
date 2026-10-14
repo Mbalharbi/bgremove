@@ -251,6 +251,11 @@ const MODEL_ASSETS: Record<string, AssetSource> = {
     upstream: "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm/",
     allow: /^vision_wasm\w*\.(js|wasm)$/,
   },
+  "heic2any-0.0.4": {
+    // HEIC/HEIF (iPhone photo) decoder, MIT; loaded only when someone uploads one.
+    upstream: "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/",
+    allow: /^heic2any\.min\.js$/,
+  },
   "selfie-segmenter": {
     upstream: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/1/",
     allow: /^selfie_segmenter\.tflite$/,
@@ -318,7 +323,7 @@ const FEEDBACK_MAX_BODY = 4 * 1024;
 const FEEDBACK_LOCALES = ["en", "hi", "id", "pt", "es", "ar", "de", "zh"];
 const FEEDBACK_USE_CASES = ["product", "portrait", "logo", "document", "social", "other"];
 const FEEDBACK_NEEDS = [
-  "change-bg", "touch-up", "better-edges", "faster", "hd", "resize", "passport", "mobile-app",
+  "change-bg", "touch-up", "better-edges", "faster", "hd", "resize", "passport", "mobile-app", "magic-wand",
 ];
 
 function jsonOk(body: unknown, status = 200) {
@@ -382,6 +387,7 @@ async function handleFeedbackPost(req: Request, env: Env): Promise<Response> {
     dtype: pick(body.dtype, ["fp16", "fp32", "q8"]),
     device: pick(body.device, ["webgpu", "wasm"]),
     edited: body.edited === true,
+    bgChanged: body.bgChanged === true,
   };
   if (!entry.useCase && !needs.length && rating === null && !message) {
     return jsonError(400, "empty_feedback", "Pick at least one answer.");
@@ -436,6 +442,15 @@ const BOT_UA = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|phantom|pup
 const isBot = (req: Request) => BOT_UA.test(req.headers.get("user-agent") || "");
 
 let schemaReady: Promise<unknown> | null = null;
+async function addColumns(db: D1Database) {
+  for (const sql of [`ALTER TABLE events ADD COLUMN load_ms INTEGER`, `ALTER TABLE events ADD COLUMN file_type TEXT`]) {
+    try {
+      await db.prepare(sql).run();
+    } catch {
+      /* column already exists */
+    }
+  }
+}
 function ensureSchema(db: D1Database) {
   schemaReady ??= db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS events (
@@ -454,7 +469,7 @@ function ensureSchema(db: D1Database) {
       day TEXT NOT NULL, dim TEXT NOT NULL, key TEXT NOT NULL, views INTEGER, visits INTEGER,
       PRIMARY KEY (day, dim, key))`),
     db.prepare(`CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)`),
-  ]).catch((e) => {
+  ]).then(() => addColumns(db)).catch((e) => {
     schemaReady = null;
     throw e;
   });
@@ -491,8 +506,8 @@ async function handleEvent(req: Request, env: Env, ctx: ExecutionContext): Promi
   if ((rl?.n ?? 0) > EVENTS_PER_IP_PER_DAY) return new Response(null, { status: 429 });
 
   await db
-    .prepare(`INSERT INTO events (day, tool, event, engine, dtype, device, ms, count, reason, locale, country, is_return)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .prepare(`INSERT INTO events (day, tool, event, engine, dtype, device, ms, count, reason, locale, country, is_return, load_ms, file_type)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
     .bind(
       day, tool, event,
       pick(b.engine, ["rmbg-1.4", "mediapipe-selfie", "solid-colour"]),
@@ -503,7 +518,9 @@ async function handleEvent(req: Request, env: Env, ctx: ExecutionContext): Promi
       pick(b.reason, EVENT_REASONS),
       pick(b.locale, FEEDBACK_LOCALES),
       (req as Request & { cf?: { country?: string } }).cf?.country ?? null,
-      b.returning === true ? 1 : 0
+      b.returning === true ? 1 : 0,
+      int(b.loadMs, 600000),
+      typeof b.fileType === "string" && /^[a-z0-9+.-]{1,12}$/.test(b.fileType) ? b.fileType : null
     )
     .run();
 
@@ -534,9 +551,12 @@ async function handleUsage(req: Request, url: URL, env: Env): Promise<Response> 
     q(`SELECT tool, event, COUNT(*) AS n, SUM(COALESCE(count, 1)) AS items FROM events WHERE day >= ? GROUP BY tool, event`),
     q(`SELECT day, event, COUNT(*) AS n FROM events WHERE day >= ? GROUP BY day, event ORDER BY day`),
     q(`SELECT COALESCE(engine,'?') AS engine, COALESCE(dtype,'?') AS dtype, COALESCE(device,'?') AS device,
-              COUNT(*) AS n, CAST(AVG(ms) AS INTEGER) AS avg_ms
+              COUNT(*) AS n, CAST(AVG(ms) AS INTEGER) AS avg_ms,
+              CAST(AVG(CASE WHEN load_ms IS NOT NULL THEN ms - load_ms END) AS INTEGER) AS avg_process_ms,
+              CAST(AVG(CASE WHEN load_ms > 1000 THEN load_ms END) AS INTEGER) AS avg_first_load_ms,
+              SUM(load_ms IS NOT NULL) AS timed
        FROM events WHERE day >= ? AND event = 'success' GROUP BY 1, 2, 3 ORDER BY n DESC`),
-    q(`SELECT tool, COALESCE(reason,'?') AS reason, COUNT(*) AS n FROM events WHERE day >= ? AND event = 'fail' GROUP BY 1, 2 ORDER BY n DESC`),
+    q(`SELECT tool, COALESCE(reason,'?') AS reason, COALESCE(file_type,'?') AS file_type, COUNT(*) AS n FROM events WHERE day >= ? AND event = 'fail' GROUP BY 1, 2, 3 ORDER BY n DESC`),
     q(`SELECT COALESCE(country,'?') AS country, COUNT(*) AS n FROM events WHERE day >= ? AND event = 'success' GROUP BY 1 ORDER BY n DESC LIMIT 15`),
     q(`SELECT COALESCE(locale,'?') AS locale, COUNT(*) AS n FROM events WHERE day >= ? AND event = 'success' GROUP BY 1 ORDER BY n DESC`),
     q(`SELECT is_return, COUNT(*) AS n FROM events WHERE day >= ? AND event = 'upload' GROUP BY 1`),

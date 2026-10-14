@@ -221,6 +221,7 @@ export async function removeBackgroundRmbg(
 ): Promise<RemoveResult> {
   const start = performance.now();
   const { model, processor, T } = await getRmbgPipeline(opts.onProgress, opts.onDownloadProgress);
+  const loadMs = performance.now() - start;
   opts.onProgress?.("ready");
 
   // Decode into HTMLImageElement so we know the original dimensions.
@@ -277,6 +278,7 @@ export async function removeBackgroundRmbg(
     width,
     height,
     processingMs: performance.now() - start,
+    loadMs,
     downscaled,
     engine: "rmbg-1.4",
     dtype: chosen?.dtype,

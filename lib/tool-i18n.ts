@@ -78,6 +78,10 @@ export interface ToolStrings {
   solidPickHint: string;
   solidSuggest: string;
   solidUseAi: string;
+  heicConverting: string;
+  bgTitle: string;
+  newBadge: string;
+  errHeic: string;
 }
 
 const MB = "MB";
@@ -142,6 +146,10 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidPickHint: "Click the image to pick the background colour. Raise the tolerance if traces remain.",
     solidSuggest: "This image has a plain background. Solid-colour mode keeps text and logos 100% intact.",
     solidUseAi: "Use AI instead",
+    heicConverting: "Converting iPhone photo (HEIC)…",
+    bgTitle: "Change background",
+    newBadge: "New",
+    errHeic: "This HEIC photo couldn't be converted. Export it as JPG and try again.",
   },
   ar: {
     dropOne: "اسحب صورة أو الصقها أو اضغط للرفع",
@@ -202,6 +210,10 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidPickHint: "اضغط على الصورة لاختيار لون الخلفية. ارفع درجة التسامح إذا بقيت آثار.",
     solidSuggest: "خلفية هذه الصورة بلون واحد. «وضع اللون الواحد» يحافظ على النصوص والشعارات كاملة.",
     solidUseAi: "استخدم الذكاء الاصطناعي بدلاً منه",
+    heicConverting: "جارٍ تحويل صورة الآيفون (HEIC)…",
+    bgTitle: "غيّر الخلفية",
+    newBadge: "جديد",
+    errHeic: "تعذّر تحويل صورة HEIC هذه. صدّرها بصيغة JPG ثم حاول مرة أخرى.",
   },
   zh: {
     dropOne: "拖放、粘贴或点击上传图片",
@@ -262,6 +274,10 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidPickHint: "点击图片选取背景色。如有残留，请调高容差。",
     solidSuggest: "这张图片是纯色背景。“纯色模式”可完整保留文字和 Logo。",
     solidUseAi: "改用 AI 抠图",
+    heicConverting: "正在转换 iPhone 照片（HEIC）…",
+    bgTitle: "更换背景",
+    newBadge: "新",
+    errHeic: "无法转换这张 HEIC 照片，请导出为 JPG 后重试。",
   },
   es: {
     dropOne: "Suelta una imagen, pégala o toca para subir",
@@ -322,6 +338,10 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidPickHint: "Toca la imagen para elegir el color de fondo. Sube la tolerancia si quedan restos.",
     solidSuggest: "Esta imagen tiene un fondo liso. El modo color sólido conserva textos y logos al 100 %.",
     solidUseAi: "Usar la IA en su lugar",
+    heicConverting: "Convirtiendo foto de iPhone (HEIC)…",
+    bgTitle: "Cambiar fondo",
+    newBadge: "Nuevo",
+    errHeic: "No se pudo convertir esta foto HEIC. Expórtala como JPG e inténtalo de nuevo.",
   },
   pt: {
     dropOne: "Solte uma imagem, cole ou toque para enviar",
@@ -382,6 +402,10 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidPickHint: "Toque na imagem para escolher a cor do fundo. Aumente a tolerância se sobrarem restos.",
     solidSuggest: "Esta imagem tem fundo liso. O modo cor sólida mantém textos e logos 100% intactos.",
     solidUseAi: "Usar a IA em vez disso",
+    heicConverting: "Convertendo foto do iPhone (HEIC)…",
+    bgTitle: "Trocar fundo",
+    newBadge: "Novo",
+    errHeic: "Não foi possível converter esta foto HEIC. Exporte como JPG e tente novamente.",
   },
   de: {
     dropOne: "Bild ablegen, einfügen oder tippen zum Hochladen",
@@ -442,6 +466,10 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidPickHint: "Ins Bild tippen, um die Hintergrundfarbe zu wählen. Bei Resten die Toleranz erhöhen.",
     solidSuggest: "Dieses Bild hat einen einfarbigen Hintergrund. Der Einfarbig-Modus erhält Texte und Logos zu 100 %.",
     solidUseAi: "Stattdessen KI verwenden",
+    heicConverting: "iPhone-Foto (HEIC) wird umgewandelt…",
+    bgTitle: "Hintergrund ändern",
+    newBadge: "Neu",
+    errHeic: "Dieses HEIC-Foto konnte nicht umgewandelt werden. Als JPG exportieren und erneut versuchen.",
   },
   hi: {
     dropOne: "इमेज ड्रॉप करें, पेस्ट करें या अपलोड के लिए टैप करें",
@@ -502,6 +530,10 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidPickHint: "बैकग्राउंड रंग चुनने के लिए इमेज पर क्लिक करें। निशान बचे रहें तो टॉलरेंस बढ़ाएँ।",
     solidSuggest: "इस इमेज का बैकग्राउंड एक रंग का है। एक-रंग मोड टेक्स्ट और लोगो को पूरा सुरक्षित रखता है।",
     solidUseAi: "इसके बजाय AI इस्तेमाल करें",
+    heicConverting: "iPhone फ़ोटो (HEIC) बदली जा रही है…",
+    bgTitle: "बैकग्राउंड बदलें",
+    newBadge: "नया",
+    errHeic: "यह HEIC फ़ोटो बदली नहीं जा सकी। JPG में एक्सपोर्ट करके दोबारा कोशिश करें।",
   },
   id: {
     dropOne: "Tarik gambar, tempel, atau ketuk untuk unggah",
@@ -562,6 +594,10 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     solidPickHint: "Klik gambar untuk memilih warna latar. Naikkan toleransi jika masih ada sisa.",
     solidSuggest: "Gambar ini berlatar polos. Mode warna polos menjaga teks dan logo tetap utuh 100%.",
     solidUseAi: "Pakai AI saja",
+    heicConverting: "Mengonversi foto iPhone (HEIC)…",
+    bgTitle: "Ganti latar",
+    newBadge: "Baru",
+    errHeic: "Foto HEIC ini tidak bisa dikonversi. Ekspor sebagai JPG lalu coba lagi.",
   },
 };
 

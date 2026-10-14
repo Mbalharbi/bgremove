@@ -18,7 +18,7 @@ import {
   type RemoveResult,
 } from "@/lib/bg-removal";
 import { useToolStrings, type ToolStrings } from "@/lib/tool-i18n";
-import { errorReason, toolFromPath, track } from "@/lib/track";
+import { errorReason, fileTypeOf, toolFromPath, track } from "@/lib/track";
 import { setLastRun } from "@/components/feedback-dialog";
 import { changeExtension, formatBytes, formatMs } from "@/lib/utils";
 
@@ -44,6 +44,27 @@ interface BeforeAfter {
 }
 
 const toMb = (bytes: number) => (bytes / 1024 / 1024).toFixed(0);
+
+/** Per-feature "used it" flags: the "New" badge shows until the visitor tries the feature. */
+function useSeen(key: string): [boolean, () => void] {
+  const [seen, setSeen] = React.useState(true); // assume seen until storage says otherwise (no flash)
+  React.useEffect(() => {
+    try {
+      setSeen(localStorage.getItem(key) === "1");
+    } catch {
+      /* storage blocked: no badge */
+    }
+  }, [key]);
+  const mark = React.useCallback(() => {
+    setSeen(true);
+    try {
+      localStorage.setItem(key, "1");
+    } catch {
+      /* ignore */
+    }
+  }, [key]);
+  return [seen, mark];
+}
 
 const BG_SWATCHES = ["#ffffff", "#000000", "#f3f4f6", "#2563eb", "#ef4444", "#10b981", "#f59e0b"];
 
@@ -109,6 +130,8 @@ export function BgRemover({ startMode = "ai" }: BgRemoverProps = {}) {
   const [plainBorder, setPlainBorder] = React.useState(false);
   const bgImageInput = React.useRef<HTMLInputElement>(null);
   const lastFile = React.useRef<File | null>(null);
+  const [bgSeen, markBgSeen] = useSeen("bgremove:seen-bg");
+  const [brushSeen, markBrushSeen] = useSeen("bgremove:seen-brush");
   // True while a solid-mode start is waiting for its first Apply (Cancel then means "use the AI").
   const [awaitingSolid, setAwaitingSolid] = React.useState(false);
 
@@ -214,7 +237,7 @@ export function BgRemover({ startMode = "ai" }: BgRemoverProps = {}) {
           onDownloadProgress: (loaded, total) => update({ loaded, total }),
         });
         const tool = toolFromPath(window.location.pathname);
-        track(tool, "success", { engine: result.engine, dtype: result.dtype, device: result.device, ms: result.processingMs });
+        track(tool, "success", { engine: result.engine, dtype: result.dtype, device: result.device, ms: result.processingMs, loadMs: result.loadMs });
         setLastRun({ engine: result.engine, dtype: result.dtype, device: result.device });
         const afterUrl = URL.createObjectURL(result.blob);
         if (result.downscaled) {
@@ -236,7 +259,7 @@ export function BgRemover({ startMode = "ai" }: BgRemoverProps = {}) {
       } catch (err) {
         URL.revokeObjectURL(beforeUrl);
         const message = err instanceof Error ? err.message : "Unknown error.";
-        track(toolFromPath(window.location.pathname), "fail", { reason: errorReason(err) });
+        track(toolFromPath(window.location.pathname), "fail", { reason: errorReason(err), fileType: fileTypeOf(file) });
         setStatus({ kind: "error", message });
         toast({ title: t.errorTitle, description: message, variant: "destructive" });
       }
@@ -318,15 +341,24 @@ export function BgRemover({ startMode = "ai" }: BgRemoverProps = {}) {
           width={result.width}
           height={result.height}
         />
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t.bgLabel}>
-          <span className="text-sm font-medium text-muted-foreground">{t.bgLabel}:</span>
+        <div
+          className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/40 bg-primary/5 p-3"
+          role="group"
+          aria-label={t.bgLabel}
+          data-testid="bg-card"
+        >
+          <span className="me-1 inline-flex items-center gap-2 text-sm font-semibold">
+            <ImagePlus className="h-4 w-4 text-primary" />
+            {t.bgTitle}
+            {!bgSeen && <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">{t.newBadge}</span>}
+          </span>
           <button
             type="button"
             aria-pressed={bg.kind === "none"}
             aria-label={t.bgTransparent}
             title={t.bgTransparent}
             onClick={() => setBg({ kind: "none" })}
-            className={cn("checker-bg h-8 w-8 rounded-md border", bg.kind === "none" ? "ring-2 ring-primary ring-offset-2" : "border-border")}
+            className={cn("checker-bg h-10 w-10 rounded-lg border", bg.kind === "none" ? "ring-2 ring-primary ring-offset-2" : "border-border")}
           />
           {BG_SWATCHES.map((c) => (
             <button
@@ -336,10 +368,12 @@ export function BgRemover({ startMode = "ai" }: BgRemoverProps = {}) {
               aria-label={c}
               title={c}
               onClick={() => {
+                markBgSeen();
                 setBg({ kind: "color", color: c });
                 track(toolFromPath(window.location.pathname), "bg_change");
+                setLastRun({ bgChanged: true });
               }}
-              className={cn("h-8 w-8 rounded-md border border-border", bg.kind === "color" && bg.color === c && "ring-2 ring-primary ring-offset-2")}
+              className={cn("h-10 w-10 rounded-lg border border-border", bg.kind === "color" && bg.color === c && "ring-2 ring-primary ring-offset-2")}
               style={{ background: c }}
             />
           ))}
@@ -349,7 +383,10 @@ export function BgRemover({ startMode = "ai" }: BgRemoverProps = {}) {
               aria-label={t.bgCustom}
               className="h-5 w-6 cursor-pointer bg-transparent"
               value={bg.kind === "color" ? bg.color : "#ffffff"}
-              onChange={(e) => setBg({ kind: "color", color: e.target.value })}
+              onChange={(e) => {
+                markBgSeen();
+                setBg({ kind: "color", color: e.target.value });
+              }}
               onBlur={() => track(toolFromPath(window.location.pathname), "bg_change")}
             />
             {t.bgCustom}
@@ -369,11 +406,13 @@ export function BgRemover({ startMode = "ai" }: BgRemoverProps = {}) {
               const f = e.target.files?.[0];
               e.target.value = "";
               if (!f) return;
+              markBgSeen();
               setBg((prev) => {
                 if (prev.kind === "image") URL.revokeObjectURL(prev.url);
                 return { kind: "image", url: URL.createObjectURL(f) };
               });
               track(toolFromPath(window.location.pathname), "bg_change");
+                setLastRun({ bgChanged: true });
             }}
           />
         </div>
@@ -398,12 +437,14 @@ export function BgRemover({ startMode = "ai" }: BgRemoverProps = {}) {
               variant="outline"
               size="lg"
               onClick={() => {
+                markBrushSeen();
                 setPanel("brush");
                 track(toolFromPath(window.location.pathname), "edit_open");
               }}
             >
               <Brush className="h-4 w-4" />
               {t.editButton}
+              {!brushSeen && <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">{t.newBadge}</span>}
             </Button>
             {!plainBorder && (
               <Button variant="outline" size="lg" onClick={() => setPanel("solid")}>

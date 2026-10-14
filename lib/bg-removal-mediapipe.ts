@@ -113,6 +113,7 @@ export async function removeBackgroundMediaPipe(
 
   const start = performance.now();
   const segmenter = await getMediaPipeSegmenter(opts.onProgress);
+  const loadMs = performance.now() - start;
 
   const img = await loadImage(file);
   const maxDim = opts.maxDimension ?? MAX_DIMENSION_DEFAULT;
@@ -165,6 +166,7 @@ export async function removeBackgroundMediaPipe(
     width,
     height,
     processingMs: performance.now() - start,
+    loadMs,
     downscaled,
     engine: "mediapipe-selfie",
   };

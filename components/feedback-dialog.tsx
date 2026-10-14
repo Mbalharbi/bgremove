@@ -52,7 +52,11 @@ const NEEDS = [
   "resize",
   "passport",
   "mobile-app",
+  "magic-wand",
 ] as const;
+
+// Needs we've already shipped: shown with "✓ available" so a tick means "improve it", not "add it".
+const AVAILABLE = new Set<string>(["change-bg", "touch-up"]);
 
 type UseCase = (typeof USE_CASES)[number];
 type Need = (typeof NEEDS)[number];
@@ -78,6 +82,7 @@ interface Strings {
   error: string;
   empty: string;
   footerLink: string;
+  available: string;
 }
 
 export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
@@ -97,6 +102,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
       resize: "Crop & resize for platforms",
       passport: "Passport / ID photo maker",
       "mobile-app": "Mobile app",
+      "magic-wand": "Magic wand (select similar area in one click)",
     },
     ratingQ: "How was your result?",
     ratings: ["Bad", "Poor", "OK", "Good", "Great"],
@@ -111,6 +117,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
     error: "Couldn't send right now. Please try again.",
     empty: "Pick at least one answer first.",
     footerLink: "Suggest a feature",
+    available: "available",
   },
   ar: {
     title: "ساعدنا نطوّر BgRemove",
@@ -128,6 +135,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
       resize: "قص وتغيير المقاس للمنصات",
       passport: "صانع صور الجواز / الهوية",
       "mobile-app": "تطبيق جوال",
+      "magic-wand": "عصا سحرية (تحديد منطقة متشابهة بنقرة)",
     },
     ratingQ: "كيف كانت النتيجة؟",
     ratings: ["سيئة", "ضعيفة", "مقبولة", "جيدة", "ممتازة"],
@@ -142,6 +150,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
     error: "تعذّر الإرسال الآن. حاول مرة أخرى.",
     empty: "اختر إجابة واحدة على الأقل.",
     footerLink: "اقترح ميزة",
+    available: "متوفرة",
   },
   zh: {
     title: "帮助我们改进 BgRemove",
@@ -159,6 +168,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
       resize: "按平台裁剪和调整尺寸",
       passport: "证件照 / 护照照片制作",
       "mobile-app": "手机 App",
+      "magic-wand": "魔术棒（一键选中相似区域）",
     },
     ratingQ: "抠图效果如何？",
     ratings: ["很差", "较差", "一般", "不错", "很棒"],
@@ -173,6 +183,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
     error: "暂时无法提交，请重试。",
     empty: "请至少选择一项。",
     footerLink: "功能建议",
+    available: "已上线",
   },
   es: {
     title: "Ayúdanos a mejorar BgRemove",
@@ -190,6 +201,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
       resize: "Recortar y redimensionar para redes",
       passport: "Creador de fotos de pasaporte",
       "mobile-app": "App móvil",
+      "magic-wand": "Varita mágica (seleccionar zona similar con un clic)",
     },
     ratingQ: "¿Qué tal el resultado?",
     ratings: ["Malo", "Flojo", "Normal", "Bueno", "Genial"],
@@ -204,6 +216,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
     error: "No se pudo enviar. Inténtalo de nuevo.",
     empty: "Elige al menos una respuesta.",
     footerLink: "Sugerir una función",
+    available: "disponible",
   },
   pt: {
     title: "Ajude-nos a melhorar o BgRemove",
@@ -221,6 +234,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
       resize: "Cortar e redimensionar para redes",
       passport: "Criador de foto 3x4 / passaporte",
       "mobile-app": "App para celular",
+      "magic-wand": "Varinha mágica (selecionar área parecida com um clique)",
     },
     ratingQ: "Como ficou o resultado?",
     ratings: ["Ruim", "Fraco", "OK", "Bom", "Ótimo"],
@@ -235,6 +249,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
     error: "Não foi possível enviar. Tente novamente.",
     empty: "Escolha pelo menos uma resposta.",
     footerLink: "Sugerir um recurso",
+    available: "disponível",
   },
   de: {
     title: "Hilf uns, BgRemove besser zu machen",
@@ -252,6 +267,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
       resize: "Zuschneiden für Plattformen",
       passport: "Passbild-Generator",
       "mobile-app": "Mobile App",
+      "magic-wand": "Zauberstab (ähnlichen Bereich per Klick auswählen)",
     },
     ratingQ: "Wie war das Ergebnis?",
     ratings: ["Schlecht", "Mäßig", "OK", "Gut", "Super"],
@@ -266,6 +282,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
     error: "Senden gerade nicht möglich. Bitte erneut versuchen.",
     empty: "Bitte wähle mindestens eine Antwort.",
     footerLink: "Funktion vorschlagen",
+    available: "verfügbar",
   },
   hi: {
     title: "BgRemove को बेहतर बनाने में मदद करें",
@@ -283,6 +300,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
       resize: "प्लेटफ़ॉर्म के लिए क्रॉप और रीसाइज़",
       passport: "पासपोर्ट / ID फ़ोटो मेकर",
       "mobile-app": "मोबाइल ऐप",
+      "magic-wand": "मैजिक वैंड (एक क्लिक में मिलता-जुलता हिस्सा चुनें)",
     },
     ratingQ: "रिज़ल्ट कैसा रहा?",
     ratings: ["बुरा", "कमज़ोर", "ठीक", "अच्छा", "शानदार"],
@@ -297,6 +315,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
     error: "अभी भेजा नहीं जा सका। फिर से कोशिश करें।",
     empty: "कम से कम एक जवाब चुनें।",
     footerLink: "फ़ीचर सुझाएँ",
+    available: "उपलब्ध",
   },
   id: {
     title: "Bantu kami mengembangkan BgRemove",
@@ -314,6 +333,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
       resize: "Potong & ubah ukuran untuk platform",
       passport: "Pembuat pas foto / paspor",
       "mobile-app": "Aplikasi ponsel",
+      "magic-wand": "Tongkat ajaib (pilih area serupa sekali klik)",
     },
     ratingQ: "Bagaimana hasilnya?",
     ratings: ["Buruk", "Kurang", "Lumayan", "Bagus", "Keren"],
@@ -328,6 +348,7 @@ export const FEEDBACK_STRINGS: Record<LocaleCode, Strings> = {
     error: "Gagal mengirim. Coba lagi.",
     empty: "Pilih minimal satu jawaban.",
     footerLink: "Usulkan fitur",
+    available: "tersedia",
   },
 };
 
@@ -342,6 +363,7 @@ interface LastRun {
   dtype?: string;
   device?: string;
   edited?: boolean;
+  bgChanged?: boolean;
 }
 let lastRun: LastRun = {};
 export function setLastRun(patch: LastRun) {
@@ -607,6 +629,9 @@ export function FeedbackDialog() {
                 {NEEDS.map((n) => (
                   <Chip key={n} selected={needs.includes(n)} onClick={() => toggleNeed(n)}>
                     {t.needs[n]}
+                    {AVAILABLE.has(n) && (
+                      <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">✓ {t.available}</span>
+                    )}
                   </Chip>
                 ))}
               </div>

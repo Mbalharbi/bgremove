@@ -24,6 +24,10 @@ export interface EventDetails {
   count?: number;
   /** Short, non-identifying error class (e.g. "model-load", "decode"). */
   reason?: string;
+  /** Model download/warm-up part of `ms` (first image of a visit only). */
+  loadMs?: number;
+  /** Image format of the upload, e.g. "jpeg", "heic" — never the file name. */
+  fileType?: string;
 }
 
 const SEEN_KEY = "bgremove:seen";
@@ -64,6 +68,7 @@ export function track(tool: Tool, event: UsageEvent, details: EventDetails = {})
     returning: returningVisit,
     ...details,
     ms: details.ms !== undefined ? Math.round(details.ms) : undefined,
+    loadMs: details.loadMs !== undefined ? Math.round(details.loadMs) : undefined,
   });
   try {
     // sendBeacon survives page navigation and never blocks the UI.
@@ -72,6 +77,14 @@ export function track(tool: Tool, event: UsageEvent, details: EventDetails = {})
   } catch {
     /* analytics must never break the tool */
   }
+}
+
+/** Coarse image format from MIME type or extension ("jpeg", "png", "heic", …). */
+export function fileTypeOf(file: File | Blob): string {
+  const name = file instanceof File ? file.name.toLowerCase() : "";
+  const ext = name.includes(".") ? name.split(".").pop()! : "";
+  const t = (file.type.split("/")[1] || ext || "unknown").replace("jpg", "jpeg").replace("x-", "");
+  return /^[a-z0-9+.-]{1,12}$/.test(t) ? t : "other";
 }
 
 /** Map an error message to a coarse, non-identifying class. */

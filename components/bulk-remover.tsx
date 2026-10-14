@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { removeBackground, type LoadStage } from "@/lib/bg-removal";
 import { changeExtension, downloadBlob, formatBytes, formatMs } from "@/lib/utils";
-import { errorReason, track } from "@/lib/track";
+import { errorReason, fileTypeOf, track } from "@/lib/track";
 
 const BULK_LIMIT = 20;
 
@@ -109,7 +109,7 @@ export function BulkRemover() {
           const result = await removeBackground(item.file, {
             onProgress: (s) => setLoadStage(s),
           });
-          track("bulk", "success", { engine: result.engine, dtype: result.dtype, device: result.device, ms: result.processingMs });
+          track("bulk", "success", { engine: result.engine, dtype: result.dtype, device: result.device, ms: result.processingMs, loadMs: result.loadMs });
           const doneUrl = URL.createObjectURL(result.blob);
           setItems((prev) =>
             prev.map((it) =>
@@ -130,7 +130,7 @@ export function BulkRemover() {
           );
         } catch (err) {
           const message = err instanceof Error ? err.message : "Unknown error.";
-          track("bulk", "fail", { reason: errorReason(err) });
+          track("bulk", "fail", { reason: errorReason(err), fileType: fileTypeOf(item.file) });
           setItems((prev) =>
             prev.map((it) => (it.id === item.id ? { ...it, status: { kind: "error", message } } : it))
           );
@@ -160,7 +160,7 @@ export function BulkRemover() {
       zip.file(name, item.status.blob);
     }
     const blob = await zip.generateAsync({ type: "blob" });
-    downloadBlob(blob, `bgremove-bulk-${Date.now()}.zip`);
+    downloadBlob(blob, `bgremove-bulk-${Date.now()}.zip`, done.length);
   };
 
   const totalProgress = (() => {

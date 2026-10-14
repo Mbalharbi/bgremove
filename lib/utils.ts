@@ -18,7 +18,7 @@ export function formatMs(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-export function downloadBlob(blob: Blob, filename: string): void {
+export function downloadBlob(blob: Blob, filename: string, images = 1): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -28,7 +28,7 @@ export function downloadBlob(blob: Blob, filename: string): void {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   // Lets the feedback popup ask for an opinion right after a successful result.
-  window.dispatchEvent(new CustomEvent(DOWNLOAD_EVENT));
+  window.dispatchEvent(new CustomEvent(DOWNLOAD_EVENT, { detail: { images } }));
 }
 
 /** Fired on every successful download (see components/feedback-dialog.tsx). */
