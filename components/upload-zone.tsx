@@ -53,15 +53,15 @@ export function UploadZone({
       }
       if (files.some(isHeic)) {
         setConverting(true);
-        try {
-          files = await Promise.all(files.map(toBrowserImage));
-        } catch {
+        // Convert one by one so a single unreadable photo doesn't drop the whole batch.
+        const results = await Promise.allSettled(files.map(toBrowserImage));
+        setConverting(false);
+        files = results.flatMap((r) => (r.status === "fulfilled" ? [r.value] : []));
+        if (files.length < results.length) {
           onError?.(t.errHeic);
           track(toolFromPath(window.location.pathname), "fail", { reason: "decode", fileType: "heic" });
-          return;
-        } finally {
-          setConverting(false);
         }
+        if (files.length === 0) return;
       }
       const valid: File[] = [];
       for (const f of files) {

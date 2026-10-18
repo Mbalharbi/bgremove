@@ -33,9 +33,20 @@ function loadConverter(): Promise<Heic2Any> {
   return loader;
 }
 
-/** Returns the file unchanged unless it's HEIC/HEIF, in which case a JPEG copy. */
+/** True when this browser can decode the file itself (Safari reads HEIC; some ".heic" files are really JPEG). */
+async function decodesNatively(file: File): Promise<boolean> {
+  if (typeof createImageBitmap !== "function") return false;
+  try {
+    (await createImageBitmap(file)).close();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Returns the file unchanged unless it's HEIC/HEIF the browser can't read, in which case a JPEG copy. */
 export async function toBrowserImage(file: File): Promise<File> {
-  if (!isHeic(file)) return file;
+  if (!isHeic(file) || (await decodesNatively(file))) return file;
   const convert = await loadConverter();
   const out = await convert({ blob: file, toType: "image/jpeg", quality: 0.92 });
   const jpeg = Array.isArray(out) ? out[0] : out;
