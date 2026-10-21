@@ -37,7 +37,7 @@ type TransformersNS = {
   AutoModel: { from_pretrained: (id: string, opts?: any) => Promise<any> };
   AutoProcessor: { from_pretrained: (id: string, opts?: any) => Promise<any> };
   RawImage: {
-    fromBlob: (b: Blob) => Promise<any>;
+    fromCanvas: (c: HTMLCanvasElement) => any;
     fromTensor: (t: any) => any;
   };
 };
@@ -200,16 +200,31 @@ export function preloadRmbg(): void {
   });
 }
 
-async function blobToImage(file: File | Blob): Promise<HTMLImageElement> {
+interface Decoded {
+  source: CanvasImageSource;
+  width: number;
+  height: number;
+  close: () => void;
+}
+
+async function blobToImage(file: File | Blob): Promise<Decoded> {
   const url = URL.createObjectURL(file);
   try {
-    return await new Promise<HTMLImageElement>((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () =>
-        reject(new Error("Could not decode this image. Try a different file."));
-      img.src = url;
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = reject;
+      el.src = url;
     });
+    return { source: img, width: img.naturalWidth, height: img.naturalHeight, close: () => {} };
+  } catch {
+    // <img> occasionally fails on low-memory phones where createImageBitmap still works.
+    try {
+      const bmp = await createImageBitmap(file);
+      return { source: bmp, width: bmp.width, height: bmp.height, close: () => bmp.close() };
+    } catch {
+      throw new Error("Could not decode this image. Try a different file.");
+    }
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -228,8 +243,8 @@ export async function removeBackgroundRmbg(
   const img = await blobToImage(file);
   const maxDim = opts.maxDimension ?? 4096;
 
-  let width = img.naturalWidth;
-  let height = img.naturalHeight;
+  let width = img.width;
+  let height = img.height;
   let downscaled = false;
   if (Math.max(width, height) > maxDim) {
     const scale = maxDim / Math.max(width, height);
@@ -245,13 +260,13 @@ export async function removeBackgroundRmbg(
   canvas.height = height;
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) throw new Error("Browser canvas is unavailable.");
-  ctx.drawImage(img, 0, 0, width, height);
+  ctx.drawImage(img.source, 0, 0, width, height);
+  img.close();
 
-  // RMBG expects a RawImage; build one from the canvas.
-  const blob = await new Promise<Blob>((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("encode failed"))), "image/png")
-  );
-  const rawImage = await T.RawImage.fromBlob(blob);
+  // RMBG expects a RawImage; read it straight from the canvas pixels. (Going
+  // through a PNG blob re-encoded and re-decoded the whole photo, which was
+  // slow and ran out of memory on weak phones.)
+  const rawImage = T.RawImage.fromCanvas(canvas);
 
   const { pixel_values } = await processor(rawImage);
   const { output } = await model({ input: pixel_values });
