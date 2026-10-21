@@ -81,8 +81,8 @@ export default function PrivacyPage() {
           <h2>What we do collect</h2>
           <ul>
             <li>
-              <strong>Anonymous traffic statistics</strong> (page views, browser type, country) kept by
-              our host, Cloudflare, at the network level. No cookies.
+              <strong>Anonymous traffic statistics</strong> (page views, browser type, country) via
+              Cloudflare Web Analytics, a small cookie-free script added by our host.
             </li>
             <li>
               <strong>Anonymous usage counts</strong> — which tool was used, whether processing
