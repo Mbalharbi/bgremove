@@ -25,8 +25,8 @@ export const metadata: Metadata = {
 
 const PROMISES = [
   { Icon: ServerOff, title: "您的图片永远不会到达我们的服务器", body: "所有 AI 处理都在您的浏览器中使用本地内存和您的 CPU/GPU 进行。没有上传步骤。" },
-  { Icon: EyeOff, title: "我们看不到您的照片", body: "物理上我们无法做到 — 技术架构使这成为不可能。" },
-  { Icon: Lock, title: "不存储图片", body: "甚至临时也不会。AI 模型从 CDN 加载一次，之后在本地运行。" },
+  { Icon: EyeOff, title: "我们看不到您的照片", body: "抠图工具从不把您的图片发送到任何地方，所以我们根本无从看到。" },
+  { Icon: Lock, title: "不存储图片", body: "甚至临时也不会。AI 模型从我们自己的域名加载一次，之后在本地运行。" },
   { Icon: ShieldCheck, title: "无需账户", body: "因为不需要。没有登录、没有同步、没有忘记删除。" },
 ];
 
@@ -48,7 +48,7 @@ export default function ZhPrivacyPage() {
       <section className="container py-10">
         <div className="prose prose-slate max-w-none dark:prose-invert">
           <h2>技术细节</h2>
-          <p>当您访问 {SITE.domain} 时，您的浏览器会从公共 CDN 下载 BgRemove Web 应用（HTML、CSS、JavaScript）以及一个小型 AI 模型（约 44 MB）。<strong>没有网络请求会传输您的图片数据。</strong>您可以自己验证：打开 DevTools → 网络选项卡，将图片拖入 BgRemove 并观察 — 不会发生上传。</p>
+          <p>当您访问 {SITE.domain} 时，您的浏览器会从我们自己的域名下载 BgRemove Web 应用（HTML、CSS、JavaScript）以及 AI 模型（根据设备约 44–88 MB）。<strong>没有网络请求会传输您的图片数据。</strong>您可以自己验证：打开 DevTools → 网络选项卡，将图片拖入 BgRemove 并观察 — 不会发生上传。</p>
           <h2>匿名使用统计</h2>
           <p>我们会统计匿名的使用情况：使用了哪个工具、处理是否成功、耗时多久、运行的是哪个 AI 引擎，以及是否下载了结果。我们也会匿名统计页面浏览（哪个页面、来源网站域名、设备类型和浏览器）。不包含图片、文件名、IP 地址或 Cookie；浏览器中只保存一个“曾经使用过”的标记。如果您提交反馈，会附带最后一张图片的处理方式（引擎和设备类型）。</p>
           <h2>联系</h2>

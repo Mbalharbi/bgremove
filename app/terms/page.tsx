@@ -27,9 +27,12 @@ export default function TermsPage() {
 
           <h2>What you can do</h2>
           <ul>
-            <li>Use BgRemove for personal or commercial work.</li>
+            <li>Use BgRemove for personal projects.</li>
             <li>Process unlimited images.</li>
-            <li>Use the output (transparent PNGs and re-encoded images) however you like.</li>
+            <li>
+              Use the output (transparent PNGs and re-encoded images), subject to the AI model
+              licences described below — please read them before any commercial use.
+            </li>
             <li>Embed or link to the site from your own pages.</li>
           </ul>
 
@@ -43,13 +46,24 @@ export default function TermsPage() {
 
           <h2>Intellectual property</h2>
           <p>
-            <strong>Your images stay yours.</strong> We never receive a copy, never store anything,
-            and claim no rights to your inputs or outputs. Full stop.
+            <strong>Your images stay yours.</strong> The tools on this website never send us a copy
+            of your images, and we claim no rights to your inputs or outputs. Full stop.
           </p>
           <p>
-            The BgRemove name, logo, and site code are owned by us. The underlying AI model is
-            provided by Google under its own license (see Google MediaPipe terms).
+            The BgRemove name, logo, and site code are owned by us. The AI models that run in your
+            browser are made by third parties and come with their own licences:
           </p>
+          <ul>
+            <li>
+              <strong>RMBG-1.4</strong> by BRIA AI — the main background-removal model. BRIA licenses
+              it for non-commercial use; commercial use requires an agreement with BRIA (see{" "}
+              <Link href="https://huggingface.co/briaai/RMBG-1.4">its model page</Link>).
+            </li>
+            <li>
+              <strong>MediaPipe Selfie Segmenter</strong> by Google — the fallback model, under the
+              Apache 2.0 licence.
+            </li>
+          </ul>
 
           <h2>No warranty</h2>
           <p>

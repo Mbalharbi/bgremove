@@ -35,7 +35,7 @@ export default function Post() {
 
         <h2>Method 1: Browser-based AI (BgRemove) — recommended</h2>
         <p>Open <Link href="/">bgremovers.org</Link> in any browser. Drop an image. Wait 3-5 seconds. Download a transparent PNG. That's the entire workflow.</p>
-        <p>Behind the scenes, this uses RMBG-1.4 — an open-source AI model that's currently competitive with Adobe's commercial background removal pipeline. It runs entirely in your browser using WebAssembly and (when available) WebGPU. Your image never leaves your device.</p>
+        <p>Behind the scenes, this uses RMBG-1.4 — an openly available AI model that's currently competitive with Adobe's commercial background removal pipeline. It runs entirely in your browser using WebAssembly and (when available) WebGPU. Your image never leaves your device.</p>
         <p><strong>Best for:</strong> Portraits, product photos, animals, complex scenes. Any photo where the foreground subject is reasonably well-lit and reasonably contrasted against its background.</p>
         <p><strong>Quality vs Photoshop:</strong> On automatic Background Eraser results, BgRemove matches Photoshop's Remove Background quality in side-by-side testing. For manual refinement with Select and Mask, Photoshop still wins. For most users — especially anyone who'd use Photoshop's automatic tool anyway — there's no quality difference.</p>
         <p><strong>Cost:</strong> Free, unlimited, no signup.</p>

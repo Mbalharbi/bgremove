@@ -26,34 +26,34 @@ export const metadata: Metadata = {
 };
 
 const PROOFS = [
-  { Icon: ServerOff, title: "We have no upload endpoint", body: "BGRemovers is a static site on Cloudflare. There is no backend API, no /api routes, no database. Even if we wanted to receive your image, we have nowhere to put it." },
-  { Icon: Cpu, title: "The AI runs in your browser", body: "We use RMBG-1.4 via transformers.js (primary) with MediaPipe Selfie Segmenter (fallback). Both execute through WebAssembly + WebGPU on your own CPU/GPU. The model weights download once from a public CDN, then cache locally." },
-  { Icon: EyeOff, title: "We physically cannot see your photos", body: "Open browser DevTools → Network tab → drop an image. You will see no outbound HTTP POST/PUT carrying image bytes. The only outbound traffic is the one-time model download and (optionally) anonymous page-view analytics." },
-  { Icon: Lock, title: "We don't store anything either", body: "No cookies set by us beyond a theme preference. No localStorage of image data. When you close the tab, every pixel is freed from memory." },
+  { Icon: ServerOff, title: "The tool never sends your image anywhere", body: "The background remover in your browser makes no request carrying image data. Our small server (a Cloudflare Worker) only receives anonymous usage counts — like “one image processed in 3.2 s” — and feedback you choose to send. A separate developer API, not currently enabled, is the only route built to accept images, and only from developers who call it directly." },
+  { Icon: Cpu, title: "The AI runs in your browser", body: "We use RMBG-1.4 via transformers.js (primary) with MediaPipe Selfie Segmenter (fallback). Both execute through WebAssembly + WebGPU on your own CPU/GPU. The model weights download once from our own domain (bgremovers.org/m/), then are cached by your browser." },
+  { Icon: EyeOff, title: "Your photos never reach us", body: "Open browser DevTools → Network tab → drop an image. You will see no outbound request carrying image bytes. The only outbound traffic is the one-time model download, anonymous usage counts and page-view statistics — none of which contain image data." },
+  { Icon: Lock, title: "Your images aren't stored", body: "No cookies. Your browser keeps a few small preferences (such as theme) in local storage — never image data. When you close the tab, every pixel is freed from memory." },
 ];
 
 const VERIFY_STEPS = [
   { n: 1, title: "Open DevTools", body: "On the BGRemovers page, press F12 (Windows/Linux) or ⌥⌘I (Mac) to open Chrome DevTools." },
   { n: 2, title: "Switch to the Network tab", body: "Click the Network tab. Hit the Clear button (🚫) to wipe previous entries. Leave the filter set to All." },
   { n: 3, title: "Drop an image", body: "Drag any photo onto the tool. Watch the Network list. You will see the model file download once (if it's not already cached), and after that — nothing. No POST request with image data." },
-  { n: 4, title: "Try it offline (the killer proof)", body: "After the first load, disconnect Wi-Fi or enable Airplane mode. Drop another image. Background removal still works. Mathematically, no upload could possibly be happening." },
+  { n: 4, title: "Optional: try it offline", body: "Once the tool has loaded, switch off Wi-Fi without reloading the page and drop another image. It still works, because the AI is already running on your device. (After a full page reload offline, whether it works depends on your browser's cache — the Network tab check above is the reliable test.)" },
 ];
 
 const VS_TABLE = [
   { feature: "Image upload to a third-party server", us: "Never", cloud: "Always (the entire model)" },
   { feature: "Stored on a server (even temporarily)", us: "Never", cloud: "Yes, for a retention window" },
   { feature: "Sent through a CDN edge that logs requests", us: "Only the model file", cloud: "Every image + every result" },
-  { feature: "Subject to third-party data breaches", us: "Impossible by design", cloud: "Possible" },
-  { feature: "Works fully offline after first load", us: "Yes", cloud: "No" },
-  { feature: "Can the operator see your photo?", us: "No — we have no path to it", cloud: "Yes, in principle" },
+  { feature: "Your photo exposed in a server data breach", us: "No — it never reaches a server", cloud: "Possible" },
+  { feature: "Keeps working without internet once loaded", us: "Yes, in an open tab", cloud: "No" },
+  { feature: "Can the operator see your photo?", us: "No — it never reaches us", cloud: "Yes, in principle" },
 ];
 
 const FAQS = [
-  { q: "How can I be 100% sure no image is being uploaded?", a: "Open Chrome DevTools (F12), switch to the Network tab, drop an image, and watch. You'll see the AI model download once (from a public CDN), and after that, no outbound request carries your image bytes. As a final test, disconnect from the internet after the first load — background removal will still work, which is mathematically only possible if it's running locally." },
+  { q: "How can I be 100% sure no image is being uploaded?", a: "Open Chrome DevTools (F12), switch to the Network tab, drop an image, and watch. You'll see the AI model download once (from our own domain), and after that, no outbound request carries your image bytes. As an extra check, switch off your internet once the tool has loaded and process another image in the same tab — it still works, because the AI runs on your device." },
   { q: "What does 'browser-only AI' actually mean?", a: "It means the neural network weights are downloaded to your browser once, then inference (the actual background-detection calculation) runs on your device's CPU or GPU via WebAssembly and WebGPU. Your image data never enters a JSON payload, FormData blob, or any other outbound network request." },
   { q: "Where does the AI model come from?", a: "Two engines run as primary + fallback. RMBG-1.4 (briaai/RMBG-1.4) — 44–88 MB depending on your device, cached after the first visit. The fallback is MediaPipe Selfie Segmenter. Both are served from bgremovers.org/m/ through Cloudflare, so your browser never contacts Hugging Face, Google or jsdelivr." },
   { q: "Why does this matter for my business / portrait / passport photo?", a: "If you're processing a product photo before launch, an internal team headshot, a child's photo, an ID document, or anything else with privacy implications — cloud-based tools store your file on their servers for a retention window. That's a real risk vector (breaches, insider access, government requests). BGRemovers eliminates the risk by never having the file in the first place." },
-  { q: "What about analytics / tracking?", a: "We use anonymous Cloudflare Web Analytics (no cookies, no IP tracking) to count page views and country distribution. We never see filenames, image contents, or any data associated with the tool itself — because those don't exist on our side." },
+  { q: "What about analytics / tracking?", a: "We count anonymous page views and tool usage: which tool, success or failure, processing time, which AI engine ran, and country. No cookies, no file names, no image contents, and IP addresses are never stored (a one-way daily hash is used only to stop abuse). Our host, Cloudflare, also keeps its standard traffic statistics." },
   { q: "Is the code open for inspection?", a: "Yes. The repository is public on GitHub. You can read every line of the background-removal code in lib/bg-removal*.ts and verify there is no fetch() or XMLHttpRequest carrying image data anywhere in the pipeline." },
 ];
 
@@ -136,9 +136,9 @@ export default function PrivacyProofPage() {
             <div className="flex items-start gap-3">
               <Wifi className="h-5 w-5 shrink-0 text-primary" />
               <div>
-                <h3 className="font-semibold">The offline test is the killer proof</h3>
+                <h3 className="font-semibold">A quick extra check: go offline</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  No cloud tool can work without internet. After your first BGRemovers visit, the AI is cached locally. Disconnect Wi-Fi and try again. If it still works — and it will — there is mathematically no way an upload is happening.
+                  A cloud tool can&apos;t process anything without internet. Once the tool has loaded, switch off Wi-Fi and process another image in the same tab — it still works, because the AI runs on your device. The Network tab check above remains the most reliable proof.
                 </p>
               </div>
             </div>

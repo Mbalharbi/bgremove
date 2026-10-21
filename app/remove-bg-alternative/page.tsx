@@ -8,7 +8,7 @@ const TITLE = "Best Remove.bg Alternative — Free, No Credits, No Upload";
 const DESC = "Free Remove.bg alternative with no credit limits and no upload to servers. Same quality, your photos stay private. Built on RMBG-1.4.";
 const faqs = [
   { q: "Why look for a Remove.bg alternative?", a: "Remove.bg's free tier gives one HD image per month — useless for actual work. Paid plans start at $0.20/image and require uploading every photo. For frequent users or privacy-sensitive workflows, that's a hard wall." },
-  { q: "How does this compare on quality?", a: "BgRemove uses RMBG-1.4, the open-source model that's currently competitive with Remove.bg's commercial pipeline. On product photos, portraits, and complex edges, results are equal or better." },
+  { q: "How does this compare on quality?", a: "BgRemove uses RMBG-1.4, the openly available model that's currently competitive with Remove.bg's commercial pipeline. On product photos, portraits, and complex edges, results are equal or better." },
   { q: "Is it really free with no limits?", a: "Yes. No credits, no per-image fee, no daily quota, no account required. The tool runs in your browser using your own CPU/GPU, so there's no marginal server cost to fund." },
   { q: "What about resolution?", a: "Output up to 4096px. Remove.bg's high-resolution output is a paid feature; here it's free." },
   { q: "How is privacy different?", a: "Remove.bg uploads every image to their servers for processing. BgRemove runs entirely in your browser — images never leave your device. Verify with DevTools → Network tab during processing." },
@@ -29,7 +29,7 @@ export default function Page() {
       ]}
       sections={[
         { heading: "Why Remove.bg has a problem", body: "Remove.bg pioneered AI background removal but locked behind credits. For a regular user processing 100 images per month, that's $20/month — $240/year. For ecommerce sellers with hundreds of SKUs, it's prohibitive.\n\nThe free tier is essentially a demo: one HD image per month. Anyone doing real work hits the paywall immediately." },
-        { heading: "How BgRemove is free forever", body: "Three architectural differences make free possible:\n\n1. The AI model (RMBG-1.4) is open-source. We don't pay licensing fees per inference.\n\n2. Inference runs in YOUR browser using YOUR CPU/GPU. We have zero marginal cost per image.\n\n3. The site is static, hosted on Cloudflare's free tier. No backend, no database, no API quotas.\n\nResult: free for users, sustainable for us. No bait-and-switch." },
+        { heading: "How BgRemove is free forever", body: "Three architectural differences make free possible:\n\n1. The AI model (RMBG-1.4) is openly available. We don't pay a fee per image.\n\n2. Inference runs in YOUR browser using YOUR CPU/GPU. We have zero marginal cost per image.\n\n3. The site is hosted on Cloudflare's free tier. No image servers to pay for, no API quotas.\n\nResult: free for users, sustainable for us. No bait-and-switch." },
         { heading: "Migration from Remove.bg", body: "Cancel your Remove.bg subscription (optional).\n\nBookmark bgremovers.org.\n\nDrop images instead of uploading.\n\nSame quality, same speed (faster after the one-time 44MB model download).\n\nNo workflow changes for users; major workflow improvement for teams handling sensitive product photography." },
       ]}
       faqs={faqs} faqTitle="Frequently asked questions"

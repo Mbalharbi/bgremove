@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 const PROMISES = [
   { Icon: ServerOff, title: "Ihre Bilder erreichen unsere Server nie", body: "Die gesamte KI-Verarbeitung findet in Ihrem Browser mit lokalem Speicher und Ihrer CPU/GPU statt. Es gibt keinen Upload-Schritt." },
   { Icon: EyeOff, title: "Wir sehen Ihre Fotos nicht", body: "Wir können es physisch nicht — die technische Architektur macht es unmöglich." },
-  { Icon: Lock, title: "Keine Bildspeicherung", body: "Nicht einmal vorübergehend. Das KI-Modell lädt einmal von einem CDN und läuft danach lokal." },
+  { Icon: Lock, title: "Keine Bildspeicherung", body: "Nicht einmal vorübergehend. Das KI-Modell lädt einmal von unserer eigenen Domain und läuft danach lokal." },
   { Icon: ShieldCheck, title: "Kein Konto erforderlich", body: "Weil keins benötigt wird. Nichts zum Einloggen, nichts zu synchronisieren, nichts zum Löschen vergessen." },
 ];
 
@@ -48,7 +48,7 @@ export default function DePrivacyPage() {
       <section className="container py-10">
         <div className="prose prose-slate max-w-none dark:prose-invert">
           <h2>Die technische Version</h2>
-          <p>Wenn Sie {SITE.domain} besuchen, lädt Ihr Browser die BgRemove-Web-App (HTML, CSS, JavaScript) zusammen mit einem kleinen KI-Modell (~44 MB) von einem öffentlichen CDN herunter. <strong>Keine Netzwerkanfrage trägt Ihre Bilddaten.</strong> Sie können dies selbst überprüfen: öffnen Sie die DevTools → Netzwerk-Tab, ziehen Sie ein Bild in BgRemove und beobachten Sie — es findet kein Upload statt.</p>
+          <p>Wenn Sie {SITE.domain} besuchen, lädt Ihr Browser die BgRemove-Web-App (HTML, CSS, JavaScript) zusammen mit dem KI-Modell (44–88 MB, je nach Gerät) von unserer eigenen Domain herunter. <strong>Keine Netzwerkanfrage trägt Ihre Bilddaten.</strong> Sie können dies selbst überprüfen: öffnen Sie die DevTools → Netzwerk-Tab, ziehen Sie ein Bild in BgRemove und beobachten Sie — es findet kein Upload statt.</p>
           <h2>Anonyme Nutzungsstatistik</h2>
           <p>Wir zählen anonym, welches Werkzeug genutzt wurde, ob die Verarbeitung geklappt hat, wie lange sie dauerte, welche KI-Engine lief und ob das Ergebnis heruntergeladen wurde. Außerdem zählen wir anonym Seitenaufrufe (welche Seite, Domain der verweisenden Website, Gerätetyp und Browser). Keine Bilder, Dateinamen, IP-Adressen oder Cookies; im Browser wird nur ein Merker „schon einmal genutzt“ gespeichert. Wenn Sie Feedback senden, enthält es, wie Ihr letztes Bild verarbeitet wurde (Engine und Gerätetyp).</p>
           <h2>DSGVO-Konformität</h2>

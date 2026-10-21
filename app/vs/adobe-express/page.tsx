@@ -114,8 +114,8 @@ export default function Page() {
             constantly nudges you toward Creative Cloud upsells.
           </li>
           <li>
-            <strong>Works offline after first load.</strong> The AI model caches in your
-            browser. Adobe Express needs an internet connection every session.
+            <strong>Keeps working if your connection drops.</strong> Once loaded, the AI runs in
+            your browser tab. Adobe Express needs an internet connection for every edit.
           </li>
         </ul>
 

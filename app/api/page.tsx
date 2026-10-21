@@ -312,7 +312,7 @@ print("Remaining today:", r.headers.get("X-RateLimit-Remaining"))`}
           <div className="rounded-xl border border-border bg-card p-5">
             <Zap className="h-5 w-5 text-primary" />
             <h3 className="mt-3 font-semibold">REST API uses open models</h3>
-            <p className="mt-1.5 text-sm text-muted-foreground">RMBG-1.4 is open source. We pay only for the Worker compute, which is on Cloudflare's free tier for the 100/day usage.</p>
+            <p className="mt-1.5 text-sm text-muted-foreground">RMBG-1.4 is openly available. We pay only for the Worker compute, which is on Cloudflare's free tier for the 100/day usage.</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-5">
             <Lock className="h-5 w-5 text-primary" />

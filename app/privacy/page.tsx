@@ -26,8 +26,8 @@ export const metadata: Metadata = {
 
 const PROMISES = [
   { Icon: ServerOff, title: "Your images never reach our servers", body: "All AI processing happens in your browser using local memory and your CPU/GPU. There is no upload step." },
-  { Icon: EyeOff, title: "We don't see your photos", body: "We physically cannot — the technical architecture makes it impossible. We didn't add a privacy mode; the only mode is private." },
-  { Icon: Lock, title: "No image storage", body: "Even temporarily. The AI model loads from a CDN once and runs locally afterward." },
+  { Icon: EyeOff, title: "We don't see your photos", body: "The background remover never sends your image anywhere, so there is nothing for us to see. We didn't add a privacy mode; the only mode is private." },
+  { Icon: Lock, title: "No image storage", body: "Not even temporarily. The AI model loads once from our own domain and runs locally afterward." },
   { Icon: ShieldCheck, title: "No account required", body: "Because there's no need for one. There's nothing to log in to, nothing to sync, nothing to forget to delete." },
 ];
 
@@ -58,8 +58,8 @@ export default function PrivacyPage() {
           <h2>The technical version</h2>
           <p>
             When you visit {SITE.domain}, your browser downloads the BgRemove web app
-            (HTML, CSS, JavaScript) along with a small AI model (~4 MB) from a public CDN.
-            The model is cached locally after the first visit. When you select an image:
+            (HTML, CSS, JavaScript) along with the AI model (44–88 MB, depending on your device)
+            from our own domain. Your browser caches the model after the first visit. When you select an image:
           </p>
           <ol>
             <li>The image is read into your browser&apos;s memory as a binary blob.</li>
@@ -72,22 +72,27 @@ export default function PrivacyPage() {
             <strong>No network request carries your image data.</strong> You can verify this yourself:
             open browser DevTools → Network tab, drop an image into BgRemove, and watch — no upload occurs.
           </p>
+          <p>
+            This applies to every tool on this website. We also have a developer REST API that is
+            not currently enabled; by its nature it would receive the images developers send to it.
+            If we enable it, its own page will say so clearly.
+          </p>
 
           <h2>What we do collect</h2>
           <ul>
             <li>
-              <strong>Anonymous analytics</strong> (page views, browser type, country) via Cloudflare
-              Web Analytics, which sets no cookies.
+              <strong>Anonymous traffic statistics</strong> (page views, browser type, country) kept by
+              our host, Cloudflare, at the network level. No cookies.
             </li>
             <li>
               <strong>Anonymous usage counts</strong> — which tool was used, whether processing
               succeeded, how long it took, which AI engine ran, and whether you downloaded the result.
-              We also count anonymous page views (which page, the referring site&apos;s domain, device type and browser). No images, file names, IP addresses or cookies; a single &ldquo;used before&rdquo; flag
-              is kept in your browser. If you send feedback, it includes how your last image was
+              We also count anonymous page views (which page, the referring site&apos;s domain, device type and browser). No images, file names or cookies, and IP addresses are never stored — a one-way daily hash
+              is used only to stop abuse. A single &ldquo;used before&rdquo; flag is kept in your browser. If you send feedback, it includes how your last image was
               processed (engine and device type).
             </li>
             <li>
-              <strong>Standard server logs</strong> from our static host (Cloudflare Pages) for the
+              <strong>Standard server logs</strong> from our host (Cloudflare) for the
               HTML/JS/model files you download. These contain IP addresses and User-Agent strings,
               held according to Cloudflare&apos;s default retention.
             </li>
@@ -105,12 +110,9 @@ export default function PrivacyPage() {
               requests to Hugging Face, Google or jsdelivr. Standard CDN logging applies.
             </li>
             <li>
-              <strong>Google Analytics 4</strong> — once enabled, sets a <code>_ga</code> cookie used
-              for anonymous traffic measurement.
-            </li>
-            <li>
-              <strong>Google AdSense</strong> — if shown, may set advertising cookies. Subject to a
-              cookie consent banner for EU/UK visitors.
+              <strong>No ads and no third-party trackers.</strong> We currently use no Google
+              Analytics, no advertising and no tracking cookies. If that ever changes, this page will
+              be updated first, and consent will be requested where the law requires it.
             </li>
           </ul>
 

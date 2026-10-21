@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 const PROMISES = [
   { Icon: ServerOff, title: "Tus imágenes nunca llegan a nuestros servidores", body: "Todo el procesamiento de IA ocurre en tu navegador usando memoria local y tu CPU/GPU. No hay paso de subida." },
   { Icon: EyeOff, title: "No vemos tus fotos", body: "Físicamente no podemos — la arquitectura técnica lo hace imposible." },
-  { Icon: Lock, title: "Sin almacenamiento de imágenes", body: "Ni siquiera temporalmente. El modelo de IA carga de un CDN una vez y luego corre localmente." },
+  { Icon: Lock, title: "Sin almacenamiento de imágenes", body: "Ni siquiera temporalmente. El modelo de IA carga una vez desde nuestro propio dominio y luego corre localmente." },
   { Icon: ShieldCheck, title: "Sin cuenta requerida", body: "Porque no se necesita. Nada para iniciar sesión, nada para sincronizar, nada para olvidar borrar." },
 ];
 
@@ -48,7 +48,7 @@ export default function EsPrivacyPage() {
       <section className="container py-10">
         <div className="prose prose-slate max-w-none dark:prose-invert">
           <h2>La versión técnica</h2>
-          <p>Cuando visitas {SITE.domain}, tu navegador descarga la aplicación BgRemove (HTML, CSS, JavaScript) junto con un pequeño modelo de IA (~44 MB) de un CDN público. <strong>Ninguna solicitud de red lleva los datos de tus imágenes.</strong> Puedes verificarlo: abre DevTools → pestaña Network, suelta una imagen en BgRemove y observa — no ocurre subida.</p>
+          <p>Cuando visitas {SITE.domain}, tu navegador descarga la aplicación BgRemove (HTML, CSS, JavaScript) junto con el modelo de IA (44–88 MB según tu dispositivo) desde nuestro propio dominio. <strong>Ninguna solicitud de red lleva los datos de tus imágenes.</strong> Puedes verificarlo: abre DevTools → pestaña Network, suelta una imagen en BgRemove y observa — no ocurre subida.</p>
           <h2>Estadísticas de uso anónimas</h2>
           <p>Contamos de forma anónima qué herramienta se usó, si el procesamiento funcionó, cuánto tardó, qué motor de IA se ejecutó y si se descargó el resultado. También contamos visitas a páginas de forma anónima (qué página, el dominio del sitio de origen, tipo de dispositivo y navegador). Sin imágenes, nombres de archivo, direcciones IP ni cookies; en tu navegador solo se guarda una marca de «ya lo usó antes». Si envías tu opinión, incluye cómo se procesó tu última imagen (motor y tipo de dispositivo).</p>
           <h2>Contacto</h2>

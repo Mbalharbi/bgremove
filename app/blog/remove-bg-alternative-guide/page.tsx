@@ -40,7 +40,7 @@ export default function Post() {
 
         <h3>1. BgRemove — recommended</h3>
         <p><strong>Cost:</strong> Free, unlimited, no signup, no watermarks.</p>
-        <p><strong>Quality:</strong> Uses RMBG-1.4 (open source, competitive with Remove.bg's commercial pipeline).</p>
+        <p><strong>Quality:</strong> Uses RMBG-1.4 (openly available, competitive with Remove.bg's commercial pipeline).</p>
         <p><strong>Privacy:</strong> Browser-only processing. Images never leave your device. <Link href="/privacy-proof/">Verifiable</Link>.</p>
         <p><strong>Bulk:</strong> 20 images at once, free.</p>
         <p><strong>Catch:</strong> Web-only, no API. First use downloads a 44MB model (one-time, cached after).</p>

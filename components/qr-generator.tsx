@@ -2,17 +2,45 @@
 
 import * as React from "react";
 import { Download, RefreshCw } from "lucide-react";
+import qrcode from "qrcode-generator";
 import { Button } from "@/components/ui/button";
 
 /**
- * Client-side QR code generator. Uses the goqr.me public SVG API (no key,
- * no upload of user secrets — the URL itself becomes the QR). All rendering
- * happens via a returned SVG that the browser decodes locally. No backend
- * of ours touches the data.
- *
- * For purely-offline generation we'd need a QR codec in the bundle (~10KB).
- * We can add `qrcode-generator` later if we want fully air-gapped mode.
+ * QR code generator that runs entirely in the browser (qrcode-generator, MIT).
+ * The text never leaves the device — it often holds Wi-Fi passwords or
+ * contact details, which a third-party QR API would receive and could log.
  */
+
+qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
+
+/** Draw the QR code to a canvas: `size`×`size` px including a 4-module quiet zone. */
+function renderQr(text: string, size: number, fg: string, bg: string, ecc: "L" | "M" | "Q" | "H"): HTMLCanvasElement | null {
+  let qr: ReturnType<typeof qrcode>;
+  try {
+    qr = qrcode(0, ecc);
+    qr.addData(text, "Byte");
+    qr.make();
+  } catch {
+    return null; // too long for a QR code at this error-correction level
+  }
+  const n = qr.getModuleCount();
+  const cell = size / (n + 8);
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d")!;
+  ctx.fillStyle = `#${bg}`;
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = `#${fg}`;
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      if (!qr.isDark(y, x)) continue;
+      // Snap to whole pixels so neighbouring modules don't leave hairline gaps.
+      const x0 = Math.round((x + 4) * cell), y0 = Math.round((y + 4) * cell);
+      ctx.fillRect(x0, y0, Math.round((x + 5) * cell) - x0, Math.round((y + 5) * cell) - y0);
+    }
+  }
+  return c;
+}
 
 const SIZES = [256, 512, 1024];
 const COLORS = [
@@ -29,17 +57,19 @@ export function QrGenerator() {
   const [ecc, setEcc] = React.useState<"L" | "M" | "Q" | "H">("M");
 
   const trimmed = text.trim();
-  const qrUrl = trimmed
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(
-        trimmed
-      )}&color=${color.fg}&bgcolor=${color.bg}&ecc=${ecc}&format=png`
-    : "";
+  // Rendered after mount (needs a canvas), so the static HTML and first client render match.
+  const [canvas, setCanvas] = React.useState<HTMLCanvasElement | null>(null);
+  const [tooLong, setTooLong] = React.useState(false);
+  React.useEffect(() => {
+    const c = trimmed ? renderQr(trimmed, size, color.fg, color.bg, ecc) : null;
+    setCanvas(c);
+    setTooLong(!!trimmed && !c);
+  }, [trimmed, size, color, ecc]);
+  const qrUrl = React.useMemo(() => canvas?.toDataURL("image/png") ?? "", [canvas]);
 
-  const handleDownload = async () => {
-    if (!qrUrl) return;
-    try {
-      const res = await fetch(qrUrl);
-      const blob = await res.blob();
+  const handleDownload = () => {
+    canvas?.toBlob((blob) => {
+      if (!blob) return;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -48,10 +78,7 @@ export function QrGenerator() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch {
-      // Fallback: open in new tab.
-      window.open(qrUrl, "_blank", "noopener");
-    }
+    }, "image/png");
   };
 
   return (
@@ -72,6 +99,7 @@ export function QrGenerator() {
           />
           <p className="mt-1 text-xs text-muted-foreground">
             {trimmed.length} character{trimmed.length === 1 ? "" : "s"}
+            {tooLong && " — too long for a QR code; shorten it or lower the error correction."}
           </p>
         </div>
 

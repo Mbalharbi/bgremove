@@ -10,7 +10,7 @@ import { SITE } from "@/lib/site";
 const URL = `${SITE.url}/tools/qr-code-generator/`;
 const TITLE = "Free QR Code Generator — Customisable, No Signup";
 const DESCRIPTION =
-  "Generate QR codes for URLs, Wi-Fi, contact cards, and more. Free, no signup, no watermark, no tracking. Download as PNG.";
+  "Generate QR codes for URLs, Wi-Fi, contact cards, and more — made on your device, so your text is never sent anywhere. Free, no signup, no watermark. Download as PNG.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 };
 
 const FAQS = [
+  { q: "Is my text (like a Wi-Fi password) sent anywhere?", a: "No. The QR code is drawn by your own browser, so what you type never leaves your device — safe for Wi-Fi passwords and contact details." },
   { q: "Is this QR generator really free?", a: "Yes — completely free, no signup, no watermark, unlimited usage. Generate as many QR codes as you want." },
   { q: "What can I encode in a QR code?", a: "Any text or URL. Common uses: links, Wi-Fi credentials, contact cards (vCard), email addresses, phone numbers, plain text, or app deep links." },
   { q: "What size should I download?", a: "256px is fine for screen use and most prints. Use 512px for posters/menus, and 1024px for large prints, billboards, or scaling tolerance." },

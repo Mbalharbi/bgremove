@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 const PROMISES = [
   { Icon: ServerOff, title: "Gambar Anda tidak pernah sampai ke server kami", body: "Semua pemrosesan AI terjadi di browser Anda menggunakan memori lokal dan CPU/GPU Anda. Tidak ada langkah upload." },
   { Icon: EyeOff, title: "Kami tidak melihat foto Anda", body: "Secara fisik kami tidak bisa — arsitektur teknisnya membuatnya mustahil." },
-  { Icon: Lock, title: "Tidak ada penyimpanan gambar", body: "Bahkan tidak sementara. Model AI dimuat sekali dari CDN dan berjalan lokal setelahnya." },
+  { Icon: Lock, title: "Tidak ada penyimpanan gambar", body: "Bahkan tidak sementara. Model AI dimuat sekali dari domain kami sendiri dan berjalan lokal setelahnya." },
   { Icon: ShieldCheck, title: "Tanpa akun", body: "Karena tidak butuh. Tidak ada yang perlu di-login, disinkronkan, atau dihapus." },
 ];
 
@@ -48,7 +48,7 @@ export default function IdPrivacyPage() {
       <section className="container py-10">
         <div className="prose prose-slate max-w-none dark:prose-invert">
           <h2>Versi teknis</h2>
-          <p>Saat Anda mengunjungi {SITE.domain}, browser Anda mengunduh aplikasi BgRemove (HTML, CSS, JavaScript) bersama model AI kecil (~44 MB) dari CDN publik. <strong>Tidak ada permintaan jaringan yang membawa data gambar Anda.</strong> Anda dapat memverifikasi sendiri: buka DevTools → tab Network, tarik gambar ke BgRemove, dan amati — tidak ada upload.</p>
+          <p>Saat Anda mengunjungi {SITE.domain}, browser Anda mengunduh aplikasi BgRemove (HTML, CSS, JavaScript) bersama model AI (44–88 MB, tergantung perangkat) dari domain kami sendiri. <strong>Tidak ada permintaan jaringan yang membawa data gambar Anda.</strong> Anda dapat memverifikasi sendiri: buka DevTools → tab Network, tarik gambar ke BgRemove, dan amati — tidak ada upload.</p>
           <h2>Statistik penggunaan anonim</h2>
           <p>Kami menghitung secara anonim alat mana yang dipakai, apakah pemrosesan berhasil, berapa lama, mesin AI mana yang berjalan, dan apakah hasilnya diunduh. Kami juga menghitung kunjungan halaman secara anonim (halaman mana, domain situs perujuk, jenis perangkat, dan browser). Tanpa gambar, nama file, alamat IP, atau cookie; di browser Anda hanya disimpan satu penanda “pernah memakai”. Jika Anda mengirim masukan, masukan itu menyertakan cara gambar terakhir Anda diproses (mesin dan jenis perangkat).</p>
           <h2>Kontak</h2>
