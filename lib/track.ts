@@ -13,7 +13,7 @@
 import { detectLocale } from "@/lib/locales";
 
 export type Tool = "remove" | "bulk" | "compress" | "resize" | "webp" | "qr" | "metadata";
-export type UsageEvent = "upload" | "success" | "fail" | "download" | "edit_open" | "edit_apply" | "bg_change" | "solid_apply";
+export type UsageEvent = "upload" | "success" | "fail" | "download" | "edit_open" | "edit_apply" | "bg_change" | "solid_apply" | "wand_use";
 
 export interface EventDetails {
   engine?: string;
@@ -92,8 +92,9 @@ export function errorReason(err: unknown): string {
   const m = (err instanceof Error ? err.message : String(err)).toLowerCase();
   if (/too large|maximum is/.test(m)) return "too-large";
   if (/decode|could not decode/.test(m)) return "decode";
-  if (/fetch|network|load|import/.test(m)) return "model-load";
-  if (/memory|allocation|oom/.test(m)) return "memory";
+  if (/fetch|network|load|import|abort/.test(m)) return "model-load";
+  // Encoding a huge canvas fails when the tab runs out of memory.
+  if (/memory|allocation|oom|encode|canvas/.test(m)) return "memory";
   if (/webgpu|gpu|device/.test(m)) return "gpu";
   return "other";
 }

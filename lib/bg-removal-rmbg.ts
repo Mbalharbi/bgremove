@@ -11,6 +11,7 @@
  */
 
 import type { LoadStage, RemoveOptions, RemoveResult } from "./bg-removal-types";
+import { refineEdges } from "./refine-edges";
 
 const MODEL_ID = "briaai/RMBG-1.4";
 
@@ -120,6 +121,11 @@ function onTransformersProgress(p: { status?: string; file?: string; loaded?: nu
 
 let rmbgReady = false;
 let chosen: DeviceChoice | null = null;
+/** Set after WebGPU fails on this device: use the CPU build of the same model from then on. */
+let forceWasm = false;
+const WASM_CHOICE: DeviceChoice = { device: "wasm", dtype: "q8" };
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function getRmbgPipeline(
   onProgress?: (stage: LoadStage) => void,
@@ -149,17 +155,34 @@ export async function getRmbgPipeline(
         T.env.backends.onnx.wasm.wasmPaths = `${window.location.origin}${ASSET_BASE}${TRANSFORMERS_DIR}`;
 
         emitStage("loading-model");
-        const { device, dtype } = await pickDevice(T);
-        chosen = { device, dtype };
-
-        const model = await T.AutoModel.from_pretrained(MODEL_ID, {
-          // @ts-ignore — transformers.js accepts these
-          device,
-          // @ts-ignore
-          dtype,
-          // @ts-ignore
-          progress_callback: onTransformersProgress,
-        });
+        const first = forceWasm ? WASM_CHOICE : await pickDevice(T);
+        // A dropped connection on the large weights file is the usual cause of
+        // a failed load (slow links, e.g. mainland China): try once more, and
+        // if WebGPU itself is the problem, fall back to the CPU build of the
+        // same model rather than the much weaker MediaPipe fallback.
+        const attempts: DeviceChoice[] = first.device === "webgpu" ? [first, first, WASM_CHOICE] : [first, first];
+        let model: any;
+        for (let k = 0; ; k++) {
+          const choice = attempts[k];
+          try {
+            model = await T.AutoModel.from_pretrained(MODEL_ID, {
+              // @ts-ignore — transformers.js accepts these
+              device: choice.device,
+              // @ts-ignore
+              dtype: choice.dtype,
+              // @ts-ignore
+              progress_callback: onTransformersProgress,
+            });
+            chosen = choice;
+            if (choice.device === "wasm") forceWasm = true;
+            break;
+          } catch (err) {
+            if (k === attempts.length - 1) throw err;
+            console.warn(`[bg-removal] RMBG load failed on ${choice.device}/${choice.dtype}, retrying:`, err);
+            fileBytes.clear();
+            await sleep(1500);
+          }
+        }
         const processor = await T.AutoProcessor.from_pretrained(MODEL_ID, {
           // @ts-ignore — supplying explicit config because the model repo lacks one
           config: {
@@ -234,6 +257,22 @@ export async function removeBackgroundRmbg(
   file: File | Blob,
   opts: RemoveOptions = {}
 ): Promise<RemoveResult> {
+  try {
+    return await runRmbg(file, opts);
+  } catch (err) {
+    // WebGPU can fail mid-run (driver reset, GPU out of memory). The CPU
+    // build gives the same quality, just slower — try it before giving up.
+    if (chosen?.device !== "webgpu" || /decode/i.test(String((err as Error)?.message))) throw err;
+    console.warn("[bg-removal] RMBG failed on WebGPU, retrying on CPU:", err);
+    forceWasm = true;
+    rmbgReady = false;
+    modelPromise?.then(({ model }) => model.dispose?.()).catch(() => {});
+    modelPromise = null;
+    return runRmbg(file, opts);
+  }
+}
+
+async function runRmbg(file: File | Blob, opts: RemoveOptions): Promise<RemoveResult> {
   const start = performance.now();
   const { model, processor, T } = await getRmbgPipeline(opts.onProgress, opts.onDownloadProgress);
   const loadMs = performance.now() - start;
@@ -274,10 +313,12 @@ export async function removeBackgroundRmbg(
   // Mask comes back at the model's working size (1024x1024). Resize to source.
   const mask = await T.RawImage.fromTensor(output[0].mul(255).to("uint8")).resize(width, height);
 
-  // Composite alpha into the existing RGB pixels.
+  // Composite alpha into the existing RGB pixels, after sharpening the
+  // stretched mask's edges against the photo itself (lib/refine-edges.ts).
   const imageData = ctx.getImageData(0, 0, width, height);
   const pixels = imageData.data;
   const m = mask.data as Uint8Array;
+  refineEdges(pixels, m, width, height);
   for (let i = 0; i < width * height; i++) pixels[i * 4 + 3] = m[i];
   ctx.putImageData(imageData, 0, 0);
 

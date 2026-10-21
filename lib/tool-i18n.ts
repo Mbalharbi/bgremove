@@ -56,6 +56,11 @@ export interface ToolStrings {
   erase: string;
   restore: string;
   brushSize: string;
+  brushTool: string;
+  wandTool: string;
+  tolerance: string;
+  wandAll: string;
+  wandHint: string;
   undo: string;
   redo: string;
   zoomIn: string;
@@ -82,6 +87,19 @@ export interface ToolStrings {
   bgTitle: string;
   newBadge: string;
   errHeic: string;
+  // Bulk page (components/bulk-remover.tsx)
+  bulkLimitTitle: string;
+  bulkLimitDesc: (max: number) => string;
+  bulkCount: (n: number, max: number, ready: number) => string;
+  bulkWorking: string;
+  bulkClear: string;
+  bulkRunning: (done: number, total: number) => string;
+  bulkStart: (n: number) => string;
+  bulkZip: (n: number) => string;
+  bulkQueued: string;
+  bulkProcessing: string;
+  downloadOne: string;
+  removeItem: string;
 }
 
 const MB = "MB";
@@ -125,6 +143,11 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     erase: "Erase",
     restore: "Restore",
     brushSize: "Size",
+    brushTool: "Brush",
+    wandTool: "Magic wand",
+    tolerance: "Tolerance",
+    wandAll: "All matching colours",
+    wandHint: "Click a colour: Erase removes that whole area, Restore brings it back. Raise Tolerance to grab more shades.",
     undo: "Undo",
     redo: "Redo",
     zoomIn: "Zoom in",
@@ -150,6 +173,18 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     bgTitle: "Change background",
     newBadge: "New",
     errHeic: "This HEIC photo couldn't be converted. Export it as JPG and try again.",
+    bulkLimitTitle: "Limit reached",
+    bulkLimitDesc: (max) => `Maximum ${max} images per batch.`,
+    bulkCount: (n, max, ready) => `${n} of ${max} images · ${ready} ready`,
+    bulkWorking: "Processing…",
+    bulkClear: "Clear all",
+    bulkRunning: (d, t) => `Processing ${d}/${t}`,
+    bulkStart: (n) => `Remove backgrounds (${n})`,
+    bulkZip: (n) => `Download all as ZIP (${n})`,
+    bulkQueued: "Queued",
+    bulkProcessing: "Processing",
+    downloadOne: "Download",
+    removeItem: "Remove",
   },
   ar: {
     dropOne: "اسحب صورة أو الصقها أو اضغط للرفع",
@@ -189,6 +224,11 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     erase: "مسح",
     restore: "استرجاع",
     brushSize: "الحجم",
+    brushTool: "فرشاة",
+    wandTool: "عصا سحرية",
+    tolerance: "الحساسية",
+    wandAll: "كل الألوان المتشابهة",
+    wandHint: "انقر على لون: «مسح» يزيل المنطقة كلها و«استرجاع» يعيدها. ارفع الحساسية لتشمل درجات أكثر.",
     undo: "تراجع",
     redo: "إعادة",
     zoomIn: "تكبير",
@@ -214,6 +254,18 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     bgTitle: "غيّر الخلفية",
     newBadge: "جديد",
     errHeic: "تعذّر تحويل صورة HEIC هذه. صدّرها بصيغة JPG ثم حاول مرة أخرى.",
+    bulkLimitTitle: "وصلت للحد الأقصى",
+    bulkLimitDesc: (max) => `الحد الأقصى ${max} صورة في الدفعة.`,
+    bulkCount: (n, max, ready) => `${n} من ${max} صورة · ${ready} جاهزة`,
+    bulkWorking: "جارٍ المعالجة…",
+    bulkClear: "مسح الكل",
+    bulkRunning: (d, t) => `جارٍ المعالجة ${d}/${t}`,
+    bulkStart: (n) => `إزالة الخلفيات (${n})`,
+    bulkZip: (n) => `تنزيل الكل ZIP (${n})`,
+    bulkQueued: "في الانتظار",
+    bulkProcessing: "جارٍ المعالجة",
+    downloadOne: "تنزيل",
+    removeItem: "حذف",
   },
   zh: {
     dropOne: "拖放、粘贴或点击上传图片",
@@ -253,6 +305,11 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     erase: "擦除",
     restore: "恢复",
     brushSize: "大小",
+    brushTool: "画笔",
+    wandTool: "魔术棒",
+    tolerance: "容差",
+    wandAll: "所有相似颜色",
+    wandHint: "点击某个颜色：“擦除”去掉整片区域，“恢复”找回它。提高容差可选中更多相近色。",
     undo: "撤销",
     redo: "重做",
     zoomIn: "放大",
@@ -278,6 +335,18 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     bgTitle: "更换背景",
     newBadge: "新",
     errHeic: "无法转换这张 HEIC 照片，请导出为 JPG 后重试。",
+    bulkLimitTitle: "已达上限",
+    bulkLimitDesc: (max) => `每批最多 ${max} 张图片。`,
+    bulkCount: (n, max, ready) => `${n} / ${max} 张 · ${ready} 张已完成`,
+    bulkWorking: "处理中…",
+    bulkClear: "全部清除",
+    bulkRunning: (d, t) => `处理中 ${d}/${t}`,
+    bulkStart: (n) => `开始抠图（${n}）`,
+    bulkZip: (n) => `打包下载 ZIP（${n}）`,
+    bulkQueued: "排队中",
+    bulkProcessing: "处理中",
+    downloadOne: "下载",
+    removeItem: "移除",
   },
   es: {
     dropOne: "Suelta una imagen, pégala o toca para subir",
@@ -317,6 +386,11 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     erase: "Borrar",
     restore: "Restaurar",
     brushSize: "Tamaño",
+    brushTool: "Pincel",
+    wandTool: "Varita mágica",
+    tolerance: "Tolerancia",
+    wandAll: "Todos los colores iguales",
+    wandHint: "Haz clic en un color: Borrar quita toda esa zona, Restaurar la recupera. Sube la tolerancia para abarcar más tonos.",
     undo: "Deshacer",
     redo: "Rehacer",
     zoomIn: "Acercar",
@@ -342,6 +416,18 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     bgTitle: "Cambiar fondo",
     newBadge: "Nuevo",
     errHeic: "No se pudo convertir esta foto HEIC. Expórtala como JPG e inténtalo de nuevo.",
+    bulkLimitTitle: "Límite alcanzado",
+    bulkLimitDesc: (max) => `Máximo ${max} imágenes por lote.`,
+    bulkCount: (n, max, ready) => `${n} de ${max} imágenes · ${ready} listas`,
+    bulkWorking: "Procesando…",
+    bulkClear: "Borrar todo",
+    bulkRunning: (d, t) => `Procesando ${d}/${t}`,
+    bulkStart: (n) => `Quitar fondos (${n})`,
+    bulkZip: (n) => `Descargar todo en ZIP (${n})`,
+    bulkQueued: "En cola",
+    bulkProcessing: "Procesando",
+    downloadOne: "Descargar",
+    removeItem: "Quitar",
   },
   pt: {
     dropOne: "Solte uma imagem, cole ou toque para enviar",
@@ -381,6 +467,11 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     erase: "Apagar",
     restore: "Restaurar",
     brushSize: "Tamanho",
+    brushTool: "Pincel",
+    wandTool: "Varinha mágica",
+    tolerance: "Tolerância",
+    wandAll: "Todas as cores iguais",
+    wandHint: "Clique numa cor: Apagar remove a área inteira, Restaurar traz de volta. Aumente a tolerância para pegar mais tons.",
     undo: "Desfazer",
     redo: "Refazer",
     zoomIn: "Ampliar",
@@ -406,6 +497,18 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     bgTitle: "Trocar fundo",
     newBadge: "Novo",
     errHeic: "Não foi possível converter esta foto HEIC. Exporte como JPG e tente novamente.",
+    bulkLimitTitle: "Limite atingido",
+    bulkLimitDesc: (max) => `Máximo de ${max} imagens por lote.`,
+    bulkCount: (n, max, ready) => `${n} de ${max} imagens · ${ready} prontas`,
+    bulkWorking: "Processando…",
+    bulkClear: "Limpar tudo",
+    bulkRunning: (d, t) => `Processando ${d}/${t}`,
+    bulkStart: (n) => `Remover fundos (${n})`,
+    bulkZip: (n) => `Baixar tudo em ZIP (${n})`,
+    bulkQueued: "Na fila",
+    bulkProcessing: "Processando",
+    downloadOne: "Baixar",
+    removeItem: "Remover",
   },
   de: {
     dropOne: "Bild ablegen, einfügen oder tippen zum Hochladen",
@@ -445,6 +548,11 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     erase: "Radieren",
     restore: "Wiederherstellen",
     brushSize: "Größe",
+    brushTool: "Pinsel",
+    wandTool: "Zauberstab",
+    tolerance: "Toleranz",
+    wandAll: "Alle ähnlichen Farben",
+    wandHint: "Klicke auf eine Farbe: Radieren entfernt den ganzen Bereich, Wiederherstellen holt ihn zurück. Höhere Toleranz erfasst mehr Farbtöne.",
     undo: "Rückgängig",
     redo: "Wiederholen",
     zoomIn: "Vergrößern",
@@ -470,6 +578,18 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     bgTitle: "Hintergrund ändern",
     newBadge: "Neu",
     errHeic: "Dieses HEIC-Foto konnte nicht umgewandelt werden. Als JPG exportieren und erneut versuchen.",
+    bulkLimitTitle: "Limit erreicht",
+    bulkLimitDesc: (max) => `Maximal ${max} Bilder pro Durchgang.`,
+    bulkCount: (n, max, ready) => `${n} von ${max} Bildern · ${ready} fertig`,
+    bulkWorking: "Wird verarbeitet…",
+    bulkClear: "Alle entfernen",
+    bulkRunning: (d, t) => `Verarbeite ${d}/${t}`,
+    bulkStart: (n) => `Hintergründe entfernen (${n})`,
+    bulkZip: (n) => `Alle als ZIP laden (${n})`,
+    bulkQueued: "Wartet",
+    bulkProcessing: "Wird verarbeitet",
+    downloadOne: "Herunterladen",
+    removeItem: "Entfernen",
   },
   hi: {
     dropOne: "इमेज ड्रॉप करें, पेस्ट करें या अपलोड के लिए टैप करें",
@@ -509,6 +629,11 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     erase: "मिटाएँ",
     restore: "वापस लाएँ",
     brushSize: "साइज़",
+    brushTool: "ब्रश",
+    wandTool: "मैजिक वैंड",
+    tolerance: "टॉलरेंस",
+    wandAll: "सभी मिलते रंग",
+    wandHint: "किसी रंग पर क्लिक करें: “मिटाएँ” पूरा हिस्सा हटाता है, “वापस लाएँ” उसे लौटाता है। ज़्यादा शेड चुनने के लिए टॉलरेंस बढ़ाएँ।",
     undo: "पूर्ववत",
     redo: "फिर से करें",
     zoomIn: "ज़ूम इन",
@@ -534,6 +659,18 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     bgTitle: "बैकग्राउंड बदलें",
     newBadge: "नया",
     errHeic: "यह HEIC फ़ोटो बदली नहीं जा सकी। JPG में एक्सपोर्ट करके दोबारा कोशिश करें।",
+    bulkLimitTitle: "सीमा पूरी",
+    bulkLimitDesc: (max) => `एक बैच में अधिकतम ${max} इमेज।`,
+    bulkCount: (n, max, ready) => `${max} में से ${n} इमेज · ${ready} तैयार`,
+    bulkWorking: "प्रोसेस हो रहा है…",
+    bulkClear: "सब हटाएँ",
+    bulkRunning: (d, t) => `प्रोसेस ${d}/${t}`,
+    bulkStart: (n) => `बैकग्राउंड हटाएँ (${n})`,
+    bulkZip: (n) => `सब ZIP में डाउनलोड करें (${n})`,
+    bulkQueued: "कतार में",
+    bulkProcessing: "प्रोसेस हो रहा है",
+    downloadOne: "डाउनलोड",
+    removeItem: "हटाएँ",
   },
   id: {
     dropOne: "Tarik gambar, tempel, atau ketuk untuk unggah",
@@ -573,6 +710,11 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     erase: "Hapus",
     restore: "Pulihkan",
     brushSize: "Ukuran",
+    brushTool: "Kuas",
+    wandTool: "Tongkat ajaib",
+    tolerance: "Toleransi",
+    wandAll: "Semua warna serupa",
+    wandHint: "Klik sebuah warna: Hapus membuang seluruh area itu, Pulihkan mengembalikannya. Naikkan toleransi untuk mencakup lebih banyak nuansa.",
     undo: "Urungkan",
     redo: "Ulangi",
     zoomIn: "Perbesar",
@@ -598,6 +740,18 @@ export const TOOL_STRINGS: Record<LocaleCode, ToolStrings> = {
     bgTitle: "Ganti latar",
     newBadge: "Baru",
     errHeic: "Foto HEIC ini tidak bisa dikonversi. Ekspor sebagai JPG lalu coba lagi.",
+    bulkLimitTitle: "Batas tercapai",
+    bulkLimitDesc: (max) => `Maksimal ${max} gambar per batch.`,
+    bulkCount: (n, max, ready) => `${n} dari ${max} gambar · ${ready} siap`,
+    bulkWorking: "Memproses…",
+    bulkClear: "Hapus semua",
+    bulkRunning: (d, t) => `Memproses ${d}/${t}`,
+    bulkStart: (n) => `Hapus latar (${n})`,
+    bulkZip: (n) => `Unduh semua sebagai ZIP (${n})`,
+    bulkQueued: "Antre",
+    bulkProcessing: "Memproses",
+    downloadOne: "Unduh",
+    removeItem: "Hapus",
   },
 };
 

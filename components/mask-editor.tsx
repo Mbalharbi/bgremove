@@ -2,7 +2,8 @@
 
 /**
  * Manual touch-up after background removal: an erase brush (make pixels
- * transparent) and a restore brush (bring back the original pixels).
+ * transparent) and a restore brush (bring back the original pixels), plus a
+ * magic wand that does the same to a whole area of similar colour in one click.
  *
  * Works on the full-resolution alpha channel. The original image's RGB is
  * always used for colour, so "restore" brings back exactly what was in the
@@ -13,12 +14,15 @@
  */
 
 import * as React from "react";
-import { Eraser, Paintbrush, Undo2, Redo2, ZoomIn, ZoomOut, Maximize2, Eye, EyeOff, Check, X } from "lucide-react";
+import { Eraser, Paintbrush, Wand2, Brush, Undo2, Redo2, ZoomIn, ZoomOut, Maximize2, Eye, EyeOff, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToolStrings } from "@/lib/tool-i18n";
 import { cn } from "@/lib/utils";
+import { wandSelect } from "@/lib/magic-wand";
+import { toolFromPath, track } from "@/lib/track";
 
 type Mode = "erase" | "restore";
+type Tool = "brush" | "wand";
 
 interface MaskEditorProps {
   originalUrl: string;
@@ -54,6 +58,10 @@ export function MaskEditor({ originalUrl, resultBlob, onDone, onCancel }: MaskEd
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [ready, setReady] = React.useState(false);
   const [mode, setMode] = React.useState<Mode>("erase");
+  const [tool, setTool] = React.useState<Tool>("brush");
+  const [tolerance, setTolerance] = React.useState(25);
+  const [wandAll, setWandAll] = React.useState(false);
+  const wandTracked = React.useRef(false);
   const [size, setSize] = React.useState(30); // on-screen diameter in CSS px
   const [zoom, setZoom] = React.useState(1);
   const [ghost, setGhost] = React.useState(true);
@@ -186,9 +194,36 @@ export function MaskEditor({ originalUrl, resultBlob, onDone, onCancel }: MaskEd
     }
   };
 
+  /** One wand click: erase or restore every pixel of similar colour. */
+  const applyWand = (x: number, y: number) => {
+    const s = st.current!;
+    pushUndo();
+    const sel = wandSelect(s.rgb, s.w, s.h, x, y, tolerance, !wandAll);
+    for (let i = 0; i < sel.length; i++) {
+      const k = sel[i];
+      if (!k) continue;
+      const a = s.alpha[i];
+      const v = mode === "erase" ? Math.min(a, Math.round((a * (255 - k)) / 255)) : Math.max(a, Math.round(a + ((255 - a) * k) / 255));
+      s.alpha[i] = v;
+      s.out.data[i * 4 + 3] = v;
+    }
+    s.dirty = [0, 0, s.w - 1, s.h - 1];
+    flush();
+    bump();
+    if (!wandTracked.current) {
+      wandTracked.current = true;
+      track(toolFromPath(window.location.pathname), "wand_use");
+    }
+  };
+
   const onPointerDown = (e: React.PointerEvent) => {
     if (!st.current) return;
     e.preventDefault();
+    if (tool === "wand") {
+      const p = toImage(e);
+      applyWand(p.x, p.y);
+      return;
+    }
     try {
       (e.target as Element).setPointerCapture(e.pointerId);
     } catch {
@@ -266,6 +301,24 @@ export function MaskEditor({ originalUrl, resultBlob, onDone, onCancel }: MaskEd
     <div ref={rootRef} className="flex min-h-[480px] scroll-mt-20 flex-col gap-3">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-2">
+        <div className="flex rounded-lg bg-muted p-1" role="group">
+          {(["brush", "wand"] as Tool[]).map((k) => (
+            <button
+              key={k}
+              type="button"
+              aria-pressed={tool === k}
+              onClick={() => setTool(k)}
+              data-testid={`tool-${k}`}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                tool === k ? "bg-background text-foreground shadow" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {k === "brush" ? <Brush className="h-4 w-4" /> : <Wand2 className="h-4 w-4" />}
+              {k === "brush" ? t.brushTool : t.wandTool}
+            </button>
+          ))}
+        </div>
         <div className="flex rounded-lg bg-muted p-1" role="group" aria-label={t.editTitle}>
           {(["erase", "restore"] as Mode[]).map((m) => (
             <button
@@ -283,18 +336,39 @@ export function MaskEditor({ originalUrl, resultBlob, onDone, onCancel }: MaskEd
             </button>
           ))}
         </div>
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          {t.brushSize}
-          <input
-            type="range"
-            min={4}
-            max={160}
-            value={size}
-            onChange={(e) => setSize(Number(e.target.value))}
-            className="w-28 accent-[hsl(var(--primary))]"
-            aria-label={t.brushSize}
-          />
-        </label>
+        {tool === "brush" ? (
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            {t.brushSize}
+            <input
+              type="range"
+              min={4}
+              max={160}
+              value={size}
+              onChange={(e) => setSize(Number(e.target.value))}
+              className="w-28 accent-[hsl(var(--primary))]"
+              aria-label={t.brushSize}
+            />
+          </label>
+        ) : (
+          <>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              {t.tolerance}
+              <input
+                type="range"
+                min={1}
+                max={100}
+                value={tolerance}
+                onChange={(e) => setTolerance(Number(e.target.value))}
+                className="w-28 accent-[hsl(var(--primary))]"
+                aria-label={t.tolerance}
+              />
+            </label>
+            <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <input type="checkbox" checked={wandAll} onChange={(e) => setWandAll(e.target.checked)} className="accent-[hsl(var(--primary))]" />
+              {t.wandAll}
+            </label>
+          </>
+        )}
         <div className="flex items-center gap-1">
           <Button type="button" variant="ghost" size="icon" onClick={() => restoreSnapshot("undo")} disabled={!canUndo} aria-label={t.undo} title={t.undo}>
             <Undo2 className="h-4 w-4" />
@@ -328,7 +402,7 @@ export function MaskEditor({ originalUrl, resultBlob, onDone, onCancel }: MaskEd
             ref={canvasRef}
             data-ready={ready}
             className="relative block h-auto w-full touch-none"
-            style={{ cursor: "none" }}
+            style={{ cursor: tool === "wand" ? "crosshair" : "none" }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={endStroke}
@@ -338,7 +412,7 @@ export function MaskEditor({ originalUrl, resultBlob, onDone, onCancel }: MaskEd
             }}
             aria-label={t.editTitle}
           />
-          {cursor && ready && (
+          {cursor && ready && tool === "brush" && (
             <div
               className={cn(
                 "pointer-events-none absolute rounded-full border-2",
@@ -351,7 +425,7 @@ export function MaskEditor({ originalUrl, resultBlob, onDone, onCancel }: MaskEd
         {!ready && <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">{t.preparing}</div>}
       </div>
 
-      <p className="text-xs text-muted-foreground">{t.editHint}</p>
+      <p className="text-xs text-muted-foreground">{tool === "wand" ? t.wandHint : t.editHint}</p>
 
       <div className="flex flex-wrap justify-end gap-2">
         <Button type="button" variant="outline" size="lg" onClick={onCancel}>

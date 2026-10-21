@@ -504,6 +504,7 @@ function UsageSection({ usage, range }: { usage: Usage | null; range: Range }) {
         <Stat label="استخدام الفرشاة" value={`${editApply} / ${editOpen} فُتحت`} />
         <Stat label="تبديل الخلفية" value={total("bg_change")} />
         <Stat label="وضع اللون الواحد" value={total("solid_apply")} />
+        <Stat label="العصا السحرية (جلسات)" value={total("wand_use")} />
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         <BarList title="الأدوات الأكثر استخدامًا (عدد الصور، كل الفترة)" rows={toolRows} total={toolTotal} />

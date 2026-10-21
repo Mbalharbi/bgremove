@@ -12,13 +12,13 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { Brush, ImagePlus, MessageSquareHeart, Pipette, Sparkles, X } from "lucide-react";
+import { Wand2, ImagePlus, MessageSquareHeart, Pipette, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resolveLocale } from "@/components/feedback-dialog";
 import { detectLocale, LOCALES, type LocaleCode } from "@/lib/locales";
 import { OPEN_FEEDBACK_EVENT } from "@/lib/utils";
 
-const ANNOUNCEMENT = "2026-10-new-tools";
+const ANNOUNCEMENT = "2026-10-magic-wand";
 const STORAGE_KEY = `bgremove:whatsnew:${ANNOUNCEMENT}`;
 const SHOW_UNTIL = Date.parse("2026-11-30T23:59:59Z");
 const DELAY_MS = 1200;
@@ -41,7 +41,7 @@ const STRINGS: Record<LocaleCode, Strings> = {
     title: "New tools — added because you asked",
     bg: "Replace the background with a colour or your own photo",
     solid: "Solid-colour mode keeps text and logos 100% intact",
-    brush: "Touch-up brush to erase or restore any detail",
+    brush: "New: magic wand — erase or restore a whole colour area in one click, plus the touch-up brush",
     ask: "Give them a try and tell us what you think.",
     tryIt: "Try it now",
     feedback: "Share your opinion",
@@ -52,7 +52,7 @@ const STRINGS: Record<LocaleCode, Strings> = {
     title: "خدمات جديدة أضفناها تلبيةً لطلباتكم",
     bg: "تبديل الخلفية بلون أو بصورة من جهازك",
     solid: "«وضع اللون الواحد» يحافظ على النصوص والشعارات كاملة",
-    brush: "فرشاة يدوية لمسح أو استرجاع أي تفصيل",
+    brush: "جديد: عصا سحرية تمسح أو تسترجع منطقة لون كاملة بنقرة، مع الفرشاة اليدوية",
     ask: "نأمل تجربتها وإعطاءنا رأيكم.",
     tryIt: "جرّبها الآن",
     feedback: "شاركنا رأيك",
@@ -63,7 +63,7 @@ const STRINGS: Record<LocaleCode, Strings> = {
     title: "根据大家的建议，我们新增了这些功能",
     bg: "一键更换背景：纯色或你自己的图片",
     solid: "“纯色模式”完整保留文字和 Logo",
-    brush: "手动修整画笔：擦除或恢复任意细节",
+    brush: "新增魔术棒：一键擦除或恢复整片相似颜色区域，另有手动修整画笔",
     ask: "欢迎试用，并告诉我们你的想法。",
     tryIt: "立即试用",
     feedback: "提交反馈",
@@ -74,7 +74,7 @@ const STRINGS: Record<LocaleCode, Strings> = {
     title: "Nuevas herramientas, añadidas porque nos las pediste",
     bg: "Cambia el fondo por un color o por tu propia foto",
     solid: "El modo color sólido conserva textos y logos al 100 %",
-    brush: "Pincel de retoque para borrar o recuperar cualquier detalle",
+    brush: "Nuevo: varita mágica para borrar o recuperar toda una zona de color con un clic, y el pincel de retoque",
     ask: "Pruébalas y cuéntanos qué te parecen.",
     tryIt: "Probar ahora",
     feedback: "Danos tu opinión",
@@ -85,7 +85,7 @@ const STRINGS: Record<LocaleCode, Strings> = {
     title: "Novas ferramentas, criadas a pedido de vocês",
     bg: "Troque o fundo por uma cor ou pela sua própria foto",
     solid: "O modo cor sólida mantém textos e logos 100% intactos",
-    brush: "Pincel de retoque para apagar ou recuperar qualquer detalhe",
+    brush: "Novo: varinha mágica para apagar ou recuperar uma área de cor inteira com um clique, e o pincel de retoque",
     ask: "Experimente e conte o que achou.",
     tryIt: "Experimentar agora",
     feedback: "Dar minha opinião",
@@ -96,7 +96,7 @@ const STRINGS: Record<LocaleCode, Strings> = {
     title: "Neue Funktionen – auf euren Wunsch hinzugefügt",
     bg: "Hintergrund durch eine Farbe oder ein eigenes Foto ersetzen",
     solid: "Einfarbig-Modus erhält Texte und Logos zu 100 %",
-    brush: "Korrekturpinsel zum Radieren oder Wiederherstellen von Details",
+    brush: "Neu: Zauberstab radiert oder holt eine ganze Farbfläche mit einem Klick zurück – dazu der Korrekturpinsel",
     ask: "Probiert sie aus und sagt uns eure Meinung.",
     tryIt: "Jetzt ausprobieren",
     feedback: "Feedback geben",
@@ -107,7 +107,7 @@ const STRINGS: Record<LocaleCode, Strings> = {
     title: "आपके कहने पर जोड़े गए नए टूल",
     bg: "बैकग्राउंड को किसी रंग या अपनी फ़ोटो से बदलें",
     solid: "एक-रंग मोड टेक्स्ट और लोगो को पूरा सुरक्षित रखता है",
-    brush: "किसी भी हिस्से को मिटाने या वापस लाने के लिए सुधार ब्रश",
+    brush: "नया: मैजिक वैंड — एक क्लिक में पूरे रंग वाले हिस्से को मिटाएँ या वापस लाएँ, साथ में सुधार ब्रश",
     ask: "इन्हें आज़माएँ और हमें अपनी राय बताएँ।",
     tryIt: "अभी आज़माएँ",
     feedback: "अपनी राय दें",
@@ -118,7 +118,7 @@ const STRINGS: Record<LocaleCode, Strings> = {
     title: "Fitur baru — kami tambahkan karena kalian minta",
     bg: "Ganti latar dengan warna atau foto milik sendiri",
     solid: "Mode warna polos menjaga teks dan logo tetap utuh 100%",
-    brush: "Kuas perapian untuk menghapus atau memulihkan detail",
+    brush: "Baru: tongkat ajaib untuk menghapus atau memulihkan satu area warna sekali klik, plus kuas perapian",
     ask: "Silakan coba dan beri tahu pendapat kalian.",
     tryIt: "Coba sekarang",
     feedback: "Beri masukan",
@@ -212,9 +212,9 @@ export function WhatsNew() {
         {t.title}
       </h2>
       <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+        <li className="flex gap-2"><Wand2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{t.brush}</li>
         <li className="flex gap-2"><ImagePlus className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{t.bg}</li>
         <li className="flex gap-2"><Pipette className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{t.solid}</li>
-        <li className="flex gap-2"><Brush className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{t.brush}</li>
       </ul>
       <p className="mt-3 text-sm">{t.ask}</p>
       <div className="mt-4 flex flex-wrap gap-2">

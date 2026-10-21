@@ -58,4 +58,28 @@ export const RELEASES: Release[] = [
     events: ["solid_apply"],
     usedFlag: "solid",
   },
+  {
+    id: "magic-wand",
+    date: "2026-10-21",
+    title: "العصا السحرية داخل محرر التعديل",
+    because: "أكثر طلب في آخر 3 أيام، وتعليق «手动擦除建议加个魔术棒»",
+    needs: ["magic-wand"],
+    events: ["wand_use"],
+  },
+  {
+    id: "edges",
+    date: "2026-10-21",
+    title: "حواف أدق تلقائيًا (شعر، فرو، نصوص)",
+    because: "«حواف أدق» من أكثر الطلبات؛ مُختبر على 270 صورة: خطأ الحواف −7٪ للصور و−40٪ للنصوص",
+    needs: ["better-edges"],
+    events: [],
+  },
+  {
+    id: "bulk-i18n",
+    date: "2026-10-21",
+    title: "صفحة الدفعات بلغة الزائر + تنزيل كل صورة على حدة",
+    because: "الصفحة كانت إنجليزية حتى للصينيين (60٪ من الزوار)، ومعدل تنزيل الدفعات 24٪ فقط",
+    needs: [],
+    events: ["download"],
+  },
 ];

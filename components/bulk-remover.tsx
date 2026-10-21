@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { removeBackground, type LoadStage } from "@/lib/bg-removal";
 import { changeExtension, downloadBlob, formatBytes, formatMs } from "@/lib/utils";
 import { errorReason, fileTypeOf, track } from "@/lib/track";
+import { useToolStrings, type ToolStrings } from "@/lib/tool-i18n";
 
 const BULK_LIMIT = 20;
 
@@ -38,6 +39,7 @@ interface Item {
 
 export function BulkRemover() {
   const { toast } = useToast();
+  const t = useToolStrings();
   const [items, setItems] = React.useState<Item[]>([]);
   const [running, setRunning] = React.useState(false);
   const [loadStage, setLoadStage] = React.useState<LoadStage>("idle");
@@ -48,8 +50,8 @@ export function BulkRemover() {
       const toAdd = files.slice(0, remaining);
       if (files.length > remaining) {
         toast({
-          title: "Limit reached",
-          description: `Maximum ${BULK_LIMIT} images per batch.`,
+          title: t.bulkLimitTitle,
+          description: t.bulkLimitDesc(BULK_LIMIT),
         });
       }
       const next: Item[] = toAdd.map((file) => ({
@@ -60,7 +62,7 @@ export function BulkRemover() {
       }));
       setItems((prev) => [...prev, ...next]);
     },
-    [items.length, toast]
+    [items.length, toast, t]
   );
 
   const revokeItem = (it: Item) => {
@@ -142,6 +144,12 @@ export function BulkRemover() {
     }
   };
 
+  const outName = (item: Item) => changeExtension(item.file.name || "image.png", "png");
+
+  const downloadOne = (item: Item) => {
+    if (item.status.kind === "done") downloadBlob(item.status.blob, outName(item), 1);
+  };
+
   const downloadZip = async () => {
     const done = items.filter((it) => it.status.kind === "done");
     if (done.length === 0) return;
@@ -149,7 +157,7 @@ export function BulkRemover() {
     const usedNames = new Set<string>();
     for (const item of done) {
       if (item.status.kind !== "done") continue;
-      let name = changeExtension(item.file.name || "image.png", "png");
+      let name = outName(item);
       let i = 1;
       while (usedNames.has(name)) {
         const dot = name.lastIndexOf(".");
@@ -179,7 +187,7 @@ export function BulkRemover() {
           multiple
           onFile={(f) => addFiles([f])}
           onFiles={addFiles}
-          onError={(m) => toast({ title: "Upload error", description: m, variant: "destructive" })}
+          onError={(m) => toast({ title: t.uploadErrorTitle, description: m, variant: "destructive" })}
           compact={items.length > 0}
         />
       )}
@@ -189,13 +197,13 @@ export function BulkRemover() {
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
             <div className="flex flex-col gap-1">
               <p className="text-sm font-semibold">
-                {items.length} of {BULK_LIMIT} images &middot; {completed} ready
+                {t.bulkCount(items.length, BULK_LIMIT, completed)}
               </p>
               {running && (
                 <p className="text-xs text-muted-foreground">
-                  {loadStage === "loading-wasm" && "Loading runtime…"}
-                  {loadStage === "loading-model" && "Loading AI model…"}
-                  {(loadStage === "ready" || loadStage === "idle") && "Processing…"}
+                  {loadStage === "loading-wasm" && t.loadingRuntime}
+                  {loadStage === "loading-model" && t.loadingModel}
+                  {(loadStage === "ready" || loadStage === "idle") && t.bulkWorking}
                 </p>
               )}
               {running && <Progress value={totalProgress} className="mt-1 h-1.5 w-48" />}
@@ -203,18 +211,18 @@ export function BulkRemover() {
             <div className="flex flex-wrap items-center gap-2">
               <Button variant="outline" onClick={clearAll} disabled={running}>
                 <Trash2 className="h-4 w-4" />
-                Clear all
+                {t.bulkClear}
               </Button>
               {queued > 0 && (
                 <Button onClick={processAll} disabled={running} size="lg">
                   {running ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {running ? `Processing ${completed}/${items.length}` : `Remove backgrounds (${queued})`}
+                  {running ? t.bulkRunning(completed, items.length) : t.bulkStart(queued)}
                 </Button>
               )}
               {completed > 0 && (
                 <Button variant={queued === 0 ? "default" : "outline"} size="lg" onClick={downloadZip}>
                   <Download className="h-4 w-4" />
-                  Download ZIP ({completed})
+                  {t.bulkZip(completed)}
                 </Button>
               )}
             </div>
@@ -244,13 +252,21 @@ export function BulkRemover() {
                     type="button"
                     onClick={() => remove(item.id)}
                     disabled={running}
-                    className="rounded-full p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 disabled:cursor-not-allowed"
-                    aria-label={`Remove ${item.file.name}`}
+                    className="rounded-full p-1 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive disabled:cursor-not-allowed sm:opacity-0 sm:group-hover:opacity-100"
+                    aria-label={`${t.removeItem} ${item.file.name}`}
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <StatusBadge item={item} />
+                <div className="flex items-center justify-between gap-2">
+                  <StatusBadge item={item} t={t} />
+                  {item.status.kind === "done" && (
+                    <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => downloadOne(item)}>
+                      <Download className="h-3.5 w-3.5" />
+                      {t.downloadOne}
+                    </Button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
@@ -260,19 +276,19 @@ export function BulkRemover() {
   );
 }
 
-function StatusBadge({ item }: { item: Item }) {
+function StatusBadge({ item, t }: { item: Item; t: ToolStrings }) {
   switch (item.status.kind) {
     case "queued":
       return (
         <span className="inline-flex w-fit items-center rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-          Queued · {formatBytes(item.file.size)}
+          {t.bulkQueued} · {formatBytes(item.file.size)}
         </span>
       );
     case "processing":
       return (
         <span className="inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
           <Loader2 className="h-3 w-3 animate-spin" />
-          Processing
+          {t.bulkProcessing}
         </span>
       );
     case "done":

@@ -433,7 +433,7 @@ async function handleFeedbackExport(req: Request, env: Env): Promise<Response> {
 // kept only in `event_rl` (today's rows) to cap abuse, and pruned daily.
 
 const EVENT_TOOLS = ["remove", "bulk", "compress", "resize", "webp", "qr", "metadata"];
-const EVENT_NAMES = ["upload", "success", "fail", "download", "edit_open", "edit_apply", "bg_change", "solid_apply"];
+const EVENT_NAMES = ["upload", "success", "fail", "download", "edit_open", "edit_apply", "bg_change", "solid_apply", "wand_use"];
 const EVENT_REASONS = ["too-large", "decode", "model-load", "memory", "gpu", "other"];
 const EVENTS_PER_IP_PER_DAY = 400;
 
